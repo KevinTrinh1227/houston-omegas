@@ -138,9 +138,9 @@ export default function HomePage() {
         </div>
 
         {/* Title + CTAs */}
-        <div className="relative z-10 flex flex-col items-center pt-[18vh] sm:pt-[20vh]">
+        <div className="relative z-10 flex flex-col items-center pt-[18vh] sm:pt-[20vh] lg:pt-[32vh]">
           <div className="animate-float">
-            <p className="text-black/40 text-xs sm:text-sm tracking-[0.3em] uppercase mb-3 text-center" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="text-black/60 text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase mb-3 text-center" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Established 2004
             </p>
             <h1 className="text-black text-5xl sm:text-6xl md:text-8xl tracking-[0.08em]" style={{ fontFamily: 'var(--font-metal-mania), serif' }}>
@@ -148,9 +148,9 @@ export default function HomePage() {
             </h1>
           </div>
           {/* Event CTA */}
-          <div className="mt-6 sm:mt-8">
-            <Link href="#events" className="bg-black/80 backdrop-blur-sm text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-7 py-2.5 rounded-lg hover:bg-black/90 transition-all inline-flex items-center gap-2.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+          <div className="mt-8 sm:mt-10">
+            <Link href="#events" className="border border-black/20 text-black/70 hover:text-black hover:border-black/40 text-[10px] uppercase tracking-[0.2em] font-medium px-8 py-3 rounded-full backdrop-blur-sm transition-all duration-300 inline-flex items-center gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
               Love at First Light &middot; Feb 13
             </Link>
           </div>

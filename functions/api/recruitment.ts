@@ -1,6 +1,5 @@
-interface Env {
-  DISCORD_WEBHOOK_URL: string;
-}
+import type { Env } from '../types';
+import { getClientIP } from '../lib/rate-limit';
 
 interface RecruitmentData {
   firstName: string;
@@ -23,6 +22,28 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
+    const ip = getClientIP(context.request);
+    const userAgent = context.request.headers.get('User-Agent') || null;
+    const referer = context.request.headers.get('Referer') || null;
+    const country = context.request.headers.get('CF-IPCountry') || null;
+    const city = context.request.headers.get('CF-IPCity') || null;
+
+    // Log to D1 database
+    try {
+      await context.env.DB.prepare(
+        `INSERT INTO recruitment_submissions
+         (first_name, last_name, phone, classification, major, instagram, heard_from, ip_address, user_agent, referer, country, city)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        body.firstName, body.lastName, body.phone, body.classification,
+        body.major || null, body.instagram, body.heardFrom,
+        ip, userAgent, referer, country, city
+      ).run();
+    } catch {
+      // Don't fail the whole request if D1 logging fails
+    }
+
+    // Send Discord webhook
     const webhookUrl = context.env.DISCORD_WEBHOOK_URL;
     if (webhookUrl) {
       const embed = {

@@ -2,5 +2,24 @@ name = "houston-omegas"
 pages_build_output_dir = "out"
 compatibility_date = "2024-09-23"
 
-# DISCORD_WEBHOOK_URL is set as a secret via:
-# npx wrangler pages secret put DISCORD_WEBHOOK_URL --project-name=omega-mansion
+# Secrets (set via wrangler pages secret put):
+# npx wrangler pages secret put DISCORD_WEBHOOK_URL --project-name=houston-omegas
+# npx wrangler pages secret put GOOGLE_CLIENT_ID --project-name=houston-omegas
+# npx wrangler pages secret put GOOGLE_CLIENT_SECRET --project-name=houston-omegas
+# npx wrangler pages secret put DISCORD_CLIENT_ID --project-name=houston-omegas
+# npx wrangler pages secret put DISCORD_CLIENT_SECRET --project-name=houston-omegas
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "houston-omegas-db"
+database_id = "c10c2f49-2814-4e4f-bd2b-0960ea42b6cd"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "houston-omegas-media"
+
+# Cron cleanup: Call GET /api/cron/cleanup manually or via external cron service
+# Cloudflare Pages doesn't support cron triggers natively.
+# Use Cloudflare Workers Cron or an external service to hit /api/cron/cleanup daily.

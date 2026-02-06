@@ -7,7 +7,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: '/dashboard/',
     },
-    sitemap: 'https://rent.houstonomegas.com/sitemap.xml',
+    sitemap: 'https://houstonomegas.com/sitemap.xml',
   };
 }

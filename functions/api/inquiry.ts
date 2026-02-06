@@ -1,6 +1,5 @@
-interface Env {
-  DISCORD_WEBHOOK_URL: string;
-}
+import type { Env } from '../types';
+import { getClientIP } from '../lib/rate-limit';
 
 interface InquiryData {
   name: string;
@@ -10,11 +9,20 @@ interface InquiryData {
   guestCount?: string;
   date?: string;
   message?: string;
+  website?: string; // honeypot
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body = (await context.request.json()) as InquiryData;
+
+    // Honeypot check
+    if (body.website) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     // Validate required fields
     if (!body.name || !body.email || !body.phone || !body.eventType) {
@@ -30,6 +38,27 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    const ip = getClientIP(context.request);
+    const userAgent = context.request.headers.get('User-Agent') || null;
+    const referer = context.request.headers.get('Referer') || null;
+    const country = context.request.headers.get('CF-IPCountry') || null;
+    const city = context.request.headers.get('CF-IPCity') || null;
+
+    // Log to D1 database
+    try {
+      await context.env.DB.prepare(
+        `INSERT INTO inquiry_submissions
+         (name, email, phone, event_type, guest_count, date, message, ip_address, user_agent, referer, country, city)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        body.name, body.email, body.phone, body.eventType,
+        body.guestCount || null, body.date || null, body.message || null,
+        ip, userAgent, referer, country, city
+      ).run();
+    } catch {
+      // Don't fail the whole request if D1 logging fails
     }
 
     // Send Discord webhook
