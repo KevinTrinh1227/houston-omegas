@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "deploy": "npm run build && npx wrangler pages deploy out --project-name=omega-mansion --commit-dirty=true"
+    "deploy": "npm run build && npx wrangler pages deploy out --project-name=houston-omegas --commit-dirty=true"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",
