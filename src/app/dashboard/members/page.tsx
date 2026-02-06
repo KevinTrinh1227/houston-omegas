@@ -14,6 +14,7 @@ interface Member {
   class_year: string | null;
   major: string | null;
   instagram: string | null;
+  avatar_url: string | null;
   is_active: number;
   created_at: string;
   last_login_at: string | null;
@@ -175,9 +176,13 @@ export default function MembersPage() {
                 <tr key={m.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${!m.is_active ? 'opacity-50' : ''}`}>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-[10px] font-semibold shrink-0">
-                        {m.first_name[0]}{m.last_name[0]}
-                      </div>
+                      {m.avatar_url ? (
+                        <img src={m.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-[10px] font-semibold shrink-0">
+                          {m.first_name[0]}{m.last_name[0]}
+                        </div>
+                      )}
                       <span className="text-xs font-medium text-gray-900">{m.first_name} {m.last_name}</span>
                     </div>
                   </td>

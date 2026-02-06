@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAuth } from './AuthProvider';
+import PhoneRequiredModal from './PhoneRequiredModal';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { member, loading } = useAuth();
@@ -27,5 +28,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {member.needs_phone && <PhoneRequiredModal />}
+      {children}
+    </>
+  );
 }

@@ -15,6 +15,7 @@ export interface AuthMember {
   avatar_url: string | null;
   created_at: string;
   last_login_at: string | null;
+  needs_phone: boolean;
 }
 
 interface AuthContextType {

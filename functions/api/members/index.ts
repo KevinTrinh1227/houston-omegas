@@ -4,6 +4,7 @@ import { requireAuth, logAudit, generateId } from '../../lib/auth';
 import { getClientIP } from '../../lib/rate-limit';
 import { json, error, options } from '../../lib/response';
 import { sanitize, isValidEmail } from '../../lib/validate';
+import { notifyNewMember } from '../../lib/notify';
 
 // GET: Auth - list members
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -57,6 +58,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const ip = getClientIP(context.request);
     await logAudit(context.env.DB, result.auth.member.id, 'invite_member', 'member', id, { email, role }, ip);
+
+    await notifyNewMember(context.env.DISCORD_WEBHOOK_URL, `${firstName} ${lastName}`, role);
 
     return json(member, 201);
   } catch {

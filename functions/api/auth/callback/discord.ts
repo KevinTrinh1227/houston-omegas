@@ -49,7 +49,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.redirect(`${loginUrl}?error=user_info_failed`, 302);
   }
 
-  const userInfo = (await userRes.json()) as { email?: string };
+  const userInfo = (await userRes.json()) as { email?: string; id?: string; avatar?: string };
   const email = userInfo.email?.toLowerCase();
 
   if (!email) {
@@ -58,11 +58,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   // Check if member exists and is active
   const member = await context.env.DB.prepare(
-    'SELECT id, is_active FROM members WHERE email = ? AND is_active = 1'
+    'SELECT id, is_active, avatar_url FROM members WHERE email = ? AND is_active = 1'
   ).bind(email).first();
 
   if (!member) {
     return Response.redirect(`${loginUrl}?error=not_registered`, 302);
+  }
+
+  // Save avatar from Discord if member doesn't have one
+  if (!member.avatar_url && userInfo.id && userInfo.avatar) {
+    const discordAvatar = `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}.png?size=256`;
+    await context.env.DB.prepare(
+      `UPDATE members SET avatar_url = ?, updated_at = datetime('now') WHERE id = ?`
+    ).bind(discordAvatar, member.id).run();
   }
 
   return createOAuthSession(

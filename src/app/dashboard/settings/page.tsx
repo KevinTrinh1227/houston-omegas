@@ -7,6 +7,7 @@ export default function SettingsPage() {
   const { member, refresh } = useAuth();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     first_name: member?.first_name || '',
     last_name: member?.last_name || '',
@@ -53,6 +54,57 @@ export default function SettingsPage() {
       </div>
 
       <div className="max-w-lg">
+        {/* Avatar */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+          <div className="flex items-center gap-4">
+            {member?.avatar_url ? (
+              <img src={member.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-lg font-semibold">
+                {member?.first_name?.[0]}{member?.last_name?.[0]}
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium text-gray-900 mb-1">Profile Photo</p>
+              <label className="cursor-pointer text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 hover:text-gray-700 transition-colors">
+                {uploading ? 'Uploading...' : 'Change Photo'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploading(true);
+                    try {
+                      const fd = new FormData();
+                      fd.append('file', file);
+                      const res = await fetch('/api/members/avatar', {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: fd,
+                      });
+                      if (res.ok) {
+                        await refresh();
+                        setMessage('Avatar updated.');
+                      } else {
+                        const data = await res.json();
+                        setMessage(data.error || 'Failed to upload avatar.');
+                      }
+                    } catch {
+                      setMessage('Upload failed.');
+                    } finally {
+                      setUploading(false);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           {message && (
             <div className={`p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>

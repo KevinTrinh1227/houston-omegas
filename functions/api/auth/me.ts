@@ -24,6 +24,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       avatar_url: member.avatar_url,
       created_at: member.created_at,
       last_login_at: member.last_login_at,
+      needs_phone: !member.phone,
     });
   } catch {
     return error('Internal server error', 500);

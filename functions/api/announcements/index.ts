@@ -4,6 +4,7 @@ import { requireAuth, logAudit } from '../../lib/auth';
 import { getClientIP } from '../../lib/rate-limit';
 import { json, jsonCached, error, options } from '../../lib/response';
 import { sanitize } from '../../lib/validate';
+import { notifyNewAnnouncement } from '../../lib/notify';
 
 // GET: Public - active announcements (cached)
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -60,6 +61,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const ip = getClientIP(context.request);
     await logAudit(context.env.DB, result.auth.member.id, 'create_announcement', 'announcement', String(res?.id), { title }, ip);
+
+    await notifyNewAnnouncement(context.env.DISCORD_WEBHOOK_URL, title, `${result.auth.member.first_name} ${result.auth.member.last_name}`);
 
     return json(res, 201);
   } catch {
