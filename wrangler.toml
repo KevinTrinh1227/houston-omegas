@@ -1,0 +1,6 @@
+name = "omega-mansion"
+pages_build_output_dir = "out"
+compatibility_date = "2024-09-23"
+
+# DISCORD_WEBHOOK_URL is set as a secret via:
+# npx wrangler pages secret put DISCORD_WEBHOOK_URL --project-name=omega-mansion

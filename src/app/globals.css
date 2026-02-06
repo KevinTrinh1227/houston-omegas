@@ -2,8 +2,8 @@
 
 :root {
   --black: #0c0c0c;
-  --gold: #c9a96e;
-  --gold-hover: #b8894f;
+  --gold: #B2BEB5;
+  --gold-hover: #9AA6A0;
   --white: #ffffff;
   --cream: #f8f7f4;
   --text: #1a1a1a;
@@ -74,3 +74,113 @@ a { transition: color 0.2s ease; }
 ::-webkit-scrollbar-track { background: #f5f5f5; }
 ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* Animated night scene */
+@keyframes cloud-drift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(8vw); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes bat-fly {
+  0% { transform: translate(0, 0); opacity: 0; }
+  5% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translate(calc(60vw), calc(-20vh)); opacity: 0; }
+}
+
+@keyframes bat-flap {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.4); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.animate-cloud-drift {
+  animation: cloud-drift 60s ease-in-out infinite;
+}
+
+.animate-crow-fly {
+  animation: bat-fly 16s ease-in-out infinite;
+}
+
+.animate-crow-flap {
+  animation: bat-flap 0.35s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Lightning flash */
+@keyframes lightning {
+  0%, 92%, 94%, 96%, 100% { opacity: 0; }
+  93% { opacity: 0.15; }
+  95% { opacity: 0.08; }
+}
+
+@keyframes lightning-2 {
+  0%, 78%, 80%, 82%, 100% { opacity: 0; }
+  79% { opacity: 0.12; }
+  81% { opacity: 0.06; }
+}
+
+.animate-lightning {
+  animation: lightning 8s ease-in-out infinite;
+}
+
+.animate-lightning-2 {
+  animation: lightning-2 12s ease-in-out infinite;
+}
+
+/* Crows circling near house */
+@keyframes crow-circle {
+  0% { transform: translate(0, 0) scaleX(1); }
+  25% { transform: translate(80px, -30px) scaleX(1); }
+  50% { transform: translate(160px, 0) scaleX(-1); }
+  75% { transform: translate(80px, 30px) scaleX(-1); }
+  100% { transform: translate(0, 0) scaleX(1); }
+}
+
+@keyframes crow-circle-reverse {
+  0% { transform: translate(0, 0) scaleX(-1); }
+  25% { transform: translate(-60px, -20px) scaleX(-1); }
+  50% { transform: translate(-120px, 0) scaleX(1); }
+  75% { transform: translate(-60px, 20px) scaleX(1); }
+  100% { transform: translate(0, 0) scaleX(-1); }
+}
+
+.animate-crow-circle {
+  animation: crow-circle 12s ease-in-out infinite;
+}
+
+.animate-crow-circle-reverse {
+  animation: crow-circle-reverse 15s ease-in-out infinite;
+}
+
+/* Sponsors ticker */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.33%); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+/* Scrollbar for dark pages */
+.dark-scroll::-webkit-scrollbar-track { background: #111; }
+.dark-scroll::-webkit-scrollbar-thumb { background: #333; }
+.dark-scroll::-webkit-scrollbar-thumb:hover { background: #B2BEB5; }

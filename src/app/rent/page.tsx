@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { MapPin, Mail, Clock, Check, Play } from 'lucide-react';
-import { FaInstagram, FaTiktok, FaFacebookF, FaPinterestP, FaLinkedinIn, FaThreads } from 'react-icons/fa6';
-import InquiryForm from '@/components/InquiryForm';
+import Link from 'next/link';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import SchemaMarkup from '@/components/SchemaMarkup';
 
 export const metadata: Metadata = {
@@ -21,13 +21,6 @@ export const metadata: Metadata = {
   },
 };
 
-function Logo({ size = 'default' }: { size?: 'default' | 'small' }) {
-  const s = size === 'small' ? 24 : 32;
-  return (
-    <Image src="/images/omega-logo.jpg" alt="Omega Mansion" width={s} height={s} className={`${size === 'small' ? 'w-6 h-6' : 'w-8 h-8'} rounded-[4px] shrink-0 object-cover`} />
-  );
-}
-
 const amenities = [
   'Full kitchen for catering',
   'Climate control (A/C & heat)',
@@ -43,287 +36,214 @@ const faqs = [
   { q: 'Can I bring my own catering?', a: 'Yes. Outside catering is welcome and our full kitchen is available for your caterer to use.' },
   { q: 'What are the venue hours?', a: 'Events can run from 8 AM to 11 PM, seven days a week.' },
   { q: 'Is there a security deposit?', a: 'Yes, a refundable deposit is required at booking and returned after your event.' },
-  { q: 'How far in advance should I book?', a: 'We recommend 2\u20134 weeks ahead. Popular weekend dates fill up faster.' },
+  { q: 'How far in advance should I book?', a: 'We recommend 2-4 weeks ahead. Popular weekend dates fill up faster.' },
   { q: 'Is cleaning included?', a: 'Optional add-on. Without it, renters handle cleanup after the event.' },
-  { q: 'Can I bring my own decorations?', a: 'Absolutely. You\u2019re free to decorate however you like. We just ask that everything is removed afterward.' },
+  { q: 'Can I bring my own decorations?', a: 'Absolutely. You are free to decorate however you like. We just ask that everything is removed afterward.' },
 ];
 
 const pastClients = [
-  { name: 'Secret Society Party', abbr: 'SS', url: 'https://linktr.ee/secretsocietyusa' },
-  { name: 'UH VSA', abbr: 'VSA', url: 'https://www.uhvsa.com/' },
-  { name: 'Sigma Phi Omega', abbr: 'ΣΦΩ', url: 'https://uhsigmasweb.wixsite.com/mysite' },
-  { name: 'Sigma Alpha Epsilon', abbr: 'ΣAE', url: '#' },
+  { name: 'Secret Society', abbr: 'SS' },
+  { name: 'UH VSA', abbr: 'VSA' },
+  { name: 'ΣΦΩ', abbr: 'ΣΦΩ' },
+  { name: 'ΣAE', abbr: 'ΣAE' },
 ];
 
-const socials = [
-  { icon: FaInstagram, color: '#E4405F', url: '#', label: 'Instagram' },
-  { icon: FaTiktok, color: '#000000', url: '#', label: 'TikTok' },
-  { icon: FaFacebookF, color: '#1877F2', url: '#', label: 'Facebook' },
-  { icon: FaPinterestP, color: '#BD081C', url: '#', label: 'Pinterest' },
-  { icon: FaLinkedinIn, color: '#0A66C2', url: '#', label: 'LinkedIn' },
-  { icon: FaThreads, color: '#000000', url: '#', label: 'Threads' },
+const galleryImages = [
+  { src: '/images/gallery-5.jpg', alt: 'Event Setup', span: 'col-span-2 row-span-2' },
+  { src: '/images/gallery-3.jpg', alt: 'Outdoor', span: '' },
+  { src: '/images/gallery-4.jpg', alt: 'Night Event', span: '' },
+  { src: '/images/gallery-6.jpg', alt: 'Festival', span: '' },
+  { src: '/images/mansion.jpeg', alt: 'Omega Mansion', span: '' },
+  { src: '/images/gallery-2.jpg', alt: 'Gathering', span: 'col-span-2' },
 ];
 
 export default function RentPage() {
   return (
-    <>
+    <div className="relative bg-white text-gray-900 min-h-screen">
       <SchemaMarkup />
-
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-[#eee]">
-        {/* Desktop */}
-        <div className="max-w-6xl mx-auto px-6 h-16 items-center hidden lg:grid grid-cols-[1fr_auto_1fr]">
-          <a href="https://houstonomegas.com" className="flex items-center gap-2.5">
-            <Logo />
-            <span className="text-[#1a1a1a] font-semibold tracking-[0.06em] text-[13px] uppercase">Houston Omegas</span>
-          </a>
-          <div className="flex items-center gap-8">
-            <a href="#venue" className="text-[13px] text-[#555] font-medium hover:text-[#1a1a1a] transition-colors">Rent</a>
-            <a href="#gallery" className="text-[13px] text-[#555] font-medium hover:text-[#1a1a1a] transition-colors">Gallery</a>
-            <a href="#faq" className="text-[13px] text-[#555] font-medium hover:text-[#1a1a1a] transition-colors">FAQ</a>
-          </div>
-          <div className="flex items-center gap-5 justify-end">
-            <a href="#contact" className="text-[13px] text-[#555] font-medium hover:text-[#1a1a1a] transition-colors">Contact</a>
-            <a href="#contact" className="btn-primary !py-2 !px-5 !text-[10px]">Book Now</a>
-          </div>
-        </div>
-        {/* Mobile */}
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between lg:hidden">
-          <a href="https://houstonomegas.com" className="flex items-center gap-2.5">
-            <Logo />
-            <span className="text-[#1a1a1a] font-semibold tracking-[0.06em] text-[13px] uppercase">Houston Omegas</span>
-          </a>
-          <a href="#contact" className="btn-primary !py-1.5 !px-4 !text-[10px]">Book Now</a>
-        </div>
-      </nav>
+      <Navbar variant="light" />
 
       {/* Hero */}
-      <section className="min-h-[90vh] flex items-center justify-center pt-16">
-        <div className="text-center px-6 max-w-3xl mx-auto py-24">
-          <p className="text-[#1a1a1a] text-xs tracking-[0.25em] uppercase mb-8 font-semibold">
-            Private Event Venue &middot; Houston, TX
-          </p>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#1a1a1a] mb-6 tracking-tight leading-[1.1]">
-            Omega Mansion
-          </h1>
-          <p className="text-[#555] text-lg sm:text-xl mb-10 leading-relaxed max-w-xl mx-auto">
-            5,300 sq ft of flexible event space for parties, corporate events, weddings, and more.
-          </p>
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <a href="#contact" className="btn-primary text-center inline-flex items-center justify-center gap-2">Book Now</a>
-            <a href="#contact" className="btn-outline text-center inline-flex items-center justify-center gap-2 rounded-lg">Check Availability</a>
-          </div>
-          <p className="text-[#888] text-sm mb-20">
-            <MapPin className="w-3.5 h-3.5 inline -mt-0.5 mr-1" />
-            3819 Reveille St, Houston, TX 77087
-          </p>
-
-          {/* Past Clients */}
-          <div className="pt-4">
-            <p className="text-[#999] text-xs tracking-[0.15em] uppercase font-medium mb-6">Recent clients we&apos;ve hosted</p>
-            <div className="flex items-center justify-center gap-8 sm:gap-12 whitespace-nowrap overflow-x-auto">
-              {pastClients.map((client) => (
-                <a key={client.name} href={client.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 shrink-0 hover:opacity-70 transition-opacity">
-                  <div className="w-7 h-7 bg-[#1a1a1a] rounded-[4px] flex items-center justify-center shrink-0">
-                    <span className="text-white text-[8px] font-bold leading-none">{client.abbr}</span>
-                  </div>
-                  <span className="text-[#555] text-sm font-medium">{client.name}</span>
-                </a>
-              ))}
-            </div>
-          </div>
+      <section className="pt-28 pb-20 px-6 sm:px-10 max-w-4xl mx-auto text-center">
+        <p className="text-xs text-gray-400 uppercase tracking-[0.3em] mb-4">Private Event Venue &middot; Houston, TX</p>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl text-gray-900 mb-5 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          Omega Mansion
+        </h1>
+        <p className="text-gray-500 text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed">
+          5,300 sq ft of flexible event space for parties, corporate events, weddings, and more.
+        </p>
+        <div className="flex items-center justify-center gap-4 mb-10">
+          <Link href="/contact" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-7 py-3 rounded-lg hover:bg-gray-800 transition-all">
+            Book Now
+          </Link>
+          <Link href="/contact" className="border border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-700 text-[11px] uppercase tracking-[0.15em] px-7 py-3 rounded-lg transition-all">
+            Check Availability
+          </Link>
         </div>
-      </section>
+        <p className="text-gray-400 text-xs flex items-center justify-center gap-1.5 mb-12">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+          3819 Reveille St, Houston, TX 77087
+        </p>
 
-      {/* About / Video */}
-      <section id="about" className="scroll-mt-16">
-        <div className="max-w-6xl mx-auto px-6 py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-5">About Omega Mansion</h2>
-              <p className="text-[#555] leading-relaxed mb-6">
-                Located in Houston&apos;s Golfcrest neighborhood &mdash; just minutes from the University of Houston &mdash; Omega Mansion offers a versatile event space perfect for any occasion.
-              </p>
-              <div className="flex items-center gap-6 text-sm">
-                <div>
-                  <p className="text-2xl font-bold text-[#1a1a1a]">5,300</p>
-                  <p className="text-[#999] text-xs uppercase tracking-wider">Sq Ft</p>
+        {/* Past Clients */}
+        <div className="border-t border-gray-200 pt-8">
+          <p className="text-gray-300 text-[10px] uppercase tracking-[0.2em] mb-5">Recent clients we&apos;ve hosted</p>
+          <div className="flex items-center justify-center gap-6 sm:gap-10 flex-wrap">
+            {pastClients.map((c) => (
+              <div key={c.name} className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
+                  <span className="text-gray-400 text-[8px] font-bold">{c.abbr}</span>
                 </div>
-                <div className="w-px h-10 bg-[#e5e5e5]" />
-                <div>
-                  <p className="text-2xl font-bold text-[#1a1a1a]">500</p>
-                  <p className="text-[#999] text-xs uppercase tracking-wider">Guest Capacity</p>
-                </div>
-                <div className="w-px h-10 bg-[#e5e5e5]" />
-                <div>
-                  <p className="text-2xl font-bold text-[#1a1a1a]">7</p>
-                  <p className="text-[#999] text-xs uppercase tracking-wider">Days / Week</p>
-                </div>
-              </div>
-            </div>
-            <div className="relative aspect-video bg-[#e8e5de] rounded-xl overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                  <Play className="w-6 h-6 text-[#1a1a1a] ml-1" fill="#1a1a1a" />
-                </div>
-              </div>
-              <p className="absolute bottom-4 left-0 right-0 text-center text-[#999] text-xs">Video coming soon</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Venue */}
-      <section id="venue" className="scroll-mt-16">
-        <div className="max-w-6xl mx-auto px-6 py-24 space-y-20">
-          {/* Row 1: Text + Image */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-5 text-[#1a1a1a]">Everything You Need</h2>
-              <p className="text-[#555] mb-8 leading-relaxed">
-                The entire first floor of Omega Mansion is yours to rent. Multiple connected rooms create a natural flow &mdash; set up a dining area, a dance floor, a lounge, or whatever your event needs.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {amenities.map((item) => (
-                  <div key={item} className="flex items-center gap-3 py-1.5">
-                    <Check className="w-4 h-4 text-[#c9a96e] shrink-0" />
-                    <span className="text-sm text-[#444] font-medium">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-[#e8e5de] rounded-lg min-h-[320px]" />
-          </div>
-
-          {/* Row 2: Image + Text */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="bg-[#e8e5de] rounded-lg min-h-[320px] order-last lg:order-first" />
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-5 text-[#1a1a1a]">Any Occasion</h2>
-              <p className="text-[#555] leading-relaxed">
-                We welcome events of every kind &mdash; from student organizations and Greek life to corporate retreats, weddings, graduation parties, baby showers, and everything in between. If you&apos;re planning a gathering of 20 or 500, the flexible layout adapts to fit your vision.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery */}
-      <section id="gallery" className="scroll-mt-16">
-        <div className="max-w-6xl mx-auto px-6 py-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a]">See the Space</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-[180px] md:auto-rows-[200px]">
-            <div className="col-span-2 row-span-2 bg-[#e8e5de] rounded-lg" />
-            <div className="bg-[#ddd9d0] rounded-lg" />
-            <div className="bg-[#f0ede8] rounded-lg" />
-            <div className="bg-[#e2dfd8] rounded-lg" />
-            <div className="bg-[#ebe8e2] rounded-lg" />
-            <div className="bg-[#d8d4cb] rounded-lg" />
-            <div className="bg-[#e5e2dc] rounded-lg col-span-2" />
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="scroll-mt-16">
-        <div className="max-w-5xl mx-auto px-6 py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a]">Common Questions</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
-            {faqs.map((faq) => (
-              <div key={faq.q}>
-                <h3 className="font-semibold text-[#1a1a1a] mb-2">{faq.q}</h3>
-                <p className="text-[#666] text-sm leading-relaxed">{faq.a}</p>
+                <span className="text-gray-400 text-xs font-medium">{c.name}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Location */}
-      <section id="location" className="scroll-mt-16">
-        <div className="max-w-6xl mx-auto px-6 py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-            <div className="lg:col-span-2">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-[#1a1a1a]">Find Us</h2>
-              <div className="space-y-4 text-sm">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-[#c9a96e] shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-[#1a1a1a]">3819 Reveille St</p>
-                    <p className="text-[#888]">Houston, TX 77087</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-[#c9a96e] shrink-0" />
-                  <a href="mailto:events@houstonomegas.com" className="text-[#555] font-medium hover:text-[#c9a96e] transition-colors">events@houstonomegas.com</a>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-[#c9a96e] shrink-0" />
-                  <span className="text-[#555] font-medium">Events: 8 AM &ndash; 11 PM daily</span>
-                </div>
-              </div>
-              <p className="text-[#999] text-xs mt-8 leading-relaxed">
-                Located in Houston&apos;s Golfcrest neighborhood, minutes from the University of Houston and downtown via I-45 and I-610.
-              </p>
-            </div>
-            <div className="lg:col-span-3">
-              <div className="w-full h-[350px] lg:h-full min-h-[300px] overflow-hidden rounded-lg">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3465.5!2d-95.317!3d29.692!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640bf5a65b7b42d%3A0x0!2zMzgxOSBSZXZlaWxsZSBTdCwgSG91c3RvbiwgVFggNzcwODc!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Omega Mansion - 3819 Reveille St, Houston, TX 77087"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="h-px bg-gray-200 mx-10" />
 
-      {/* Contact */}
-      <section id="contact" className="scroll-mt-16">
-        <div className="max-w-5xl mx-auto px-6 py-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-3">Contact Us</h2>
-            <p className="text-[#888] text-sm">
-              Tell us about your event and we&apos;ll respond within 24 hours.
+      {/* About */}
+      <section className="py-24 px-6 sm:px-10 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-3xl sm:text-4xl text-gray-900 mb-5 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              About the Venue
+            </h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-6">
+              Located in Houston&apos;s Golfcrest neighborhood, just minutes from the University of Houston. Omega Mansion offers a versatile event space perfect for any occasion.
             </p>
+            <div className="flex items-center gap-6 text-sm">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">5,300</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider">Sq Ft</p>
+              </div>
+              <div className="w-px h-10 bg-gray-200" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">500</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider">Guest Capacity</p>
+              </div>
+              <div className="w-px h-10 bg-gray-200" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">7</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider">Days / Week</p>
+              </div>
+            </div>
           </div>
-          <InquiryForm />
+          <div className="relative aspect-video rounded-xl overflow-hidden border border-gray-200">
+            <Image src="/images/mansion.jpeg" alt="Omega Mansion" fill className="object-cover" />
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="pt-10 pb-8">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <a href="https://houstonomegas.com" className="flex items-center gap-2.5">
-              <Logo size="small" />
-              <span className="font-semibold text-sm tracking-[0.05em] uppercase text-[#444]">Houston Omegas</span>
-            </a>
-            <p className="text-xs text-[#aaa]">3819 Reveille St, Houston, TX 77087</p>
-            <div className="flex items-center gap-2.5">
-              {socials.map((s) => (
-                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-8 h-8 rounded-lg flex items-center justify-center transition-opacity hover:opacity-70" style={{ backgroundColor: s.color }}>
-                  <s.icon className="w-3.5 h-3.5 text-white" />
-                </a>
+      <div className="h-px bg-gray-200 mx-10" />
+
+      {/* Amenities */}
+      <section className="py-24 px-6 sm:px-10 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-3xl sm:text-4xl text-gray-900 mb-5 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              Everything You Need
+            </h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-8">
+              The entire first floor of Omega Mansion is yours to rent. Multiple connected rooms create a natural flow. Set up a dining area, a dance floor, a lounge, or whatever your event needs.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {amenities.map((item) => (
+                <div key={item} className="flex items-center gap-3 py-1.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[#B2BEB5] shrink-0"><path d="M20 6L9 17l-5-5" /></svg>
+                  <span className="text-sm text-gray-600">{item}</span>
+                </div>
               ))}
             </div>
-            <p className="text-xs text-[#aaa]">
-              &copy; {new Date().getFullYear()} Houston Omegas &middot; Powered by{' '}
-              <a href="https://visibleseed.com" target="_blank" rel="noopener noreferrer" className="hover:underline">VisibleSeed</a>
-            </p>
+          </div>
+          <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-gray-200">
+            <Image src="/images/gallery-1.jpg" alt="Interior" fill className="object-cover" />
           </div>
         </div>
-      </footer>
-    </>
+      </section>
+
+      <div className="h-px bg-gray-200 mx-10" />
+
+      {/* Gallery */}
+      <section id="gallery" className="py-24 px-6 sm:px-10 max-w-6xl mx-auto">
+        <h2 className="text-center text-3xl sm:text-4xl text-gray-900 mb-10 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          See the Space
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5 auto-rows-[180px] md:auto-rows-[200px]">
+          {galleryImages.map((img, i) => (
+            <div key={i} className={`relative overflow-hidden rounded-lg ${img.span}`}>
+              <Image src={img.src} alt={img.alt} fill className="object-cover" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="h-px bg-gray-200 mx-10" />
+
+      {/* FAQ */}
+      <section id="faq" className="py-24 px-6 sm:px-10 max-w-5xl mx-auto">
+        <h2 className="text-center text-3xl sm:text-4xl text-gray-900 mb-12 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          Common Questions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
+          {faqs.map((faq) => (
+            <div key={faq.q} className="border-b border-gray-200 pb-6">
+              <h3 className="text-gray-800 text-sm font-semibold mb-2">{faq.q}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="h-px bg-gray-200 mx-10" />
+
+      {/* Location */}
+      <section className="py-24 px-6 sm:px-10 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+          <div className="lg:col-span-2">
+            <h2 className="text-3xl sm:text-4xl text-gray-900 mb-6 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              Find Us
+            </h2>
+            <div className="space-y-4 text-sm">
+              <div className="flex items-start gap-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#B2BEB5] shrink-0 mt-0.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                <div>
+                  <p className="font-semibold text-gray-800">3819 Reveille St</p>
+                  <p className="text-gray-500">Houston, TX 77087</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#B2BEB5] shrink-0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><path d="m22 6-10 7L2 6" /></svg>
+                <a href="mailto:events@houstonomegas.com" className="text-gray-600 hover:text-gray-900 transition-colors">events@houstonomegas.com</a>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#B2BEB5] shrink-0"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                <span className="text-gray-600">Events: 8 AM - 11 PM daily</span>
+              </div>
+            </div>
+            <p className="text-gray-400 text-xs mt-8 leading-relaxed">
+              Located in Houston&apos;s Golfcrest neighborhood, minutes from the University of Houston and downtown via I-45 and I-610.
+            </p>
+          </div>
+          <div className="lg:col-span-3">
+            <div className="w-full h-[350px] lg:h-full min-h-[300px] overflow-hidden rounded-xl border border-gray-200">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3465.5!2d-95.317!3d29.692!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640bf5a65b7b42d%3A0x0!2zMzgxOSBSZXZlaWxsZSBTdCwgSG91c3RvbiwgVFggNzcwODc!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Omega Mansion - 3819 Reveille St, Houston, TX 77087"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer variant="light" />
+    </div>
   );
 }
