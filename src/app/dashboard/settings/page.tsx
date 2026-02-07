@@ -15,6 +15,7 @@ export default function SettingsPage() {
     class_year: member?.class_year || '',
     major: member?.major || '',
     instagram: member?.instagram || '',
+    discord_id: member?.discord_id || '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,9 +145,15 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Instagram</label>
-            <input type="text" value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} placeholder="@username" className={inputClass} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Instagram</label>
+              <input type="text" value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} placeholder="@username" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Discord ID</label>
+              <input type="text" value={form.discord_id} onChange={e => setForm({ ...form, discord_id: e.target.value })} placeholder="User ID" className={inputClass} />
+            </div>
           </div>
 
           <div className="pt-2">

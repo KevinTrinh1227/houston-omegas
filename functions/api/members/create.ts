@@ -10,7 +10,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body = await context.request.json() as {
       email?: string; first_name?: string; last_name?: string; role?: string;
-      class_year?: string; major?: string; phone?: string; instagram?: string;
+      class_year?: string; major?: string; phone?: string; instagram?: string; discord_id?: string;
     };
 
     if (!body.email || !body.first_name || !body.last_name) {
@@ -34,12 +34,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const id = generateId();
     await context.env.DB.prepare(
-      `INSERT INTO members (id, email, first_name, last_name, role, class_year, major, phone, instagram, invited_by, is_active, status, has_completed_onboarding)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', 0)`
+      `INSERT INTO members (id, email, first_name, last_name, role, class_year, major, phone, instagram, discord_id, invited_by, is_active, status, has_completed_onboarding)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', 0)`
     ).bind(
       id, email, body.first_name.trim(), body.last_name.trim(),
       body.role || 'active', body.class_year || null, body.major || null,
-      body.phone || null, body.instagram || null, auth.member.id
+      body.phone || null, body.instagram || null, body.discord_id || null, auth.member.id
     ).run();
 
     const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown';

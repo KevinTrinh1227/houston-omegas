@@ -21,6 +21,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       class_year: member.class_year,
       major: member.major,
       instagram: member.instagram,
+      discord_id: member.discord_id,
       avatar_url: member.avatar_url,
       created_at: member.created_at,
       last_login_at: member.last_login_at,

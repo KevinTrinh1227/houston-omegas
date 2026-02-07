@@ -13,7 +13,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (result.errorResponse) return result.errorResponse;
 
     const rows = await context.env.DB.prepare(
-      `SELECT id, email, first_name, last_name, role, phone, class_year, major, instagram,
+      `SELECT id, email, first_name, last_name, role, phone, class_year, major, instagram, discord_id,
               avatar_url, is_active, created_at, last_login_at
        FROM members ORDER BY
          CASE role WHEN 'admin' THEN 0 WHEN 'president' THEN 1 WHEN 'vpi' THEN 2 WHEN 'vpx' THEN 3 WHEN 'treasurer' THEN 4 WHEN 'secretary' THEN 5 WHEN 'junior_active' THEN 6 WHEN 'active' THEN 7 WHEN 'alumni' THEN 8 ELSE 9 END,

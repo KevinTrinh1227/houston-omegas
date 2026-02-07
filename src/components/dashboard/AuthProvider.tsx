@@ -13,6 +13,7 @@ export interface AuthMember {
   class_year: string | null;
   major: string | null;
   instagram: string | null;
+  discord_id: string | null;
   avatar_url: string | null;
   created_at: string;
   last_login_at: string | null;

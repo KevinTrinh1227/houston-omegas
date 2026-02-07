@@ -185,7 +185,7 @@ export default function HomePage() {
           </div>
           {/* CTA */}
           <div className="mt-8 sm:mt-10 flex flex-col items-center">
-            <Link href="/events/detail?slug=love-at-first-light" className="relative bg-gray-900 hover:bg-black text-white border border-white/20 hover:border-white/40 text-[11px] uppercase tracking-[0.2em] font-semibold px-8 py-3 rounded-lg backdrop-blur-sm transition-all duration-300 animate-hero-cta-glow">
+            <Link href="/events/detail?slug=love-at-first-site-party" className="relative bg-gray-900 hover:bg-black text-white border border-white/20 hover:border-white/40 text-[11px] uppercase tracking-[0.2em] font-semibold px-8 py-3 rounded-lg backdrop-blur-sm transition-all duration-300 animate-hero-cta-glow">
               Valentine&apos;s Party
             </Link>
             <span className="text-[10px] text-black/50 mt-2 tracking-[0.15em] uppercase">Feb 13 &middot; Love at First Light</span>

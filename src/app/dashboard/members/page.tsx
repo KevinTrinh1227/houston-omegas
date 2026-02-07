@@ -14,6 +14,7 @@ interface Member {
   class_year: string | null;
   major: string | null;
   instagram: string | null;
+  discord_id: string | null;
   avatar_url: string | null;
   is_active: number;
   created_at: string;
@@ -29,7 +30,7 @@ export default function MembersPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', first_name: '', last_name: '', role: 'active' });
-  const [createForm, setCreateForm] = useState({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '' });
+  const [createForm, setCreateForm] = useState({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '', discord_id: '' });
   const [message, setMessage] = useState('');
 
   const fetchMembers = useCallback(async () => {
@@ -93,7 +94,7 @@ export default function MembersPage() {
         body: JSON.stringify(createForm),
       });
       if (res.ok) {
-        setCreateForm({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '' });
+        setCreateForm({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '', discord_id: '' });
         setShowCreate(false);
         setMessage('Profile created (pending). Member can now log in to activate.');
         fetchMembers();
@@ -211,6 +212,7 @@ export default function MembersPage() {
             <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Major</label><input type="text" value={createForm.major} onChange={e => setCreateForm({ ...createForm, major: e.target.value })} className={inputClass} /></div>
             <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Phone</label><input type="text" value={createForm.phone} onChange={e => setCreateForm({ ...createForm, phone: e.target.value })} className={inputClass} /></div>
             <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Instagram</label><input type="text" value={createForm.instagram} onChange={e => setCreateForm({ ...createForm, instagram: e.target.value })} placeholder="@handle" className={inputClass} /></div>
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Discord ID</label><input type="text" value={createForm.discord_id} onChange={e => setCreateForm({ ...createForm, discord_id: e.target.value })} placeholder="User ID" className={inputClass} /></div>
           </div>
           <div className="flex gap-3">
             <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
@@ -262,7 +264,7 @@ export default function MembersPage() {
                       <select
                         value={m.role}
                         onChange={e => handleRoleChange(m.id, e.target.value)}
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase border-0 cursor-pointer ${roleColor[m.role as Role] || 'bg-gray-100 text-gray-500'}`}
+                        className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase border-0 cursor-pointer ${roleColor[m.role as Role] || 'bg-gray-100 text-gray-500'}`}
                       >
                         <option value="admin">Admin</option>
                         <option value="president">President</option>
@@ -276,7 +278,7 @@ export default function MembersPage() {
                         <option value="inactive">Inactive</option>
                       </select>
                     ) : (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${roleColor[m.role as Role] || 'bg-gray-100 text-gray-500'}`}>{ROLE_LABELS[m.role as Role] || m.role}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase ${roleColor[m.role as Role] || 'bg-gray-100 text-gray-500'}`}>{ROLE_LABELS[m.role as Role] || m.role}</span>
                     )}
                   </td>
                   <td className="px-5 py-3 text-xs text-gray-400 hidden sm:table-cell">

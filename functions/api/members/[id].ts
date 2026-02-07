@@ -14,7 +14,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const id = (context.params as { id: string }).id;
 
     const member = await context.env.DB.prepare(
-      `SELECT id, email, first_name, last_name, role, phone, class_year, major, instagram,
+      `SELECT id, email, first_name, last_name, role, phone, class_year, major, instagram, discord_id,
               avatar_url, is_active, created_at, updated_at, last_login_at
        FROM members WHERE id = ?`
     ).bind(id).first();
@@ -51,6 +51,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (body.class_year !== undefined) { fields.push('class_year = ?'); values.push(sanitize(body.class_year as string) || null); }
     if (body.major !== undefined) { fields.push('major = ?'); values.push(sanitize(body.major as string) || null); }
     if (body.instagram !== undefined) { fields.push('instagram = ?'); values.push(sanitize(body.instagram as string) || null); }
+    if (body.discord_id !== undefined) { fields.push('discord_id = ?'); values.push(sanitize(body.discord_id as string) || null); }
     if (body.has_completed_onboarding !== undefined) { fields.push('has_completed_onboarding = ?'); values.push(body.has_completed_onboarding ? 1 : 0); }
 
     // Only exec can change role and active status
@@ -72,7 +73,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     values.push(id);
 
     const updated = await context.env.DB.prepare(
-      `UPDATE members SET ${fields.join(', ')} WHERE id = ? RETURNING id, email, first_name, last_name, role, phone, class_year, major, instagram, avatar_url, is_active, created_at, updated_at`
+      `UPDATE members SET ${fields.join(', ')} WHERE id = ? RETURNING id, email, first_name, last_name, role, phone, class_year, major, instagram, discord_id, avatar_url, is_active, created_at, updated_at`
     ).bind(...values).first();
 
     if (!updated) return error('Member not found', 404);
