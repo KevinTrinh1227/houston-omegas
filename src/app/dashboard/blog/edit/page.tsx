@@ -91,12 +91,12 @@ function EditPostInner() {
     } catch { /* */ }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" />
       </div>
     );
   }
@@ -110,7 +110,7 @@ function EditPostInner() {
         </div>
         <button
           onClick={() => setPreview(!preview)}
-          className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all"
+          className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all"
         >
           {preview ? 'Edit' : 'Preview'}
         </button>
@@ -157,11 +157,11 @@ function EditPostInner() {
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button onClick={() => handleSubmit()} disabled={saving} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all disabled:opacity-50">
+          <button onClick={() => handleSubmit()} disabled={saving} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all disabled:opacity-50">
             {saving ? 'Saving...' : 'Save'}
           </button>
           {form.status !== 'published' && (
-            <button onClick={() => handleSubmit('published')} disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
+            <button onClick={() => handleSubmit('published')} disabled={saving} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50">
               Publish
             </button>
           )}
@@ -180,7 +180,7 @@ export default function EditBlogPost() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" />
       </div>
     }>
       <EditPostInner />

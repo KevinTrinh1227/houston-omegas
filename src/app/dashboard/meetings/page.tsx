@@ -98,7 +98,7 @@ export default function MeetingsPage() {
     if (meetingId) fetchDetail(meetingId);
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   // Detail view
   if (meetingId && detail) {
@@ -114,7 +114,7 @@ export default function MeetingsPage() {
           </div>
         </div>
 
-        {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
+        {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">{message}</div>}
 
         {/* Notes */}
         <div className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6">
@@ -126,7 +126,7 @@ export default function MeetingsPage() {
             <div>
               <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} rows={12} className={`${inputClass} font-mono text-xs`} />
               <div className="flex gap-3 mt-3">
-                <button onClick={handleSaveNotes} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Save</button>
+                <button onClick={handleSaveNotes} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Save</button>
                 <button onClick={() => { setEditing(false); setEditNotes(detail.notes || ''); }} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border">Cancel</button>
               </div>
             </div>
@@ -192,11 +192,11 @@ export default function MeetingsPage() {
           <select value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)} className="px-3 py-2 bg-dash-card border border-dash-border rounded-lg text-sm">
             {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          {canManage && <button onClick={() => setShowNew(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">New Meeting</button>}
+          {canManage && <button onClick={() => setShowNew(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">New Meeting</button>}
         </div>
       </div>
 
-      {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
+      {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">{message}</div>}
 
       {showNew && canManage && (
         <form onSubmit={handleCreate} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 space-y-4">
@@ -207,14 +207,14 @@ export default function MeetingsPage() {
             <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Date</label><input type="date" value={form.meeting_date} onChange={e => setForm({ ...form, meeting_date: e.target.value })} required className={inputClass} /></div>
           </div>
           <div className="flex gap-3">
-            <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Create</button>
+            <button type="submit" className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Create</button>
             <button type="button" onClick={() => setShowNew(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border">Cancel</button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" /></div>
       ) : meetings.length === 0 ? (
         <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center text-sm text-dash-text-muted">No meetings yet.</div>
       ) : (

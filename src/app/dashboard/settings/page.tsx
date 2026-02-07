@@ -45,7 +45,7 @@ export default function SettingsPage() {
     }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text placeholder-gray-400 focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all text-sm';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text placeholder-dash-text-muted focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 outline-none transition-all text-sm';
 
   return (
     <div>
@@ -108,7 +108,7 @@ export default function SettingsPage() {
 
         <form onSubmit={handleSubmit} className="bg-dash-card rounded-xl border border-dash-border p-6 space-y-4">
           {message && (
-            <div className={`p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+            <div className={`p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'}`}>
               {message}
             </div>
           )}
@@ -157,7 +157,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="pt-2">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
+            <button type="submit" disabled={saving} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50">
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>

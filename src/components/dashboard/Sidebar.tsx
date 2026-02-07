@@ -12,7 +12,9 @@ import {
   Settings, UserPlus, BookOpen, Handshake,
   ChevronLeft, ChevronDown, Info, LogOut,
   GraduationCap, PartyPopper, Camera, HeartHandshake,
+  Sun, Moon,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 const EXEC = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
 
@@ -111,6 +113,22 @@ function ChangelogModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function SidebarThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="p-2 w-[31px] h-[31px]" />;
+  return (
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
+    >
+      {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+    </button>
   );
 }
 
@@ -233,40 +251,14 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
       </nav>
 
       {/* Bottom section */}
-      <div className={`mt-auto border-t border-white/10 ${collapsed && !isMobile ? 'px-2 py-3' : 'px-4 py-4'}`}>
-        {/* Settings + Info */}
-        <div className={`flex items-center mb-3 ${collapsed && !isMobile ? 'flex-col gap-2' : 'gap-2'}`}>
-          <Link
-            href="/dashboard/settings"
-            onClick={onClose}
-            title="Settings"
-            className={`flex items-center gap-3 py-2 rounded-lg text-xs font-medium transition-all ${
-              collapsed && !isMobile ? 'justify-center px-2' : 'px-3 flex-1'
-            } ${
-              isActive('/dashboard/settings')
-                ? 'bg-white/10 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Settings size={16} />
-            {(!collapsed || isMobile) && 'Settings'}
-          </Link>
-          <button
-            onClick={() => setShowChangelog(true)}
-            title="Changelog"
-            className="text-gray-500 hover:text-gray-300 p-2 rounded-lg hover:bg-white/5 transition-all"
-          >
-            <Info size={14} />
-          </button>
-        </div>
-
-        {/* User */}
-        {(!collapsed || isMobile) && (
-          <div className="flex items-center gap-3 mb-3">
+      <div className={`mt-auto border-t border-white/10 ${collapsed && !isMobile ? 'px-2 py-3' : 'px-3 py-3'}`}>
+        {/* User profile */}
+        {(!collapsed || isMobile) ? (
+          <div className="flex items-center gap-3 px-2 mb-3">
             {member?.avatar_url ? (
-              <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+              <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs font-semibold">
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs font-semibold shrink-0">
                 {member?.first_name?.[0]}{member?.last_name?.[0]}
               </div>
             )}
@@ -275,24 +267,54 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
               <p className="text-gray-500 text-[10px] uppercase tracking-wider">{ROLE_LABELS[member?.role as Role] || member?.role}</p>
             </div>
           </div>
+        ) : (
+          <div className="flex justify-center mb-3">
+            {member?.avatar_url ? (
+              <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs font-semibold">
+                {member?.first_name?.[0]}{member?.last_name?.[0]}
+              </div>
+            )}
+          </div>
         )}
 
-        {/* Sign out + Collapse toggle */}
-        <div className={`flex items-center ${collapsed && !isMobile ? 'flex-col gap-2' : 'gap-2'}`}>
+        {/* Action buttons row */}
+        <div className={`flex items-center ${collapsed && !isMobile ? 'flex-col gap-1' : 'gap-1'}`}>
+          <Link
+            href="/dashboard/settings"
+            onClick={onClose}
+            title="Settings"
+            className={`flex items-center justify-center p-2 rounded-lg transition-all ${
+              isActive('/dashboard/settings')
+                ? 'bg-white/10 text-white'
+                : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+            }`}
+          >
+            <Settings size={15} />
+          </Link>
+          <SidebarThemeToggle />
+          <button
+            onClick={() => setShowChangelog(true)}
+            title="Changelog"
+            className="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
+          >
+            <Info size={15} />
+          </button>
           <button
             onClick={logout}
             title="Sign Out"
-            className={`flex items-center gap-2 text-gray-500 hover:text-gray-300 text-[11px] uppercase tracking-wider transition-colors ${collapsed && !isMobile ? 'p-2' : 'flex-1'}`}
+            className="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-white/5 transition-all"
           >
-            <LogOut size={14} />
-            {(!collapsed || isMobile) && 'Sign Out'}
+            <LogOut size={15} />
           </button>
+          {(!collapsed || isMobile) && <div className="flex-1" />}
           <button
             onClick={() => setCollapsed(!collapsed)}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="hidden lg:flex text-gray-500 hover:text-gray-300 p-2 rounded-lg hover:bg-white/5 transition-all"
+            className="hidden lg:flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
           >
-            <ChevronLeft size={14} className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
+            <ChevronLeft size={15} className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
           </button>
         </div>
       </div>

@@ -204,7 +204,7 @@ export default function FilesPage() {
     fetchDocuments();
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   const totalCount = (activeTab === 'media' ? files.length : documents.length);
 
@@ -217,12 +217,12 @@ export default function FilesPage() {
         </div>
         <div className="flex items-center gap-2">
           {activeTab === 'media' && (
-            <button onClick={() => setShowMediaUpload(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Upload</button>
+            <button onClick={() => setShowMediaUpload(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Upload</button>
           )}
           {activeTab === 'documents' && isExec && (
             <div className="flex gap-2">
-              <button onClick={() => setShowNewCat(true)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">New Category</button>
-              <button onClick={() => setShowDocUpload(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Upload</button>
+              <button onClick={() => setShowNewCat(true)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all">New Category</button>
+              <button onClick={() => setShowDocUpload(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Upload</button>
             </div>
           )}
         </div>
@@ -238,7 +238,7 @@ export default function FilesPage() {
       {activeTab === 'media' && (
         <>
           {mediaMessage && (
-            <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">
+            <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">
               {mediaMessage}
               <button onClick={() => setMediaMessage('')} className="ml-2 underline">dismiss</button>
             </div>
@@ -280,10 +280,10 @@ export default function FilesPage() {
                   <input type="text" value={mediaUploadForm.description} onChange={e => setMediaUploadForm({ ...mediaUploadForm, description: e.target.value })} placeholder="Brief description..." className={inputClass} />
                 </div>
                 <div className="flex gap-3">
-                  <button type="submit" disabled={mediaUploading} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
+                  <button type="submit" disabled={mediaUploading} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50">
                     {mediaUploading ? 'Uploading...' : 'Upload'}
                   </button>
-                  <button type="button" onClick={() => setShowMediaUpload(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
+                  <button type="button" onClick={() => setShowMediaUpload(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all">Cancel</button>
                 </div>
               </form>
             </div>
@@ -328,7 +328,7 @@ export default function FilesPage() {
                   <div className="flex gap-3 pt-2">
                     <a
                       href={`/api/media/${selectedFile.id}?download=1`}
-                      className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all"
+                      className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all"
                     >
                       Download
                     </a>
@@ -340,7 +340,7 @@ export default function FilesPage() {
                         Delete
                       </button>
                     )}
-                    <button onClick={() => setSelectedFile(null)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all ml-auto">Close</button>
+                    <button onClick={() => setSelectedFile(null)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all ml-auto">Close</button>
                   </div>
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function FilesPage() {
           {/* File grid */}
           {mediaLoading ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
+              <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" />
             </div>
           ) : files.length === 0 ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center text-sm text-dash-text-muted">No files yet.</div>
@@ -405,7 +405,7 @@ export default function FilesPage() {
       {/* ===== DOCUMENTS TAB ===== */}
       {activeTab === 'documents' && (
         <>
-          {docMessage && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{docMessage}<button onClick={() => setDocMessage('')} className="ml-2 underline">dismiss</button></div>}
+          {docMessage && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">{docMessage}<button onClick={() => setDocMessage('')} className="ml-2 underline">dismiss</button></div>}
 
           {/* Category tabs */}
           <div className="flex gap-1 mb-6 bg-dash-badge-bg rounded-lg p-1 w-fit overflow-x-auto">
@@ -419,7 +419,7 @@ export default function FilesPage() {
           {showNewCat && isExec && (
             <form onSubmit={handleCreateCategory} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 flex gap-3 items-end">
               <div className="flex-1"><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Category Name</label><input type="text" value={newCatName} onChange={e => setNewCatName(e.target.value)} required className={inputClass} /></div>
-              <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Create</button>
+              <button type="submit" className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Create</button>
               <button type="button" onClick={() => setShowNewCat(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border">Cancel</button>
             </form>
           )}
@@ -435,7 +435,7 @@ export default function FilesPage() {
               <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">File (max 10MB)</label><input type="file" required className="text-sm text-dash-text" /></div>
               <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Visibility</label><select value={docUploadForm.visibility} onChange={e => setDocUploadForm({ ...docUploadForm, visibility: e.target.value })} className={inputClass}><option value="members">All Members</option><option value="exec">Exec Only</option></select></div>
               <div className="flex gap-3">
-                <button type="submit" disabled={docUploading} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">{docUploading ? 'Uploading...' : 'Upload'}</button>
+                <button type="submit" disabled={docUploading} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50">{docUploading ? 'Uploading...' : 'Upload'}</button>
                 <button type="button" onClick={() => setShowDocUpload(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border">Cancel</button>
               </div>
             </form>
@@ -443,7 +443,7 @@ export default function FilesPage() {
 
           {/* Document list */}
           {docLoading ? (
-            <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+            <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" /></div>
           ) : documents.length === 0 ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center text-sm text-dash-text-muted">No documents yet.</div>
           ) : (

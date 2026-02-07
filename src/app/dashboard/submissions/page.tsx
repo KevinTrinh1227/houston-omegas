@@ -64,13 +64,13 @@ function SubmissionsInner() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by name, email, event type..."
-          className="w-full max-w-sm px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all"
+          className="w-full max-w-sm px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all"
         />
       </form>
 
       {loading ? (
         <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
-          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
+          <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" />
         </div>
       ) : inquiries.length === 0 ? (
         <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
@@ -90,7 +90,7 @@ function SubmissionsInner() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {s.date && <span className="text-xs text-dash-text-secondary hidden sm:inline">Event: {s.date}</span>}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" className={`transition-transform ${expanded === s.id ? 'rotate-180' : ''}`}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${expanded === s.id ? 'rotate-180' : ''}`}>
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </div>
@@ -131,7 +131,7 @@ function SubmissionsInner() {
 
 export default function SubmissionsPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" /></div>}>
       <SubmissionsInner />
     </Suspense>
   );

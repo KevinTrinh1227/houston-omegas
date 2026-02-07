@@ -65,7 +65,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const ALL_STATUSES = ['new', 'contacted', 'interested', 'not_interested', 'pledged'] as const;
 
-const INPUT_CLASS = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+const INPUT_CLASS = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
 const EMPTY_PROSPECT_FORM = {
   first_name: '',
@@ -348,7 +348,7 @@ function RecruitmentInner() {
         {tab === 'prospects' && (
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all"
+            className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all"
           >
             Add Prospect
           </button>
@@ -357,7 +357,7 @@ function RecruitmentInner() {
 
       {/* Message */}
       {message && (
-        <div className={`mb-4 p-3 rounded-lg text-xs text-center ${message.includes('success') || message.includes('updated') || message.includes('deleted') || message.includes('added') ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+        <div className={`mb-4 p-3 rounded-lg text-xs text-center ${message.includes('success') || message.includes('updated') || message.includes('deleted') || message.includes('added') ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'}`}>
           {message}
         </div>
       )}
@@ -393,13 +393,13 @@ function RecruitmentInner() {
               value={recruitSearch}
               onChange={e => setRecruitSearch(e.target.value)}
               placeholder="Search by name, Instagram, phone..."
-              className="w-full max-w-sm px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all"
+              className="w-full max-w-sm px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all"
             />
           </form>
 
           {recruitLoading ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
+              <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" />
             </div>
           ) : recruitments.length === 0 ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
@@ -459,7 +459,7 @@ function RecruitmentInner() {
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all sm:w-48"
+              className="px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all sm:w-48"
             >
               <option value="all">All Statuses</option>
               {ALL_STATUSES.map(s => (
@@ -471,7 +471,7 @@ function RecruitmentInner() {
               value={prospectSearch}
               onChange={e => setProspectSearch(e.target.value)}
               placeholder="Search by name, email, Instagram..."
-              className="flex-1 max-w-sm px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all"
+              className="flex-1 max-w-sm px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all"
             />
           </div>
 
@@ -494,7 +494,7 @@ function RecruitmentInner() {
           {/* Prospect list */}
           {prospectsLoading ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
+              <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" />
             </div>
           ) : filteredProspects.length === 0 ? (
             <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
@@ -544,7 +544,7 @@ function RecruitmentInner() {
                         </select>
 
                         {/* Expand chevron */}
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
                           <path d="M6 9l6 6 6-6" />
                         </svg>
                       </div>
@@ -584,7 +584,7 @@ function RecruitmentInner() {
                         <div className="flex gap-2 mt-4">
                           <button
                             onClick={() => startEditing(p)}
-                            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg border border-dash-border hover:border-gray-300 transition-all"
+                            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all"
                           >
                             Edit
                           </button>
@@ -676,13 +676,13 @@ function RecruitmentInner() {
                           <button
                             onClick={() => handleUpdateProspect(p.id)}
                             disabled={saving}
-                            className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50"
+                            className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
                           >
                             {saving ? 'Saving...' : 'Save Changes'}
                           </button>
                           <button
                             onClick={() => setEditingProspect(null)}
-                            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all"
+                            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all"
                           >
                             Cancel
                           </button>
@@ -792,14 +792,14 @@ function RecruitmentInner() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50"
+                className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
               >
                 {saving ? 'Adding...' : 'Add Prospect'}
               </button>
               <button
                 type="button"
                 onClick={() => { setShowAddModal(false); setAddForm(EMPTY_PROSPECT_FORM); }}
-                className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all"
+                className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all"
               >
                 Cancel
               </button>
@@ -815,7 +815,7 @@ function RecruitmentInner() {
 
 export default function RecruitmentPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" /></div>}>
       <RecruitmentInner />
     </Suspense>
   );

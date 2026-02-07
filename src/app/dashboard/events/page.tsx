@@ -130,7 +130,7 @@ export default function EventsPage() {
     if (res.ok) { setMessage('Attendance saved.'); fetchDetail(eventId); }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   // Event detail view
   if (eventId && detail) {
@@ -151,13 +151,13 @@ export default function EventsPage() {
           </div>
         </div>
 
-        {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
+        {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">{message}</div>}
 
         {/* Attendance roll call */}
         <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
           <div className="flex items-center justify-between px-5 py-3 border-b border-dash-border">
             <h2 className="text-sm font-medium text-dash-text">Attendance</h2>
-            {canMark && <button onClick={handleSaveAttendance} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg hover:bg-gray-800 transition-all">Save</button>}
+            {canMark && <button onClick={handleSaveAttendance} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Save</button>}
           </div>
           <table className="w-full">
             <thead>
@@ -308,7 +308,7 @@ export default function EventsPage() {
               {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           )}
-          {isExec && attendanceTab === 'events' && <button onClick={() => setShowNew(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">New Event</button>}
+          {isExec && attendanceTab === 'events' && <button onClick={() => setShowNew(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">New Event</button>}
         </div>
       </div>
 
@@ -321,12 +321,12 @@ export default function EventsPage() {
         <button onClick={() => setAttendanceTab('calendar')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'calendar' ? 'bg-gray-900 text-white' : 'text-dash-text-secondary border border-dash-border hover:border-gray-300'}`}>Calendar</button>
       </div>
 
-      {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
+      {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">{message}</div>}
 
       {/* Attendance Stats Tab */}
       {attendanceTab === 'attendance' && isExec && (
         attLoading ? (
-          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" /></div>
         ) : (
           <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
             <table className="w-full min-w-[600px]">
@@ -367,7 +367,7 @@ export default function EventsPage() {
               <h2 className="text-sm font-semibold text-dash-text min-w-[160px] text-center">{MONTHS[calMonth]} {calYear}</h2>
               <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-dash-badge-bg text-dash-text-secondary transition-colors"><ChevronRight size={18} /></button>
             </div>
-            <button onClick={goToToday} className="text-[11px] uppercase tracking-[0.15em] font-semibold text-dash-text-secondary border border-dash-border px-4 py-2 rounded-lg hover:border-gray-300 transition-all">Today</button>
+            <button onClick={goToToday} className="text-[11px] uppercase tracking-[0.15em] font-semibold text-dash-text-secondary border border-dash-border px-4 py-2 rounded-lg hover:border-dash-text-muted transition-all">Today</button>
           </div>
 
           {/* Legend */}
@@ -434,15 +434,15 @@ export default function EventsPage() {
           )}
 
           <div className="flex gap-3">
-            <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Create</button>
-            <button type="button" onClick={() => setShowNew(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
+            <button type="submit" className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Create</button>
+            <button type="button" onClick={() => setShowNew(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all">Cancel</button>
           </div>
         </form>
       )}
 
       {attendanceTab === 'events' && (
         loading ? (
-          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" /></div>
         ) : events.length === 0 ? (
           <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center text-sm text-dash-text-muted">No events yet.</div>
         ) : (

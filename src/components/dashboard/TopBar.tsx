@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from './AuthProvider';
-import ThemeToggle from './ThemeToggle';
 import { Menu } from 'lucide-react';
 
 export default function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
@@ -20,7 +19,6 @@ export default function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
         <div className="hidden lg:block" />
 
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <div className="text-right">
             <p className="text-xs font-medium text-dash-text">{member?.first_name} {member?.last_name}</p>
             <p className="text-[10px] text-dash-text-muted uppercase tracking-wider">{member?.role}</p>

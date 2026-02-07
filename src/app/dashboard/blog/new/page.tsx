@@ -62,7 +62,7 @@ export default function NewBlogPost() {
     } catch { /* */ }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   return (
     <div>
@@ -74,7 +74,7 @@ export default function NewBlogPost() {
         <div className="flex gap-2">
           <button
             onClick={() => setPreview(!preview)}
-            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all"
+            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all"
           >
             {preview ? 'Edit' : 'Preview'}
           </button>
@@ -143,14 +143,14 @@ export default function NewBlogPost() {
           <button
             onClick={() => handleSubmit('draft')}
             disabled={saving || !form.title || !form.body}
-            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all disabled:opacity-50"
+            className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save as Draft'}
           </button>
           <button
             onClick={() => handleSubmit('published')}
             disabled={saving || !form.title || !form.body}
-            className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50"
+            className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
           >
             {saving ? 'Publishing...' : 'Publish'}
           </button>

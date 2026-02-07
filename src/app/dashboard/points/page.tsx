@@ -90,7 +90,7 @@ export default function PointsPage() {
     fetchData();
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   const myPoints = leaderboard.find(l => l.id === member?.id);
 
@@ -105,11 +105,11 @@ export default function PointsPage() {
           <select value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)} className="px-3 py-2 bg-dash-card border border-dash-border rounded-lg text-sm">
             {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          {canManage && <button onClick={() => setShowAward(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Award Points</button>}
+          {canManage && <button onClick={() => setShowAward(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Award Points</button>}
         </div>
       </div>
 
-      {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}<button onClick={() => setMessage('')} className="ml-2 underline">dismiss</button></div>}
+      {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">{message}<button onClick={() => setMessage('')} className="ml-2 underline">dismiss</button></div>}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-dash-badge-bg rounded-lg p-1 w-fit">
@@ -131,14 +131,14 @@ export default function PointsPage() {
             <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Reason</label><input type="text" value={awardForm.reason} onChange={e => setAwardForm({ ...awardForm, reason: e.target.value })} className={inputClass} /></div>
           </div>
           <div className="flex gap-3">
-            <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Award</button>
+            <button type="submit" className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Award</button>
             <button type="button" onClick={() => setShowAward(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border">Cancel</button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" /></div>
       ) : tab === 'leaderboard' ? (
         <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
           <table className="w-full">
@@ -177,7 +177,7 @@ export default function PointsPage() {
               </div>
               <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Description</label><input type="text" value={dateForm.description} onChange={e => setDateForm({ ...dateForm, description: e.target.value })} placeholder="What did you do?" className={inputClass} /></div>
               <div className="flex gap-3">
-                <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Submit</button>
+                <button type="submit" className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Submit</button>
                 <button type="button" onClick={() => setShowDateForm(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border">Cancel</button>
               </div>
             </form>

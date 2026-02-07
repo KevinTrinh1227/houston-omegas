@@ -116,7 +116,7 @@ export default function MembersPage() {
 
   const roleColor = ROLE_COLORS;
 
-  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all';
 
   return (
     <div>
@@ -127,10 +127,10 @@ export default function MembersPage() {
         </div>
         {isExec && !showInvite && !showCreate && (
           <div className="flex gap-2">
-            <button onClick={() => setShowCreate(true)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">
+            <button onClick={() => setShowCreate(true)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all">
               Create Profile
             </button>
-            <button onClick={() => setShowInvite(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">
+            <button onClick={() => setShowInvite(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
               Invite Member
             </button>
           </div>
@@ -138,7 +138,7 @@ export default function MembersPage() {
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+        <div className={`mb-4 p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'}`}>
           {message}
         </div>
       )}
@@ -175,10 +175,10 @@ export default function MembersPage() {
             <input type="email" value={inviteForm.email} onChange={e => setInviteForm({ ...inviteForm, email: e.target.value })} required placeholder="member@email.com" className={inputClass} />
           </div>
           <div className="flex gap-3">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
+            <button type="submit" disabled={saving} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50">
               {saving ? 'Inviting...' : 'Invite'}
             </button>
-            <button type="button" onClick={() => setShowInvite(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">
+            <button type="button" onClick={() => setShowInvite(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all">
               Cancel
             </button>
           </div>
@@ -215,10 +215,10 @@ export default function MembersPage() {
             <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Discord ID</label><input type="text" value={createForm.discord_id} onChange={e => setCreateForm({ ...createForm, discord_id: e.target.value })} placeholder="User ID" className={inputClass} /></div>
           </div>
           <div className="flex gap-3">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
+            <button type="submit" disabled={saving} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50">
               {saving ? 'Creating...' : 'Create Profile'}
             </button>
-            <button type="button" onClick={() => setShowCreate(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
+            <button type="button" onClick={() => setShowCreate(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all">Cancel</button>
           </div>
         </form>
       )}
@@ -226,7 +226,7 @@ export default function MembersPage() {
       {/* Member list */}
       {loading ? (
         <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
-          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
+          <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto" />
         </div>
       ) : (
         <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
