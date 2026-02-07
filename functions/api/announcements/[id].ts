@@ -34,6 +34,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (body.ends_at !== undefined) { fields.push('ends_at = ?'); values.push(body.ends_at as string || null); }
     if (body.image_url !== undefined) { fields.push('image_url = ?'); values.push(sanitize(body.image_url as string) || null); }
     if (body.target_pages !== undefined) { fields.push('target_pages = ?'); values.push(body.target_pages as string || '[]'); }
+    if (body.display_mode !== undefined) { fields.push('display_mode = ?'); values.push(body.display_mode as string); }
 
     if (fields.length === 0) return error('No fields to update');
 

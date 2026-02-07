@@ -30,6 +30,7 @@ interface Announcement {
   link_text: string | null;
   image_url: string | null;
   target_pages: string | null;
+  display_mode: string;
   is_active: number;
   starts_at: string | null;
   ends_at: string | null;
@@ -56,7 +57,7 @@ export default function ContentPage() {
   const [form, setForm] = useState({
     title: '', body: '', type: 'banner', priority: 'normal',
     link_url: '', link_text: '', starts_at: '', ends_at: '',
-    image_url: '', target_pages: [] as string[],
+    image_url: '', target_pages: [] as string[], display_mode: 'toast',
   });
 
   const fetchPosts = useCallback(async () => {
@@ -91,7 +92,7 @@ export default function ContentPage() {
 
   // Announcement handlers
   const resetForm = () => {
-    setForm({ title: '', body: '', type: 'banner', priority: 'normal', link_url: '', link_text: '', starts_at: '', ends_at: '', image_url: '', target_pages: [] });
+    setForm({ title: '', body: '', type: 'banner', priority: 'normal', link_url: '', link_text: '', starts_at: '', ends_at: '', image_url: '', target_pages: [], display_mode: 'toast' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -104,6 +105,7 @@ export default function ContentPage() {
       link_url: a.link_url || '', link_text: a.link_text || '',
       starts_at: a.starts_at || '', ends_at: a.ends_at || '',
       image_url: a.image_url || '', target_pages: pages,
+      display_mode: a.display_mode || 'toast',
     });
     setEditingId(a.id);
     setShowForm(true);
@@ -275,13 +277,21 @@ export default function ContentPage() {
                 <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} required rows={3} className={inputClass} />
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 <div>
                   <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Type</label>
                   <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className={selectClass}>
                     <option value="banner">Banner</option>
                     <option value="popup">Popup</option>
                     <option value="both">Both</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Display</label>
+                  <select value={form.display_mode} onChange={e => setForm({ ...form, display_mode: e.target.value })} className={selectClass}>
+                    <option value="toast">Toast</option>
+                    <option value="center">Center Modal</option>
+                    <option value="image_only">Image Only</option>
                   </select>
                 </div>
                 <div>
@@ -382,6 +392,7 @@ export default function ContentPage() {
                         <h3 className="text-sm font-medium text-gray-900 truncate">{a.title}</h3>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${priorityColor[a.priority]}`}>{a.priority}</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase">{a.type}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 uppercase">{a.display_mode || 'toast'}</span>
                         {!a.is_active && <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 uppercase">Inactive</span>}
                       </div>
                       <p className="text-xs text-gray-500 line-clamp-2">{a.body}</p>

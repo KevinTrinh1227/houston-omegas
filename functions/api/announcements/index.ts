@@ -10,7 +10,7 @@ import { notifyNewAnnouncement } from '../../lib/notify';
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const rows = await context.env.DB.prepare(
-      `SELECT id, title, body, type, priority, link_url, link_text, starts_at, ends_at, image_url, target_pages
+      `SELECT id, title, body, type, priority, link_url, link_text, starts_at, ends_at, image_url, target_pages, display_mode
        FROM announcements
        WHERE is_active = 1
          AND (starts_at IS NULL OR starts_at <= datetime('now'))
@@ -43,6 +43,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const endsAt = body.ends_at || null;
     const imageUrl = sanitize(body.image_url) || null;
     const targetPages = body.target_pages || '[]';
+    const displayMode = body.display_mode || 'toast';
 
     if (!title || !bodyText) {
       return error('Title and body are required');
@@ -54,12 +55,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!['low', 'normal', 'high', 'urgent'].includes(priority)) {
       return error('Invalid priority');
     }
+    if (!['toast', 'center', 'image_only'].includes(displayMode)) {
+      return error('Invalid display mode');
+    }
 
     const res = await context.env.DB.prepare(
-      `INSERT INTO announcements (title, body, type, priority, link_url, link_text, starts_at, ends_at, image_url, target_pages, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO announcements (title, body, type, priority, link_url, link_text, starts_at, ends_at, image_url, target_pages, display_mode, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
-    ).bind(title, bodyText, type, priority, linkUrl, linkText, startsAt, endsAt, imageUrl, targetPages, result.auth.member.id).first();
+    ).bind(title, bodyText, type, priority, linkUrl, linkText, startsAt, endsAt, imageUrl, targetPages, displayMode, result.auth.member.id).first();
 
     const ip = getClientIP(context.request);
     await logAudit(context.env.DB, result.auth.member.id, 'create_announcement', 'announcement', String(res?.id), { title }, ip);

@@ -326,7 +326,6 @@ export default function HomePage() {
             <div key={card.label} className="group relative rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/[0.15] transition-all duration-300">
               <div className="relative aspect-[4/3]">
                 <Image src={card.image} alt={card.label} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               </div>
               <div className="p-5 bg-[#0c0e13]">
                 <h3 className="text-white/90 text-sm font-semibold uppercase tracking-[0.1em] mb-1.5">{card.label}</h3>
