@@ -4,8 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_registered: 'This email is not registered. Contact an exec board member for access.',
@@ -86,16 +84,10 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
-      <Navbar variant="light" />
-
-      <section className="pt-28 pb-20 px-6 sm:px-10 min-h-[80vh] flex items-center justify-center">
-        <Suspense fallback={<div className="w-5 h-5 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />}>
-          <LoginContent />
-        </Suspense>
-      </section>
-
-      <Footer variant="light" />
+    <div className="relative bg-white text-gray-900 min-h-screen flex items-center justify-center px-6">
+      <Suspense fallback={<div className="w-5 h-5 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />}>
+        <LoginContent />
+      </Suspense>
     </div>
   );
 }
