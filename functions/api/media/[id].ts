@@ -10,11 +10,31 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (result.errorResponse) return result.errorResponse;
 
     const id = (context.params as { id: string }).id;
+    const url = new URL(context.request.url);
 
     const file = await context.env.DB.prepare(`SELECT * FROM media_files WHERE id = ?`).bind(id).first();
     if (!file) return error('Media file not found', 404);
 
-    return json(file);
+    // Return JSON metadata if ?meta=1
+    if (url.searchParams.get('meta') === '1') {
+      return json(file);
+    }
+
+    // Serve actual file from R2
+    const object = await context.env.MEDIA.get(file.r2_key as string);
+    if (!object) return error('File not found in storage', 404);
+
+    const headers: Record<string, string> = {
+      'Content-Type': (file.content_type as string) || 'application/octet-stream',
+      'Cache-Control': 'public, max-age=86400',
+    };
+
+    // Force download if ?download=1
+    if (url.searchParams.get('download') === '1') {
+      headers['Content-Disposition'] = `attachment; filename="${file.filename}"`;
+    }
+
+    return new Response(object.body, { headers });
   } catch {
     return error('Internal server error', 500);
   }
