@@ -51,6 +51,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (body.end_time !== undefined) { fields.push('end_time = ?'); values.push(sanitize(body.end_time as string) || null); }
     if (body.is_mandatory !== undefined) { fields.push('is_mandatory = ?'); values.push(body.is_mandatory ? 1 : 0); }
     if (body.points_value !== undefined) { fields.push('points_value = ?'); values.push(Number(body.points_value) || 0); }
+    if (body.is_public !== undefined) { fields.push('is_public = ?'); values.push(body.is_public ? 1 : 0); }
+
+    const textFields = ['slug', 'flyer_url', 'cover_url', 'address', 'map_url', 'age_requirement', 'dress_code', 'ticket_url', 'ticket_price', 'disclaimer', 'capacity', 'parking_info', 'contact_info'];
+    for (const f of textFields) {
+      if (body[f] !== undefined) { fields.push(`${f} = ?`); values.push(sanitize(body[f] as string) || null); }
+    }
+    if (body.rules !== undefined) { fields.push('rules = ?'); values.push(typeof body.rules === 'string' ? body.rules : JSON.stringify(body.rules)); }
+    if (body.faq !== undefined) { fields.push('faq = ?'); values.push(typeof body.faq === 'string' ? body.faq : JSON.stringify(body.faq)); }
 
     if (fields.length === 0) return error('No fields to update');
 

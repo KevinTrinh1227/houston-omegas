@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Cinzel, Metal_Mania } from 'next/font/google';
 import AnnouncementBanner from '@/components/AnnouncementBanner';
+import AnnouncementPopup from '@/components/AnnouncementPopup';
 import './globals.css';
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${inter.variable} ${cinzel.variable} ${metalMania.variable} antialiased`}>
         <AnnouncementBanner />
+        <AnnouncementPopup />
         {children}
         {/* Cloudflare Web Analytics */}
         <script

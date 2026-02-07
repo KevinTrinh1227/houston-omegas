@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface Announcement {
   id: number;
@@ -10,9 +11,12 @@ interface Announcement {
   priority: string;
   link_url: string | null;
   link_text: string | null;
+  image_url: string | null;
+  target_pages: string | null;
 }
 
 export default function AnnouncementBanner() {
+  const pathname = usePathname();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
 
@@ -38,9 +42,18 @@ export default function AnnouncementBanner() {
     } catch { /* */ }
   };
 
-  const banners = announcements.filter(
-    a => (a.type === 'banner' || a.type === 'both') && !dismissed.has(a.id)
-  );
+  const banners = announcements.filter(a => {
+    if (a.type !== 'banner' && a.type !== 'both') return false;
+    if (dismissed.has(a.id)) return false;
+    // Filter by target_pages
+    if (a.target_pages) {
+      try {
+        const pages: string[] = JSON.parse(a.target_pages);
+        if (pages.length > 0 && !pages.includes(pathname)) return false;
+      } catch { /* show on all pages if parse fails */ }
+    }
+    return true;
+  });
 
   if (banners.length === 0) return null;
 
@@ -56,7 +69,10 @@ export default function AnnouncementBanner() {
       {banners.map(a => (
         <div key={a.id} className={`${priorityBg[a.priority] || 'bg-gray-900'} text-white px-4 py-2.5`}>
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex-1 min-w-0 text-center">
+            <div className="flex-1 min-w-0 text-center flex items-center justify-center gap-3">
+              {a.image_url && (
+                <img src={a.image_url} alt="" className="w-6 h-6 rounded object-cover shrink-0" />
+              )}
               <span className="text-xs font-medium">
                 {a.title}: {a.body}
                 {a.link_url && (

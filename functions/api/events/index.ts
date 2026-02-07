@@ -50,11 +50,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!title || !start_time) return error('Title and start_time are required');
 
+    // Generate slug from title
+    const slug = sanitize(body.slug as string) || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const is_public = body.is_public ? 1 : 0;
+    const flyer_url = sanitize(body.flyer_url as string) || null;
+    const cover_url = sanitize(body.cover_url as string) || null;
+    const address = sanitize(body.address as string) || null;
+    const map_url = sanitize(body.map_url as string) || null;
+    const age_requirement = sanitize(body.age_requirement as string) || null;
+    const dress_code = sanitize(body.dress_code as string) || null;
+    const ticket_url = sanitize(body.ticket_url as string) || null;
+    const ticket_price = sanitize(body.ticket_price as string) || null;
+    const rules = typeof body.rules === 'string' ? body.rules : JSON.stringify(body.rules || []);
+    const faq = typeof body.faq === 'string' ? body.faq : JSON.stringify(body.faq || []);
+    const disclaimer = sanitize(body.disclaimer as string) || null;
+    const capacity = sanitize(body.capacity as string) || null;
+    const parking_info = sanitize(body.parking_info as string) || null;
+    const contact_info = sanitize(body.contact_info as string) || null;
+
     const id = generateId();
     await context.env.DB.prepare(
-      `INSERT INTO events (id, title, description, event_type, location, start_time, end_time, semester_id, is_mandatory, points_value, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(id, title, description, event_type, location, start_time, end_time, semester_id, is_mandatory, points_value, result.auth.member.id).run();
+      `INSERT INTO events (id, title, description, event_type, location, start_time, end_time, semester_id, is_mandatory, points_value, slug, is_public, flyer_url, cover_url, address, map_url, age_requirement, dress_code, ticket_url, ticket_price, rules, faq, disclaimer, capacity, parking_info, contact_info, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(id, title, description, event_type, location, start_time, end_time, semester_id, is_mandatory, points_value, slug, is_public, flyer_url, cover_url, address, map_url, age_requirement, dress_code, ticket_url, ticket_price, rules, faq, disclaimer, capacity, parking_info, contact_info, result.auth.member.id).run();
 
     const ip = getClientIP(context.request);
     await logAudit(context.env.DB, result.auth.member.id, 'create_event', 'event', id, { title }, ip);

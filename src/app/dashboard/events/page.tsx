@@ -33,7 +33,8 @@ export default function EventsPage() {
   const [attendanceMap, setAttendanceMap] = useState<Record<string, string>>({});
 
   // New event form
-  const [form, setForm] = useState({ title: '', description: '', event_type: 'general', location: '', start_time: '', end_time: '', is_mandatory: false, points_value: '0' });
+  const [form, setForm] = useState({ title: '', description: '', event_type: 'general', location: '', start_time: '', end_time: '', is_mandatory: false, points_value: '0', slug: '', is_public: false, flyer_url: '', cover_url: '', address: '', age_requirement: '', dress_code: '', ticket_url: '', ticket_price: '', disclaimer: '', capacity: '', parking_info: '', contact_info: '' });
+  const [showPublicFields, setShowPublicFields] = useState(false);
 
   const fetchSemesters = useCallback(async () => {
     const res = await fetch('/api/semesters', { credentials: 'include' });
@@ -79,7 +80,7 @@ export default function EventsPage() {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
       body: JSON.stringify({ ...form, semester_id: selectedSemester, points_value: Number(form.points_value) }),
     });
-    if (res.ok) { setShowNew(false); setForm({ title: '', description: '', event_type: 'general', location: '', start_time: '', end_time: '', is_mandatory: false, points_value: '0' }); fetchEvents(); }
+    if (res.ok) { setShowNew(false); setForm({ title: '', description: '', event_type: 'general', location: '', start_time: '', end_time: '', is_mandatory: false, points_value: '0', slug: '', is_public: false, flyer_url: '', cover_url: '', address: '', age_requirement: '', dress_code: '', ticket_url: '', ticket_price: '', disclaimer: '', capacity: '', parking_info: '', contact_info: '' }); setShowPublicFields(false); fetchEvents(); }
     else { const d = await res.json(); setMessage(d.error || 'Failed'); }
   };
 
@@ -183,7 +184,36 @@ export default function EventsPage() {
             <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Points</label><input type="number" value={form.points_value} onChange={e => setForm({ ...form, points_value: e.target.value })} min="0" className={inputClass} /></div>
           </div>
           <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Description</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className={inputClass} /></div>
-          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_mandatory} onChange={e => setForm({ ...form, is_mandatory: e.target.checked })} /> Mandatory event</label>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_mandatory} onChange={e => setForm({ ...form, is_mandatory: e.target.checked })} /> Mandatory event</label>
+            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_public} onChange={e => setForm({ ...form, is_public: e.target.checked })} /> Public event page</label>
+          </div>
+
+          {/* Public event fields toggle */}
+          <button type="button" onClick={() => setShowPublicFields(!showPublicFields)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+            {showPublicFields ? '▾ Hide public page fields' : '▸ Show public page fields (flyer, address, rules, etc.)'}
+          </button>
+
+          {showPublicFields && (
+            <div className="border border-gray-100 rounded-lg p-4 space-y-4 bg-gray-50/50">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Public Event Page Fields</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">URL Slug</label><input type="text" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated from title" className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Flyer Image URL</label><input type="text" value={form.flyer_url} onChange={e => setForm({ ...form, flyer_url: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Cover Image URL</label><input type="text" value={form.cover_url} onChange={e => setForm({ ...form, cover_url: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Full Address</label><input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Age Requirement</label><input type="text" value={form.age_requirement} onChange={e => setForm({ ...form, age_requirement: e.target.value })} placeholder="e.g. 18+ to enter, 21+ to drink" className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Dress Code</label><input type="text" value={form.dress_code} onChange={e => setForm({ ...form, dress_code: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Ticket URL</label><input type="text" value={form.ticket_url} onChange={e => setForm({ ...form, ticket_url: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Ticket Price</label><input type="text" value={form.ticket_price} onChange={e => setForm({ ...form, ticket_price: e.target.value })} placeholder="e.g. $15 presale / $20 door" className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Capacity</label><input type="text" value={form.capacity} onChange={e => setForm({ ...form, capacity: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Contact Info</label><input type="text" value={form.contact_info} onChange={e => setForm({ ...form, contact_info: e.target.value })} className={inputClass} /></div>
+              </div>
+              <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Parking Info</label><input type="text" value={form.parking_info} onChange={e => setForm({ ...form, parking_info: e.target.value })} className={inputClass} /></div>
+              <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Disclaimer / Legal</label><textarea value={form.disclaimer} onChange={e => setForm({ ...form, disclaimer: e.target.value })} rows={2} className={inputClass} /></div>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Create</button>
             <button type="button" onClick={() => setShowNew(false)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">Cancel</button>

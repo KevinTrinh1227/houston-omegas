@@ -1,13 +1,22 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-export const metadata: Metadata = {
-  title: 'Partners',
-  description: 'Partner with Houston Omegas. Sponsorship opportunities for events, social media, and community engagement.',
-};
+interface Partner {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  description: string | null;
+  category: string;
+  tier: string;
+  website_url: string | null;
+  is_current: number;
+}
 
 const tiers = [
   {
@@ -27,13 +36,40 @@ const tiers = [
   },
 ];
 
-const currentPartners = [
-  { name: 'UH VSA', logo: '/images/vsa-logo.png', url: 'https://www.uhvsa.com/' },
-  { name: 'Sigma Phi Omega', logo: '/images/sigma-phi-omega.jpg', url: 'https://uhsigmasweb.wixsite.com/mysite' },
-  { name: 'Secret Society', logo: '/images/secret-society.jpg', url: 'https://linktr.ee/secretsocietyusa' },
+const fallbackPartners = [
+  { name: 'UH VSA', logo: '/images/vsa-logo.png', slug: 'uh-vsa', tier: 'gold' },
+  { name: 'Sigma Phi Omega', logo: '/images/sigma-phi-omega.jpg', slug: 'sigma-phi-omega', tier: 'silver' },
+  { name: 'Secret Society', logo: '/images/secret-society.jpg', slug: 'secret-society', tier: 'bronze' },
 ];
 
+const TIER_ORDER = ['gold', 'silver', 'bronze', 'community'] as const;
+
 export default function PartnersPage() {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/partners')
+      .then(res => res.ok ? res.json() : null)
+      .then((data: Partner[] | null) => {
+        if (data && data.length > 0) {
+          setPartners(data.filter(p => p.is_current));
+        }
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  // Group partners by tier
+  const groupedByTier = TIER_ORDER.map(tier => ({
+    tier: tier.charAt(0).toUpperCase() + tier.slice(1),
+    tierKey: tier,
+    partners: partners.filter(p => p.tier === tier),
+  })).filter(g => g.partners.length > 0);
+
+  // Use fallback if no API data
+  const showPartners = loaded && partners.length === 0 ? fallbackPartners : null;
+
   return (
     <div className="relative bg-white text-gray-900 min-h-screen">
       <Navbar variant="light" />
@@ -98,14 +134,49 @@ export default function PartnersPage() {
         <h2 className="text-center text-2xl sm:text-3xl text-gray-900 mb-12 tracking-[0.06em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
           Current Partners
         </h2>
-        <div className="flex items-center justify-center gap-10 flex-wrap">
-          {currentPartners.map((p) => (
-            <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 group">
-              <Image src={p.logo} alt={p.name} width={64} height={64} className="w-16 h-16 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" />
-              <span className="text-gray-400 text-xs group-hover:text-gray-700 transition-colors">{p.name}</span>
-            </a>
-          ))}
-        </div>
+
+        {/* API-loaded partners grouped by tier */}
+        {groupedByTier.length > 0 ? (
+          <div className="space-y-10">
+            {groupedByTier.map(group => (
+              <div key={group.tierKey}>
+                <p className="text-center text-xs text-gray-400 uppercase tracking-[0.2em] mb-6 font-semibold">{group.tier} Tier</p>
+                <div className="flex items-center justify-center gap-10 flex-wrap">
+                  {group.partners.map((p) => (
+                    <Link key={p.id} href={`/partners/profile?slug=${p.slug}`} className="flex flex-col items-center gap-3 group">
+                      {p.logo_url ? (
+                        <Image src={p.logo_url} alt={p.name} width={64} height={64} className="w-16 h-16 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" />
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-bold">
+                          {p.name[0]}
+                        </div>
+                      )}
+                      <span className="text-gray-400 text-xs group-hover:text-gray-700 transition-colors">{p.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : showPartners ? (
+          <div className="flex items-center justify-center gap-10 flex-wrap">
+            {showPartners.map((p) => (
+              <Link key={p.name} href={`/partners/profile?slug=${p.slug}`} className="flex flex-col items-center gap-3 group">
+                <Image src={p.logo} alt={p.name} width={64} height={64} className="w-16 h-16 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" />
+                <span className="text-gray-400 text-xs group-hover:text-gray-700 transition-colors">{p.name}</span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-10 flex-wrap">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex flex-col items-center gap-3 animate-pulse">
+                <div className="w-16 h-16 rounded-xl bg-gray-100" />
+                <div className="h-3 w-16 bg-gray-100 rounded" />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <div className="h-px bg-gray-200 mx-10" />

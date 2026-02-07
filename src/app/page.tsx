@@ -75,11 +75,26 @@ const merchItems = [
 export default function HomePage() {
   const rushTime = useMemo(() => new Date('2026-08-17T09:00:00').getTime(), []);
   const countdown = useCountdown(rushTime);
-  const eventTime = useMemo(() => new Date('2026-02-13T20:00:00').getTime(), []);
-  const eventCountdown = useCountdown(eventTime);
 
   return (
     <div className="relative bg-[#080a0f] text-white">
+      {/* Subtle floating particles across dark sections */}
+      <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              left: `${8 + (i * 7.5) % 84}%`,
+              top: `${30 + (i * 23) % 60}%`,
+              animationDuration: `${8 + (i % 5) * 2}s`,
+              animationDelay: `${(i * 1.3) % 10}s`,
+              width: `${1.5 + (i % 3)}px`,
+              height: `${1.5 + (i % 3)}px`,
+            }}
+          />
+        ))}
+      </div>
       <Navbar variant="light" />
       <QuickActions />
 
@@ -98,17 +113,43 @@ export default function HomePage() {
         <div className="absolute inset-0 z-[3] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.22) 70%, rgba(0,0,0,0.5) 100%)' }} />
         <div className="absolute top-0 left-0 right-0 h-[12vh] bg-gradient-to-b from-black/10 to-transparent z-[3] pointer-events-none" />
 
-        {/* Wispy cloud streaks */}
+        {/* Clouds */}
         <div className="absolute inset-0 z-[4] pointer-events-none overflow-hidden">
-          <div className="absolute top-[8%] left-[5%] w-[40vw] h-[3px] bg-gradient-to-r from-transparent via-gray-300/30 to-transparent rounded-full blur-[2px] animate-cloud-drift" />
-          <div className="absolute top-[12%] right-[10%] w-[30vw] h-[2px] bg-gradient-to-r from-transparent via-gray-400/20 to-transparent rounded-full blur-[3px] animate-cloud-drift" style={{ animationDelay: '8s', animationDuration: '80s' }} />
-          <div className="absolute top-[6%] left-[40%] w-[25vw] h-[2px] bg-gradient-to-r from-transparent via-gray-400/15 to-transparent rounded-full blur-[2px] animate-cloud-drift" style={{ animationDelay: '22s', animationDuration: '70s' }} />
-          <div className="absolute top-[18%] left-[20%] w-[50vw] h-[4px] bg-gradient-to-r from-transparent via-gray-300/25 to-transparent rounded-full blur-[4px] animate-cloud-drift" style={{ animationDelay: '15s', animationDuration: '90s' }} />
-          <div className="absolute top-[22%] right-[5%] w-[35vw] h-[3px] bg-gradient-to-r from-transparent via-gray-300/20 to-transparent rounded-full blur-[3px] animate-cloud-drift" style={{ animationDelay: '30s', animationDuration: '100s' }} />
-          <div className="absolute top-[35%] left-[8%] w-[45vw] h-[3px] bg-gradient-to-r from-transparent via-gray-300/22 to-transparent rounded-full blur-[3px] animate-cloud-drift" style={{ animationDelay: '18s', animationDuration: '85s' }} />
-          <div className="absolute top-[45%] left-[25%] w-[35vw] h-[3px] bg-gradient-to-r from-transparent via-gray-300/18 to-transparent rounded-full blur-[3px] animate-cloud-drift" style={{ animationDelay: '42s', animationDuration: '105s' }} />
-          <div className="absolute top-[10%] left-[15%] w-[15vw] h-[8px] bg-gradient-to-r from-transparent via-gray-300/15 to-transparent rounded-full blur-[6px] animate-cloud-drift" style={{ animationDelay: '12s', animationDuration: '110s' }} />
-          <div className="absolute top-[38%] left-[45%] w-[12vw] h-[6px] bg-gradient-to-r from-transparent via-gray-300/10 to-transparent rounded-full blur-[5px] animate-cloud-drift" style={{ animationDelay: '38s', animationDuration: '115s' }} />
+          {/* Large cloud cluster - top left */}
+          <div className="absolute -top-[2%] -left-[5%] animate-cloud-drift" style={{ animationDuration: '120s' }}>
+            <div className="relative">
+              <div className="w-[30vw] h-[8vw] bg-white/40 rounded-full blur-[40px]" />
+              <div className="absolute top-[1vw] left-[8vw] w-[18vw] h-[6vw] bg-white/30 rounded-full blur-[35px]" />
+              <div className="absolute -top-[1vw] left-[4vw] w-[14vw] h-[5vw] bg-white/50 rounded-full blur-[30px]" />
+            </div>
+          </div>
+
+          {/* Medium cloud - top right */}
+          <div className="absolute top-[1%] right-[0%] animate-cloud-drift" style={{ animationDelay: '15s', animationDuration: '140s', animationDirection: 'reverse' }}>
+            <div className="relative">
+              <div className="w-[25vw] h-[7vw] bg-white/35 rounded-full blur-[35px]" />
+              <div className="absolute top-[0.5vw] left-[5vw] w-[16vw] h-[5vw] bg-white/45 rounded-full blur-[30px]" />
+              <div className="absolute -top-[1vw] left-[10vw] w-[10vw] h-[4vw] bg-white/35 rounded-full blur-[25px]" />
+            </div>
+          </div>
+
+          {/* Small wispy cloud - top center */}
+          <div className="absolute top-[5%] left-[30%] animate-cloud-drift" style={{ animationDelay: '8s', animationDuration: '100s' }}>
+            <div className="relative">
+              <div className="w-[20vw] h-[4vw] bg-white/25 rounded-full blur-[30px]" />
+              <div className="absolute top-[0.5vw] left-[6vw] w-[10vw] h-[3vw] bg-white/30 rounded-full blur-[25px]" />
+            </div>
+          </div>
+
+          {/* Thin wisp - mid left */}
+          <div className="absolute top-[15%] left-[5%] animate-cloud-drift" style={{ animationDelay: '25s', animationDuration: '90s' }}>
+            <div className="w-[22vw] h-[2vw] bg-white/15 rounded-full blur-[20px]" />
+          </div>
+
+          {/* Thin wisp - mid right */}
+          <div className="absolute top-[12%] right-[8%] animate-cloud-drift" style={{ animationDelay: '35s', animationDuration: '110s', animationDirection: 'reverse' }}>
+            <div className="w-[18vw] h-[2vw] bg-white/12 rounded-full blur-[18px]" />
+          </div>
         </div>
 
         {/* Flying crows */}
@@ -133,30 +174,27 @@ export default function HomePage() {
         </div>
 
         {/* House (not selectable / not draggable) */}
-        <div className="absolute bottom-[10px] left-1/2 -translate-x-1/2 w-full max-w-3xl lg:max-w-[52rem] z-[7] px-4 select-none pointer-events-none">
+        <div className="absolute bottom-[38px] left-1/2 -translate-x-1/2 w-full max-w-[42rem] lg:max-w-[46rem] z-[7] px-4 select-none pointer-events-none">
           <Image src="/images/mansion-illustration.png" alt="Omega Mansion" width={1200} height={675} className="w-full h-auto brightness-[0.85]" draggable={false} priority />
         </div>
 
         {/* Title + CTAs */}
-        <div className="relative z-10 flex flex-col items-center pt-[18vh] sm:pt-[20vh] lg:pt-[32vh]">
+        <div className="relative z-10 flex flex-col items-center pt-[14vh] sm:pt-[20vh] lg:pt-[32vh]">
           <div className="animate-float">
-            <p className="text-black/60 text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase mb-3 text-center" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="text-black/60 text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase mb-1 text-center" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Established 2004
             </p>
             <h1 className="text-black text-5xl sm:text-6xl md:text-8xl tracking-[0.08em]" style={{ fontFamily: 'var(--font-metal-mania), serif' }}>
               Houston Omegas
             </h1>
           </div>
-          {/* Event CTA */}
-          <div className="mt-8 sm:mt-10">
-            <Link href="#events" className="border border-black/20 text-black/70 hover:text-black hover:border-black/40 text-[10px] uppercase tracking-[0.2em] font-medium px-8 py-3 rounded-full backdrop-blur-sm transition-all duration-300 inline-flex items-center gap-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-              Love at First Light &middot; Feb 13
+          {/* CTA */}
+          <div className="mt-8 sm:mt-10 flex flex-col items-center">
+            <Link href="/events/detail?slug=love-at-first-light" className="relative border border-black/20 bg-black/[0.04] hover:bg-black/[0.08] text-black/90 hover:text-black hover:border-black/40 text-[11px] uppercase tracking-[0.2em] font-semibold px-8 py-3 rounded-lg backdrop-blur-sm transition-all duration-300 animate-hero-cta-glow">
+              Valentine&apos;s Party &middot; Feb 13
             </Link>
+            <span className="text-[10px] text-black/50 mt-2 tracking-[0.15em] uppercase">Love at First Light</span>
           </div>
-          <p className="text-black/30 text-[10px] tracking-[0.15em] mt-3 tabular-nums">
-            {eventCountdown.days}d {eventCountdown.hours}h {eventCountdown.minutes}m until the party
-          </p>
         </div>
 
         {/* Fade into dark content */}
@@ -198,8 +236,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-10" />
-
       {/* ═══════════ EVENTS ═══════════ */}
       <section id="events" className="relative py-24 px-6 sm:px-10 max-w-6xl mx-auto">
         <h2 className="text-center text-4xl sm:text-5xl lg:text-6xl mb-4 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -209,7 +245,7 @@ export default function HomePage() {
 
         {/* Featured event (Valentine's Day) */}
         {upcomingEvents.filter(e => e.featured).map((e) => (
-          <a key={e.title} href={e.flyer || '#'} target="_blank" rel="noopener noreferrer" className="block mb-8 border border-white/[0.1] rounded-2xl overflow-hidden bg-white/[0.02] hover:border-white/[0.18] transition-all duration-300 cursor-pointer group">
+          <Link key={e.title} href={`/events/detail?slug=${e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`} className="block mb-8 border border-white/[0.1] rounded-2xl overflow-hidden bg-white/[0.02] hover:border-white/[0.18] transition-all duration-300 cursor-pointer group">
             <div className="grid grid-cols-1 md:grid-cols-2">
               {/* Flyer */}
               <div className="relative aspect-[3/4] md:aspect-auto min-h-[320px] bg-[#0c0e13] flex items-center justify-center p-6">
@@ -238,7 +274,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
 
         {/* Other upcoming events */}
@@ -252,9 +288,12 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        <div className="text-center mt-10">
+          <Link href="/events" className="inline-block border border-white/[0.12] hover:border-white/[0.25] text-white/60 hover:text-white text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-lg transition-all duration-300">
+            View All Events
+          </Link>
+        </div>
       </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-10" />
 
       {/* ═══════════ MERCH ═══════════ */}
       <section id="merch" className="relative py-24 px-6 sm:px-10 max-w-5xl mx-auto">
@@ -281,31 +320,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-10" />
-
-      {/* ═══════════ MEDIA ═══════════ */}
+      {/* ═══════════ MEDIA TEASER ═══════════ */}
       <section id="gallery" className="relative py-24 px-6 sm:px-10 max-w-6xl mx-auto">
-        <h2 className="text-center text-4xl sm:text-5xl lg:text-6xl mb-10 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <h2 className="text-center text-4xl sm:text-5xl lg:text-6xl mb-4 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
           Media
         </h2>
+        <p className="text-center text-white/40 text-sm mb-10">Photos, videos, and highlights from our events and brotherhood.</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 auto-rows-[180px] md:auto-rows-[200px]">
-          {galleryImages.map((img, i) => (
-            <a key={i} href="https://www.instagram.com/houstonomegas/" target="_blank" rel="noopener noreferrer" className={`relative overflow-hidden group rounded-lg ${img.span}`}>
+          {galleryImages.slice(0, 4).map((img, i) => (
+            <Link key={i} href="/media" className={`relative overflow-hidden group rounded-lg ${img.span}`}>
               <Image src={img.src} alt={img.alt} fill className="object-cover transition-all duration-500 group-hover:scale-105 brightness-100 group-hover:brightness-110" />
-            </a>
+            </Link>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <a href="https://www.instagram.com/houstonomegas/" target="_blank" rel="noopener noreferrer" className="inline-block border border-white/[0.12] hover:border-white/[0.25] text-white/50 hover:text-white text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-lg transition-all duration-300">
-            View More
-          </a>
+        <div className="text-center mt-10">
+          <Link href="/media" className="inline-block border border-white/[0.12] hover:border-white/[0.25] text-white/60 hover:text-white text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-lg transition-all duration-300">
+            View All Media
+          </Link>
         </div>
       </section>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-10" />
-
       {/* ═══════════ RECRUITMENT ═══════════ */}
-      <section id="recruitment" className="relative py-24 px-6 sm:px-10 max-w-3xl mx-auto">
+      <section id="recruitment" className="relative py-24 px-6 sm:px-10 max-w-3xl mx-auto overflow-hidden">
+        {/* Subtle bat animations */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-[20%] -left-4 animate-bat-section-fly" style={{ animationDelay: '0s' }}>
+            <svg width="18" height="10" viewBox="0 0 24 14" fill="none" className="animate-crow-flap"><path d="M12 6 C10 3, 6 0, 1 2 C4 4, 6 5, 7 7 C8 5, 10 5, 12 6 C14 5, 16 5, 17 7 C18 5, 20 4, 23 2 C18 0, 14 3, 12 6Z" fill="rgba(255,255,255,0.22)" /></svg>
+          </div>
+          <div className="absolute top-[45%] -left-4 animate-bat-section-fly" style={{ animationDelay: '6s' }}>
+            <svg width="14" height="8" viewBox="0 0 24 14" fill="none" className="animate-crow-flap"><path d="M12 6 C10 3, 6 0, 1 2 C4 4, 6 5, 7 7 C8 5, 10 5, 12 6 C14 5, 16 5, 17 7 C18 5, 20 4, 23 2 C18 0, 14 3, 12 6Z" fill="rgba(255,255,255,0.16)" /></svg>
+          </div>
+          <div className="absolute top-[70%] -left-4 animate-bat-section-fly" style={{ animationDelay: '12s' }}>
+            <svg width="16" height="9" viewBox="0 0 24 14" fill="none" className="animate-crow-flap"><path d="M12 6 C10 3, 6 0, 1 2 C4 4, 6 5, 7 7 C8 5, 10 5, 12 6 C14 5, 16 5, 17 7 C18 5, 20 4, 23 2 C18 0, 14 3, 12 6Z" fill="rgba(255,255,255,0.18)" /></svg>
+          </div>
+        </div>
+
         <h2 className="text-center text-4xl sm:text-5xl lg:text-6xl mb-4 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
           Recruitment
         </h2>
@@ -327,12 +376,10 @@ export default function HomePage() {
         </div>
         <div className="text-center">
           <Link href="/recruitment" className="inline-block border border-white/[0.12] hover:border-white/[0.25] text-white/60 hover:text-white text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-lg transition-all duration-300">
-            Learn More
+            Interested in Becoming an &Omega;?
           </Link>
         </div>
       </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mx-10" />
 
       {/* ═══════════ CTA — Get Involved ═══════════ */}
       <section className="relative py-24 px-6 sm:px-10 max-w-6xl mx-auto">

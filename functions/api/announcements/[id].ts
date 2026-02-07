@@ -32,6 +32,8 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (body.is_active !== undefined) { fields.push('is_active = ?'); values.push(body.is_active ? 1 : 0); }
     if (body.starts_at !== undefined) { fields.push('starts_at = ?'); values.push(body.starts_at as string || null); }
     if (body.ends_at !== undefined) { fields.push('ends_at = ?'); values.push(body.ends_at as string || null); }
+    if (body.image_url !== undefined) { fields.push('image_url = ?'); values.push(sanitize(body.image_url as string) || null); }
+    if (body.target_pages !== undefined) { fields.push('target_pages = ?'); values.push(body.target_pages as string || '[]'); }
 
     if (fields.length === 0) return error('No fields to update');
 

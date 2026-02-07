@@ -1,40 +1,68 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Info } from 'lucide-react';
 
-const sponsors = [
-  { name: 'UH VSA', logo: '/images/vsa-logo.png', url: 'https://www.uhvsa.com/' },
-  { name: 'ΣΦΩ', logo: '/images/sigma-phi-omega.jpg', url: 'https://uhsigmasweb.wixsite.com/mysite' },
-  { name: 'Secret Society', logo: '/images/secret-society.jpg', url: 'https://linktr.ee/secretsocietyusa' },
-  { name: 'Kruto Vodka', logo: '/images/kruto-logo.webp', url: 'https://krutovodka.com/' },
-  { name: 'R&B Tea', logo: '/images/rb-tea-logo.png', url: '#' },
-  { name: 'Bori', logo: '/images/bori-logo.png', url: 'https://borirestaurant.com/' },
+interface Partner {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  is_current: number;
+}
+
+const fallbackSponsors = [
+  { name: 'UH VSA', logo: '/images/vsa-logo.png', slug: 'uh-vsa' },
+  { name: 'ΣΦΩ', logo: '/images/sigma-phi-omega.jpg', slug: 'sigma-phi-omega' },
+  { name: 'Secret Society', logo: '/images/secret-society.jpg', slug: 'secret-society' },
+  { name: 'Kruto Vodka', logo: '/images/kruto-logo.webp', slug: 'kruto-vodka' },
+  { name: 'R&B Tea', logo: '/images/rb-tea-logo.png', slug: 'rb-tea' },
+  { name: 'Bori', logo: '/images/bori-logo.png', slug: 'bori' },
 ];
 
-function SponsorItem({ s }: { s: typeof sponsors[number] }) {
+function SponsorItem({ name, logo, slug }: { name: string; logo: string; slug: string }) {
   return (
     <Link
-      href="/partners"
-      target="_blank"
+      href={`/partners/profile?slug=${slug}`}
       className="flex items-center gap-3.5 shrink-0 mx-6 sm:mx-10 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
     >
-      <Image src={s.logo} alt={s.name} width={44} height={44} className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg object-cover" />
-      <span className="text-white/80 text-sm sm:text-base font-semibold whitespace-nowrap">{s.name}</span>
+      <Image src={logo} alt={name} width={44} height={44} className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg object-cover" />
+      <span className="text-white/80 text-sm sm:text-base font-semibold whitespace-nowrap">{name}</span>
     </Link>
   );
 }
 
 export default function SponsorsTicker() {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [items, setItems] = useState(fallbackSponsors);
+
+  useEffect(() => {
+    fetch('/api/partners')
+      .then(res => res.ok ? res.json() : null)
+      .then((data: Partner[] | null) => {
+        if (data && data.length > 0) {
+          const current = data.filter(p => p.is_current && p.logo_url);
+          if (current.length > 0) {
+            setItems(current.map(p => ({
+              name: p.name,
+              logo: p.logo_url!,
+              slug: p.slug,
+            })));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const tripled = [...items, ...items, ...items];
 
   return (
     <section className="py-10">
       {/* Header with info icon */}
       <div className="flex items-center justify-center gap-2.5 mb-6 relative z-20">
-        <p className="text-sm text-white/60 uppercase tracking-[0.3em] font-bold">Our Partners</p>
+        <p className="text-sm text-white/60 uppercase tracking-[0.3em] font-bold">Partners &amp; Affiliates</p>
         <div
           className="relative"
           onMouseEnter={() => setShowTooltip(true)}
@@ -57,8 +85,8 @@ export default function SponsorsTicker() {
         <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#080a0f] to-transparent z-10 pointer-events-none" />
 
         <div className="flex animate-ticker group-hover:[animation-play-state:paused]" style={{ width: 'max-content' }}>
-          {[...sponsors, ...sponsors, ...sponsors].map((s, i) => (
-            <SponsorItem key={`${s.name}-${i}`} s={s} />
+          {tripled.map((s, i) => (
+            <SponsorItem key={`${s.name}-${i}`} name={s.name} logo={s.logo} slug={s.slug} />
           ))}
         </div>
       </div>

@@ -28,6 +28,8 @@ interface Announcement {
   priority: string;
   link_url: string | null;
   link_text: string | null;
+  image_url: string | null;
+  target_pages: string | null;
   is_active: number;
   starts_at: string | null;
   ends_at: string | null;
@@ -54,6 +56,7 @@ export default function ContentPage() {
   const [form, setForm] = useState({
     title: '', body: '', type: 'banner', priority: 'normal',
     link_url: '', link_text: '', starts_at: '', ends_at: '',
+    image_url: '', target_pages: [] as string[],
   });
 
   const fetchPosts = useCallback(async () => {
@@ -88,16 +91,19 @@ export default function ContentPage() {
 
   // Announcement handlers
   const resetForm = () => {
-    setForm({ title: '', body: '', type: 'banner', priority: 'normal', link_url: '', link_text: '', starts_at: '', ends_at: '' });
+    setForm({ title: '', body: '', type: 'banner', priority: 'normal', link_url: '', link_text: '', starts_at: '', ends_at: '', image_url: '', target_pages: [] });
     setEditingId(null);
     setShowForm(false);
   };
 
   const startEdit = (a: Announcement) => {
+    let pages: string[] = [];
+    try { pages = JSON.parse(a.target_pages || '[]'); } catch { /* */ }
     setForm({
       title: a.title, body: a.body, type: a.type, priority: a.priority,
       link_url: a.link_url || '', link_text: a.link_text || '',
       starts_at: a.starts_at || '', ends_at: a.ends_at || '',
+      image_url: a.image_url || '', target_pages: pages,
     });
     setEditingId(a.id);
     setShowForm(true);
@@ -112,7 +118,7 @@ export default function ContentPage() {
       const res = await fetch(url, {
         method, credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, target_pages: JSON.stringify(form.target_pages) }),
       });
       if (res.ok) { resetForm(); fetchAnnouncements(); }
     } catch { /* */ }
@@ -305,6 +311,39 @@ export default function ContentPage() {
                 <div>
                   <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Link Text (optional)</label>
                   <input type="text" value={form.link_text} onChange={e => setForm({ ...form, link_text: e.target.value })} placeholder="Learn more" className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Image URL (optional)</label>
+                <input type="url" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="https://... or /media/..." className={inputClass} />
+              </div>
+
+              <div>
+                <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Target Pages (leave unchecked for all pages)</label>
+                <div className="flex items-center gap-4 flex-wrap mt-1">
+                  {[
+                    { label: 'Home', value: '/' },
+                    { label: 'Recruitment', value: '/recruitment' },
+                    { label: 'Partners', value: '/partners' },
+                    { label: 'Rent', value: '/rent' },
+                    { label: 'Blog', value: '/blog' },
+                  ].map(page => (
+                    <label key={page.value} className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.target_pages.includes(page.value)}
+                        onChange={e => {
+                          const pages = e.target.checked
+                            ? [...form.target_pages, page.value]
+                            : form.target_pages.filter(p => p !== page.value);
+                          setForm({ ...form, target_pages: pages });
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-xs text-gray-600">{page.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 

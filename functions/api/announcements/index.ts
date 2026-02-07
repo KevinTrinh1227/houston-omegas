@@ -10,7 +10,7 @@ import { notifyNewAnnouncement } from '../../lib/notify';
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const rows = await context.env.DB.prepare(
-      `SELECT id, title, body, type, priority, link_url, link_text, starts_at, ends_at
+      `SELECT id, title, body, type, priority, link_url, link_text, starts_at, ends_at, image_url, target_pages
        FROM announcements
        WHERE is_active = 1
          AND (starts_at IS NULL OR starts_at <= datetime('now'))
@@ -41,6 +41,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const linkText = sanitize(body.link_text) || null;
     const startsAt = body.starts_at || null;
     const endsAt = body.ends_at || null;
+    const imageUrl = sanitize(body.image_url) || null;
+    const targetPages = body.target_pages || '[]';
 
     if (!title || !bodyText) {
       return error('Title and body are required');
@@ -54,10 +56,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const res = await context.env.DB.prepare(
-      `INSERT INTO announcements (title, body, type, priority, link_url, link_text, starts_at, ends_at, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO announcements (title, body, type, priority, link_url, link_text, starts_at, ends_at, image_url, target_pages, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
-    ).bind(title, bodyText, type, priority, linkUrl, linkText, startsAt, endsAt, result.auth.member.id).first();
+    ).bind(title, bodyText, type, priority, linkUrl, linkText, startsAt, endsAt, imageUrl, targetPages, result.auth.member.id).first();
 
     const ip = getClientIP(context.request);
     await logAudit(context.env.DB, result.auth.member.id, 'create_announcement', 'announcement', String(res?.id), { title }, ip);

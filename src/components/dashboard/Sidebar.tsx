@@ -9,7 +9,7 @@ import {
   Home, DollarSign, Users, Calendar, ClipboardCheck, Star,
   FileText, Building2, FolderOpen, UserPlus, Mail, BarChart3,
   Clock, Settings, Megaphone, Image as ImageIcon, Share2,
-  BookOpen,
+  BookOpen, Handshake,
 } from 'lucide-react';
 
 const EXEC = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
@@ -53,6 +53,7 @@ const navGroups: NavGroup[] = [
       { label: 'Content', href: '/dashboard/blog', icon: <Megaphone size={18} /> },
       { label: 'Documents', href: '/dashboard/documents', icon: <FolderOpen size={18} /> },
       { label: 'Greek Orgs', href: '/dashboard/greek-orgs', icon: <Building2 size={18} />, roles: EXEC },
+      { label: 'Partners', href: '/dashboard/partners', icon: <Handshake size={18} />, roles: EXEC },
       { label: 'Media', href: '/dashboard/media', icon: <ImageIcon size={18} /> },
       { label: 'Socials', href: '/dashboard/socials', icon: <Share2 size={18} />, roles: EXEC },
     ],

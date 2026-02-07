@@ -13,6 +13,7 @@ const actions = [
 
 export default function QuickActions() {
   const [open, setOpen] = useState(false);
+  const [hasAnnouncements, setHasAnnouncements] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +22,25 @@ export default function QuickActions() {
     };
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
+  }, []);
+
+  // Check for undismissed popup announcements
+  useEffect(() => {
+    let dismissedIds: number[] = [];
+    try {
+      const stored = localStorage.getItem('dismissed_announcements');
+      if (stored) dismissedIds = JSON.parse(stored);
+    } catch { /* */ }
+
+    fetch('/api/announcements')
+      .then(res => res.ok ? res.json() : [])
+      .then((data: { id: number; type: string }[]) => {
+        const popups = data.filter(a =>
+          (a.type === 'popup' || a.type === 'both') && !dismissedIds.includes(a.id)
+        );
+        setHasAnnouncements(popups.length > 0);
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -54,7 +74,7 @@ export default function QuickActions() {
       {/* Toggle button — menu icon */}
       <button
         onClick={() => setOpen(!open)}
-        className="w-12 h-12 rounded-full bg-black border border-white/[0.12] text-white flex items-center justify-center shadow-lg hover:bg-[#1a1a1a] transition-all duration-300"
+        className="relative w-12 h-12 rounded-full bg-black border border-white/[0.12] text-white flex items-center justify-center shadow-lg hover:bg-[#1a1a1a] transition-all duration-300"
         aria-label="Quick links menu"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-all duration-300">
@@ -68,6 +88,10 @@ export default function QuickActions() {
             </>
           )}
         </svg>
+        {/* Notification dot */}
+        {hasAnnouncements && !open && (
+          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-black" />
+        )}
       </button>
     </div>
   );
