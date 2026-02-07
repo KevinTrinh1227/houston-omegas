@@ -73,9 +73,9 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
             <span className={`${nameColor} ${nameHover} text-xs sm:text-sm uppercase tracking-[0.04em] font-bold transition-colors`} style={{ fontFamily: 'var(--font-cinzel), serif' }}>Houston Omegas</span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-5">
+          <div className="hidden lg:flex items-center gap-3">
             {mainLinks.map((l, i) => (
-              <span key={l.label} className="flex items-center gap-5">
+              <span key={l.label} className="flex items-center gap-3">
                 {i > 0 && <span className={`w-px h-3 ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />}
                 <Link href={l.href} className={`${textColor} text-xs uppercase tracking-[0.12em] font-semibold transition-colors duration-300`}>{l.label}</Link>
               </span>
@@ -83,7 +83,7 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
             <span className={`w-px h-3 ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />
             <div
               ref={moreRef}
-              className="relative"
+              className="relative flex items-center"
               onMouseEnter={() => setMoreOpen(true)}
               onMouseLeave={() => setMoreOpen(false)}
             >
@@ -105,12 +105,12 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3">
             <Link href="/dashboard" className={`${textColor} text-xs uppercase tracking-[0.12em] font-semibold transition-colors duration-300`}>
               Login
             </Link>
             <Link href="/contact" className={`${ctaBg} text-[11px] uppercase tracking-[0.15em] px-5 py-2.5 rounded-lg font-semibold transition-all duration-300`}>
-              Inquire
+              Contact Us
             </Link>
           </div>
 
@@ -158,7 +158,7 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
               onClick={() => setMobileOpen(false)}
               className="bg-white text-black text-xs uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-white/90 transition-all duration-300"
             >
-              Inquire
+              Contact Us
             </Link>
           </div>
 

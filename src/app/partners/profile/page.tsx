@@ -68,6 +68,37 @@ function PartnerProfileContent() {
       .catch(() => { setNotFound(true); setLoading(false); });
   }, [slug]);
 
+  // Dynamic SEO: document title + OG meta tags
+  useEffect(() => {
+    if (!partner) return;
+    document.title = `${partner.name} | Partners | Houston Omegas`;
+    const metaTags: Record<string, string> = {
+      'og:title': `${partner.name} | Houston Omegas Partner`,
+      'og:description': partner.description || `${partner.name} — a Houston Omegas partner`,
+      'og:image': partner.logo_url || '',
+      'og:type': 'website',
+      'og:url': `https://houstonomegas.com/partners/profile?slug=${partner.slug}`,
+      'description': partner.description || `${partner.name} — a Houston Omegas partner`,
+    };
+    const cleanup: HTMLMetaElement[] = [];
+    Object.entries(metaTags).forEach(([key, value]) => {
+      if (!value) return;
+      const attr = key.startsWith('og:') ? 'property' : 'name';
+      let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+        cleanup.push(el);
+      }
+      el.setAttribute('content', value);
+    });
+    return () => {
+      document.title = 'Houston Omegas';
+      cleanup.forEach(el => el.remove());
+    };
+  }, [partner]);
+
   const images: string[] = partner ? JSON.parse(partner.images || '[]') : [];
 
   const socials = partner ? [
@@ -199,6 +230,23 @@ function PartnerProfileContent() {
       </div>
 
       <Footer variant="light" />
+
+      {/* Schema.org structured data for SEO */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: partner.name,
+        description: partner.description || undefined,
+        url: partner.website_url || undefined,
+        logo: partner.logo_url || undefined,
+        sameAs: [
+          partner.instagram && (partner.instagram.startsWith('http') ? partner.instagram : `https://instagram.com/${partner.instagram.replace('@', '')}`),
+          partner.tiktok && (partner.tiktok.startsWith('http') ? partner.tiktok : `https://tiktok.com/@${partner.tiktok.replace('@', '')}`),
+          partner.twitter && (partner.twitter.startsWith('http') ? partner.twitter : `https://x.com/${partner.twitter.replace('@', '')}`),
+          partner.facebook && (partner.facebook.startsWith('http') ? partner.facebook : `https://facebook.com/${partner.facebook}`),
+          partner.youtube && (partner.youtube.startsWith('http') ? partner.youtube : `https://youtube.com/${partner.youtube}`),
+        ].filter(Boolean),
+      })}} />
     </PageWrapper>
   );
 }

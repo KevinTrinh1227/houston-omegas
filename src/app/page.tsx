@@ -41,16 +41,11 @@ function useCountdown(targetTime: number) {
   return timeLeft;
 }
 
-/* ─── Gallery ─── */
-const galleryImages = [
-  { src: '/images/gallery-5.jpg', alt: 'Brotherhood', span: 'col-span-2 row-span-2' },
-  { src: '/images/gallery-7.jpg', alt: 'Photoshoot', span: '' },
-  { src: '/images/gallery-3.jpg', alt: 'Beach Cleanup', span: '' },
-  { src: '/images/gallery-4.jpg', alt: 'Night Event', span: '' },
-  { src: '/images/gallery-6.jpg', alt: 'Korean Festival', span: '' },
-  { src: '/images/gallery-2.jpg', alt: 'UNITY Talent Show', span: 'col-span-2' },
-  { src: '/images/gallery-1.jpg', alt: 'Dinner', span: '' },
-  { src: '/images/mansion.jpeg', alt: 'Omega Mansion', span: '' },
+/* ─── Brotherhood Cards ─── */
+const brotherhoodCards = [
+  { image: '/images/gallery-5.jpg', label: 'Community', desc: 'A network of brothers who show up for each other — on campus, in careers, and in life.' },
+  { image: '/images/gallery-1.jpg', label: 'Tradition', desc: 'Over two decades of shared rituals, celebrations, and memories that define who we are.' },
+  { image: '/images/gallery-3.jpg', label: 'Service', desc: 'Giving back to Houston through philanthropy, cleanups, and community partnerships.' },
 ];
 
 /* ─── Upcoming Events ─── */
@@ -191,9 +186,9 @@ export default function HomePage() {
           {/* CTA */}
           <div className="mt-8 sm:mt-10 flex flex-col items-center">
             <Link href="/events/detail?slug=love-at-first-light" className="relative bg-gray-900 hover:bg-black text-white border border-white/20 hover:border-white/40 text-[11px] uppercase tracking-[0.2em] font-semibold px-8 py-3 rounded-lg backdrop-blur-sm transition-all duration-300 animate-hero-cta-glow">
-              Valentine&apos;s Party &middot; Feb 13
+              Valentine&apos;s Party
             </Link>
-            <span className="text-[10px] text-black/50 mt-2 tracking-[0.15em] uppercase">Love at First Light</span>
+            <span className="text-[10px] text-black/50 mt-2 tracking-[0.15em] uppercase">Feb 13 &middot; Love at First Light</span>
           </div>
         </div>
 
@@ -320,22 +315,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════ MEDIA TEASER ═══════════ */}
-      <section id="gallery" className="relative py-24 px-6 sm:px-10 max-w-6xl mx-auto">
+      {/* ═══════════ BROTHERHOOD ═══════════ */}
+      <section id="brotherhood" className="relative py-24 px-6 sm:px-10 max-w-6xl mx-auto">
         <h2 className="text-center text-4xl sm:text-5xl lg:text-6xl mb-4 tracking-[0.04em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-          Media
+          Brotherhood
         </h2>
-        <p className="text-center text-white/40 text-sm mb-10">Photos, videos, and highlights from our events and brotherhood.</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 auto-rows-[180px] md:auto-rows-[200px]">
-          {galleryImages.slice(0, 4).map((img, i) => (
-            <Link key={i} href="/media" className={`relative overflow-hidden group rounded-lg ${img.span}`}>
-              <Image src={img.src} alt={img.alt} fill className="object-cover transition-all duration-500 group-hover:scale-105 brightness-100 group-hover:brightness-110" />
-            </Link>
+        <p className="text-center text-white/40 text-sm mb-12">Built on loyalty, honor, and lifelong bonds.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {brotherhoodCards.map((card) => (
+            <div key={card.label} className="group relative rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/[0.15] transition-all duration-300">
+              <div className="relative aspect-[4/3]">
+                <Image src={card.image} alt={card.label} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              </div>
+              <div className="p-5 bg-[#0c0e13]">
+                <h3 className="text-white/90 text-sm font-semibold uppercase tracking-[0.1em] mb-1.5">{card.label}</h3>
+                <p className="text-white/40 text-xs leading-relaxed">{card.desc}</p>
+              </div>
+            </div>
           ))}
         </div>
         <div className="text-center mt-10">
-          <Link href="/media" className="inline-block border border-white/[0.12] hover:border-white/[0.25] text-white/60 hover:text-white text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-lg transition-all duration-300">
-            View All Media
+          <Link href="/history" className="inline-block border border-white/[0.12] hover:border-white/[0.25] text-white/60 hover:text-white text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-lg transition-all duration-300">
+            Learn More
           </Link>
         </div>
       </section>

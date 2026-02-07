@@ -116,6 +116,37 @@ function EventDetailContent() {
       .catch(() => { setNotFound(true); setLoading(false); });
   }, [slug]);
 
+  // Dynamic SEO: document title + OG meta tags
+  useEffect(() => {
+    if (!event) return;
+    document.title = `${event.title} | Houston Omegas`;
+    const metaTags: Record<string, string> = {
+      'og:title': event.title,
+      'og:description': event.description || `${event.title} hosted by Houston Omegas`,
+      'og:image': event.flyer_url || event.cover_url || '',
+      'og:type': 'website',
+      'og:url': `https://houstonomegas.com/events/detail?slug=${event.slug}`,
+      'description': event.description || `${event.title} — an event by Houston Omegas`,
+    };
+    const cleanup: HTMLMetaElement[] = [];
+    Object.entries(metaTags).forEach(([key, value]) => {
+      if (!value) return;
+      const attr = key.startsWith('og:') ? 'property' : 'name';
+      let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+        cleanup.push(el);
+      }
+      el.setAttribute('content', value);
+    });
+    return () => {
+      document.title = 'Houston Omegas';
+      cleanup.forEach(el => el.remove());
+    };
+  }, [event]);
+
   const startMs = useMemo(() => event ? new Date(event.start_time + 'Z').getTime() : 0, [event]);
   const countdown = useCountdown(startMs);
   const isPast = event ? new Date(event.start_time + 'Z') < new Date() : false;
