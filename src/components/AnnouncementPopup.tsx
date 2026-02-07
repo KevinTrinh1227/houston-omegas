@@ -102,7 +102,7 @@ export default function AnnouncementPopup() {
 
   return (
     <div
-      className={`fixed top-4 right-4 z-[70] w-[340px] max-w-[calc(100vw-2rem)] transition-all duration-300 ${show ? 'animate-[slide-down-in_0.3s_ease-out]' : 'opacity-0 -translate-y-full'}`}
+      className={`fixed z-[70] w-[340px] max-w-[calc(100vw-2rem)] transition-all duration-300 top-4 right-4 lg:right-auto lg:left-1/2 lg:-translate-x-1/2 ${show ? 'animate-[slide-down-in_0.3s_ease-out]' : 'opacity-0 -translate-y-full'}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
