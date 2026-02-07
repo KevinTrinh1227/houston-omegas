@@ -130,6 +130,7 @@ export default function MembersPage() {
               <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Role</label>
               <select value={inviteForm.role} onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })} className={inputClass}>
                 <option value="active">Active</option>
+                <option value="junior_active">J.A.</option>
                 <option value="president">President</option>
                 <option value="vpi">VP Internal</option>
                 <option value="vpx">VP External</option>
@@ -200,6 +201,7 @@ export default function MembersPage() {
                         <option value="vpx">VP External</option>
                         <option value="treasurer">Treasurer</option>
                         <option value="secretary">Secretary</option>
+                        <option value="junior_active">J.A.</option>
                         <option value="active">Active</option>
                         <option value="alumni">Alumni</option>
                         <option value="inactive">Inactive</option>

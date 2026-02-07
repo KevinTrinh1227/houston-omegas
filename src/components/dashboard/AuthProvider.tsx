@@ -1,13 +1,14 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 export interface AuthMember {
   id: string;
   email: string;
   first_name: string;
   last_name: string;
-  role: 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'active' | 'alumni' | 'inactive';
+  role: 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
   phone: string | null;
   class_year: string | null;
   major: string | null;
@@ -16,6 +17,7 @@ export interface AuthMember {
   created_at: string;
   last_login_at: string | null;
   needs_phone: boolean;
+  needs_onboarding: boolean;
 }
 
 interface AuthContextType {
@@ -39,6 +41,8 @@ export function useAuth() {
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [member, setMember] = useState<AuthMember | null>(null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
+  const lastLoggedPath = useRef<string>('');
 
   const refresh = useCallback(async () => {
     try {
@@ -59,6 +63,18 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Log page views for analytics
+  useEffect(() => {
+    if (!member || !pathname || pathname === lastLoggedPath.current) return;
+    lastLoggedPath.current = pathname;
+    fetch('/api/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ action: 'page_view', page: pathname }),
+    }).catch(() => {});
+  }, [member, pathname]);
 
   const logout = async () => {
     try {

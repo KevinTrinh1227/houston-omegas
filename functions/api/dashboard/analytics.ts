@@ -1,10 +1,11 @@
 import type { Env } from '../../types';
+import { EXEC_ROLES } from '../../types';
 import { requireAuth } from '../../lib/auth';
 import { json, error } from '../../lib/response';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
-    const result = await requireAuth(context.request, context.env.DB, ['admin', 'president']);
+    const result = await requireAuth(context.request, context.env.DB, EXEC_ROLES);
     if (result.errorResponse) return result.errorResponse;
 
     const db = context.env.DB;

@@ -8,10 +8,10 @@ export interface Env {
   DISCORD_CLIENT_SECRET: string;
 }
 
-export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'active' | 'alumni' | 'inactive';
+export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
 
 export const EXEC_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
-export const ALL_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary', 'active', 'alumni', 'inactive'];
+export const ALL_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary', 'junior_active', 'active', 'alumni', 'inactive'];
 
 export interface Member {
   id: string;
@@ -26,6 +26,7 @@ export interface Member {
   avatar_url: string | null;
   invited_by: string | null;
   is_active: number;
+  has_completed_onboarding: number;
   created_at: string;
   updated_at: string;
   last_login_at: string | null;

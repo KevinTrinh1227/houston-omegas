@@ -37,8 +37,8 @@ export async function authenticate(
   const row = await db.prepare(
     `SELECT s.*, m.id as m_id, m.email, m.first_name, m.last_name, m.role,
             m.phone, m.class_year, m.major, m.instagram, m.avatar_url,
-            m.invited_by, m.is_active, m.created_at as m_created_at,
-            m.updated_at as m_updated_at, m.last_login_at
+            m.invited_by, m.is_active, m.has_completed_onboarding,
+            m.created_at as m_created_at, m.updated_at as m_updated_at, m.last_login_at
      FROM sessions s
      JOIN members m ON s.member_id = m.id
      WHERE s.id = ? AND s.expires_at > datetime('now')`
@@ -65,6 +65,7 @@ export async function authenticate(
     avatar_url: row.avatar_url as string | null,
     invited_by: row.invited_by as string | null,
     is_active: row.is_active as number,
+    has_completed_onboarding: (row.has_completed_onboarding as number) ?? 1,
     created_at: row.m_created_at as string,
     updated_at: row.m_updated_at as string,
     last_login_at: row.last_login_at as string | null,

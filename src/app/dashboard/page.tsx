@@ -76,10 +76,10 @@ export default function DashboardOverview() {
         <h2 className="text-sm font-medium text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: 'New Blog Post', href: '/dashboard/blog/new', check: (r: string) => isExecRole(r) || r === 'active' },
-            { label: 'Manage Announcements', href: '/dashboard/announcements', check: (r: string) => isExecRole(r) },
+            { label: 'New Blog Post', href: '/dashboard/blog/new', check: (r: string) => isExecRole(r) || r === 'active' || r === 'junior_active' },
+            { label: 'Manage Content', href: '/dashboard/blog', check: (r: string) => isExecRole(r) },
             { label: 'View Members', href: '/dashboard/members', check: (r: string) => isExecRole(r) },
-            { label: 'Edit Profile', href: '/dashboard/settings', check: (r: string) => isExecRole(r) || r === 'active' || r === 'alumni' },
+            { label: 'Edit Profile', href: '/dashboard/settings', check: (r: string) => isExecRole(r) || r === 'active' || r === 'alumni' || r === 'junior_active' },
           ]
             .filter(a => a.check(member?.role || ''))
             .map((action) => (

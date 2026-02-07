@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Analytics {
   active_users_7d: number;
@@ -21,14 +21,30 @@ interface Analytics {
 export default function AnalyticsPage() {
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  useEffect(() => {
-    fetch('/api/dashboard/analytics', { credentials: 'include' })
-      .then(res => res.ok ? res.json() : null)
-      .then(d => setData(d))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/dashboard/analytics', { credentials: 'include' });
+      if (res.ok) {
+        setData(await res.json());
+      } else if (res.status === 403) {
+        setErrorMsg('Executive board access only.');
+      } else if (res.status === 401) {
+        setErrorMsg('Please log in to view analytics.');
+      } else {
+        setErrorMsg('Failed to load analytics.');
+      }
+    } catch {
+      setErrorMsg('Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
@@ -37,10 +53,10 @@ export default function AnalyticsPage() {
       <div>
         <div className="mb-6"><h1 className="text-xl font-semibold text-gray-900">Analytics</h1></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
             <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
-              <div className="h-4 bg-gray-100 rounded w-24 mb-3" />
-              <div className="h-8 bg-gray-100 rounded w-16" />
+              <div className="h-3 bg-gray-100 rounded w-24 mb-3" />
+              <div className="h-7 bg-gray-100 rounded w-16" />
             </div>
           ))}
         </div>
@@ -48,9 +64,25 @@ export default function AnalyticsPage() {
     );
   }
 
-  if (!data) {
-    return <div className="text-center text-gray-400 py-12">Failed to load analytics.</div>;
+  if (errorMsg) {
+    return (
+      <div>
+        <div className="mb-6"><h1 className="text-xl font-semibold text-gray-900">Analytics</h1></div>
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+          <p className="text-sm text-gray-500 mb-4">{errorMsg}</p>
+          {errorMsg.includes('Network') && (
+            <button onClick={fetchData} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">
+              Retry
+            </button>
+          )}
+        </div>
+      </div>
+    );
   }
+
+  if (!data) return null;
+
+  const allZero = data.active_users_7d === 0 && data.active_users_30d === 0 && data.total_members === 0;
 
   const stats = [
     { label: 'Active Users (7d)', value: data.active_users_7d, color: 'text-blue-600' },
@@ -65,7 +97,6 @@ export default function AnalyticsPage() {
     { label: 'Documents', value: data.total_documents },
   ];
 
-  // Bar chart data for dues
   const duesBar = data.dues_total_due > 0 ? Math.round((data.dues_total_paid / data.dues_total_due) * 100) : 0;
   const attendanceBar = Math.round(data.attendance_avg);
 
@@ -75,6 +106,12 @@ export default function AnalyticsPage() {
         <h1 className="text-xl font-semibold text-gray-900">Analytics</h1>
         <p className="text-sm text-gray-500 mt-1">Organization overview and metrics</p>
       </div>
+
+      {allZero && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-xs text-blue-700">No activity data yet. Analytics will populate as members use the dashboard.</p>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAuth } from './AuthProvider';
+import WelcomeModal from './WelcomeModal';
 import PhoneRequiredModal from './PhoneRequiredModal';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!member) {
     return null;
+  }
+
+  // Show welcome modal for new members (takes priority over phone modal)
+  if (member.needs_onboarding) {
+    return <WelcomeModal />;
   }
 
   return (

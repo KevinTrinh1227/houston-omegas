@@ -16,7 +16,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       `SELECT id, email, first_name, last_name, role, phone, class_year, major, instagram,
               avatar_url, is_active, created_at, last_login_at
        FROM members ORDER BY
-         CASE role WHEN 'admin' THEN 0 WHEN 'president' THEN 1 WHEN 'vpi' THEN 2 WHEN 'vpx' THEN 3 WHEN 'treasurer' THEN 4 WHEN 'secretary' THEN 5 WHEN 'active' THEN 6 WHEN 'alumni' THEN 7 ELSE 8 END,
+         CASE role WHEN 'admin' THEN 0 WHEN 'president' THEN 1 WHEN 'vpi' THEN 2 WHEN 'vpx' THEN 3 WHEN 'treasurer' THEN 4 WHEN 'secretary' THEN 5 WHEN 'junior_active' THEN 6 WHEN 'active' THEN 7 WHEN 'alumni' THEN 8 ELSE 9 END,
          first_name ASC`
     ).all();
 
@@ -51,8 +51,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const id = generateId();
     const member = await context.env.DB.prepare(
-      `INSERT INTO members (id, email, first_name, last_name, role, invited_by)
-       VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO members (id, email, first_name, last_name, role, invited_by, has_completed_onboarding)
+       VALUES (?, ?, ?, ?, ?, ?, 0)
        RETURNING *`
     ).bind(id, email, firstName, lastName, role, result.auth.member.id).first();
 
