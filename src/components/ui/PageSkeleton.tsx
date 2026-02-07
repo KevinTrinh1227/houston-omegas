@@ -6,14 +6,14 @@ interface PageSkeletonProps {
 }
 
 function SkeletonBar({ width = 'w-full' }: { width?: string }) {
-  return <div className={`h-3 bg-gray-100 rounded ${width}`} />;
+  return <div className={`h-3 bg-dash-badge-bg rounded ${width}`} />;
 }
 
 function CardsSkeleton({ rows }: { rows: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+        <div key={i} className="bg-dash-card rounded-xl border border-dash-border p-5 animate-pulse">
           <SkeletonBar width="w-24" />
           <div className="mt-3">
             <SkeletonBar width="w-16" />
@@ -29,15 +29,15 @@ function CardsSkeleton({ rows }: { rows: number }) {
 
 function TableSkeleton({ rows }: { rows: number }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
-      <div className="border-b border-gray-100 px-5 py-3 flex gap-8">
+    <div className="bg-dash-card rounded-xl border border-dash-border overflow-hidden animate-pulse">
+      <div className="border-b border-dash-border px-5 py-3 flex gap-8">
         <SkeletonBar width="w-24" />
         <SkeletonBar width="w-32" />
         <SkeletonBar width="w-20" />
         <SkeletonBar width="w-24" />
       </div>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="border-b border-gray-50 px-5 py-3.5 flex gap-8">
+        <div key={i} className="border-b border-dash-border/50 px-5 py-3.5 flex gap-8">
           <SkeletonBar width="w-28" />
           <SkeletonBar width="w-36" />
           <SkeletonBar width="w-16" />
@@ -52,7 +52,7 @@ function ListSkeleton({ rows }: { rows: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+        <div key={i} className="bg-dash-card rounded-xl border border-dash-border p-5 animate-pulse">
           <SkeletonBar width="w-48" />
           <div className="mt-2">
             <SkeletonBar width="w-72" />

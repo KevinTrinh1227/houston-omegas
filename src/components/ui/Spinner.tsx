@@ -14,7 +14,7 @@ interface SpinnerProps {
 export default function Spinner({ size = 'md', className = '' }: SpinnerProps) {
   return (
     <div
-      className={`${sizes[size]} border-gray-300 border-t-gray-900 rounded-full animate-spin ${className}`}
+      className={`${sizes[size]} border-dash-border border-t-dash-text rounded-full animate-spin ${className}`}
     />
   );
 }

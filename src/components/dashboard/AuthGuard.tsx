@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from './AuthProvider';
+import { canAccessPage } from '@/lib/roles';
 import WelcomeModal from './WelcomeModal';
 import PhoneRequiredModal from './PhoneRequiredModal';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { member, loading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     if (!loading && !member) {
@@ -14,12 +18,21 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [loading, member]);
 
+  // Route guard — redirect unauthorized page access
+  useEffect(() => {
+    if (!member || !pathname) return;
+    const chairPosition = member.chair_position;
+    if (!canAccessPage(member.role, chairPosition, pathname)) {
+      router.replace('/dashboard');
+    }
+  }, [member, pathname, router]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-dash-bg flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-xs text-gray-400 uppercase tracking-[0.2em]">Loading</p>
+          <div className="w-8 h-8 border-2 border-dash-border border-t-dash-text rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-xs text-dash-text-muted uppercase tracking-[0.2em]">Loading</p>
         </div>
       </div>
     );
@@ -29,7 +42,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  // Show welcome modal for new members (takes priority over phone modal)
   if (member.needs_onboarding) {
     return <WelcomeModal />;
   }

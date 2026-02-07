@@ -116,18 +116,18 @@ export default function MembersPage() {
 
   const roleColor = ROLE_COLORS;
 
-  const inputClass = 'w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Members</h1>
-          <p className="text-sm text-gray-500 mt-1">{members.length} total member{members.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-xl font-semibold text-dash-text">Members</h1>
+          <p className="text-sm text-dash-text-secondary mt-1">{members.length} total member{members.length !== 1 ? 's' : ''}</p>
         </div>
         {isExec && !showInvite && !showCreate && (
           <div className="flex gap-2">
-            <button onClick={() => setShowCreate(true)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">
+            <button onClick={() => setShowCreate(true)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">
               Create Profile
             </button>
             <button onClick={() => setShowInvite(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">
@@ -145,19 +145,19 @@ export default function MembersPage() {
 
       {/* Invite form */}
       {showInvite && isExec && (
-        <form onSubmit={handleInvite} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
-          <h2 className="text-sm font-medium text-gray-900">Invite New Member</h2>
+        <form onSubmit={handleInvite} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 space-y-4">
+          <h2 className="text-sm font-medium text-dash-text">Invite New Member</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">First Name</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">First Name</label>
               <input type="text" value={inviteForm.first_name} onChange={e => setInviteForm({ ...inviteForm, first_name: e.target.value })} required className={inputClass} />
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Last Name</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Last Name</label>
               <input type="text" value={inviteForm.last_name} onChange={e => setInviteForm({ ...inviteForm, last_name: e.target.value })} required className={inputClass} />
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Role</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Role</label>
               <select value={inviteForm.role} onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })} className={inputClass}>
                 <option value="active">Active</option>
                 <option value="junior_active">J.A.</option>
@@ -171,14 +171,14 @@ export default function MembersPage() {
             </div>
           </div>
           <div>
-            <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Email</label>
+            <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Email</label>
             <input type="email" value={inviteForm.email} onChange={e => setInviteForm({ ...inviteForm, email: e.target.value })} required placeholder="member@email.com" className={inputClass} />
           </div>
           <div className="flex gap-3">
             <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
               {saving ? 'Inviting...' : 'Invite'}
             </button>
-            <button type="button" onClick={() => setShowInvite(false)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">
+            <button type="button" onClick={() => setShowInvite(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">
               Cancel
             </button>
           </div>
@@ -187,13 +187,13 @@ export default function MembersPage() {
 
       {/* Create Profile form */}
       {showCreate && isExec && (
-        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
-          <h2 className="text-sm font-medium text-gray-900">Create Member Profile</h2>
-          <p className="text-[10px] text-gray-400">Creates a pending profile. The member will activate when they first log in.</p>
+        <form onSubmit={handleCreate} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 space-y-4">
+          <h2 className="text-sm font-medium text-dash-text">Create Member Profile</h2>
+          <p className="text-[10px] text-dash-text-muted">Creates a pending profile. The member will activate when they first log in.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">First Name</label><input type="text" value={createForm.first_name} onChange={e => setCreateForm({ ...createForm, first_name: e.target.value })} required className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Last Name</label><input type="text" value={createForm.last_name} onChange={e => setCreateForm({ ...createForm, last_name: e.target.value })} required className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Role</label>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">First Name</label><input type="text" value={createForm.first_name} onChange={e => setCreateForm({ ...createForm, first_name: e.target.value })} required className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Last Name</label><input type="text" value={createForm.last_name} onChange={e => setCreateForm({ ...createForm, last_name: e.target.value })} required className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Role</label>
               <select value={createForm.role} onChange={e => setCreateForm({ ...createForm, role: e.target.value })} className={inputClass}>
                 <option value="active">Active</option>
                 <option value="junior_active">J.A.</option>
@@ -206,65 +206,65 @@ export default function MembersPage() {
               </select>
             </div>
           </div>
-          <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Email</label><input type="email" value={createForm.email} onChange={e => setCreateForm({ ...createForm, email: e.target.value })} required className={inputClass} /></div>
+          <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Email</label><input type="email" value={createForm.email} onChange={e => setCreateForm({ ...createForm, email: e.target.value })} required className={inputClass} /></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Class Year</label><input type="text" value={createForm.class_year} onChange={e => setCreateForm({ ...createForm, class_year: e.target.value })} placeholder="e.g. 2026" className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Major</label><input type="text" value={createForm.major} onChange={e => setCreateForm({ ...createForm, major: e.target.value })} className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Phone</label><input type="text" value={createForm.phone} onChange={e => setCreateForm({ ...createForm, phone: e.target.value })} className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Instagram</label><input type="text" value={createForm.instagram} onChange={e => setCreateForm({ ...createForm, instagram: e.target.value })} placeholder="@handle" className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Discord ID</label><input type="text" value={createForm.discord_id} onChange={e => setCreateForm({ ...createForm, discord_id: e.target.value })} placeholder="User ID" className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Class Year</label><input type="text" value={createForm.class_year} onChange={e => setCreateForm({ ...createForm, class_year: e.target.value })} placeholder="e.g. 2026" className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Major</label><input type="text" value={createForm.major} onChange={e => setCreateForm({ ...createForm, major: e.target.value })} className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Phone</label><input type="text" value={createForm.phone} onChange={e => setCreateForm({ ...createForm, phone: e.target.value })} className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Instagram</label><input type="text" value={createForm.instagram} onChange={e => setCreateForm({ ...createForm, instagram: e.target.value })} placeholder="@handle" className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Discord ID</label><input type="text" value={createForm.discord_id} onChange={e => setCreateForm({ ...createForm, discord_id: e.target.value })} placeholder="User ID" className={inputClass} /></div>
           </div>
           <div className="flex gap-3">
             <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
               {saving ? 'Creating...' : 'Create Profile'}
             </button>
-            <button type="button" onClick={() => setShowCreate(false)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">Cancel</button>
+            <button type="button" onClick={() => setShowCreate(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
           </div>
         </form>
       )}
 
       {/* Member list */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
           <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
           <table className="w-full min-w-[600px]">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Name</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Email</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Role</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Last Login</th>
-                {isExec && <th className="text-right text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Actions</th>}
+              <tr className="border-b border-dash-border">
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Name</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Email</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Role</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Last Login</th>
+                {isExec && <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {members.map(m => (
-                <tr key={m.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${!m.is_active ? 'opacity-50' : ''}`}>
+                <tr key={m.id} className={`border-b border-dash-border/50 hover:bg-dash-card-hover transition-colors ${!m.is_active ? 'opacity-50' : ''}`}>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       {m.avatar_url ? (
                         <img src={m.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-[10px] font-semibold shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-dash-badge-bg flex items-center justify-center text-dash-text-secondary text-[10px] font-semibold shrink-0">
                           {m.first_name[0]}{m.last_name[0]}
                         </div>
                       )}
-                      <span className="text-xs font-medium text-gray-900">{m.first_name} {m.last_name}</span>
+                      <span className="text-xs font-medium text-dash-text">{m.first_name} {m.last_name}</span>
                       {(m as Member & { status?: string }).status === 'pending' && (
                         <span className="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full uppercase font-medium">Pending</span>
                       )}
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-xs text-gray-500">{m.email}</td>
+                  <td className="px-5 py-3 text-xs text-dash-text-secondary">{m.email}</td>
                   <td className="px-5 py-3">
                     {isExec && m.id !== currentMember?.id ? (
                       <select
                         value={m.role}
                         onChange={e => handleRoleChange(m.id, e.target.value)}
-                        className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase border-0 cursor-pointer ${roleColor[m.role as Role] || 'bg-gray-100 text-gray-500'}`}
+                        className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase border-0 cursor-pointer ${roleColor[m.role as Role] || 'bg-dash-badge-bg text-dash-text-secondary'}`}
                       >
                         <option value="admin">Admin</option>
                         <option value="president">President</option>
@@ -278,10 +278,10 @@ export default function MembersPage() {
                         <option value="inactive">Inactive</option>
                       </select>
                     ) : (
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase ${roleColor[m.role as Role] || 'bg-gray-100 text-gray-500'}`}>{ROLE_LABELS[m.role as Role] || m.role}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase ${roleColor[m.role as Role] || 'bg-dash-badge-bg text-dash-text-secondary'}`}>{ROLE_LABELS[m.role as Role] || m.role}</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-xs text-gray-400 hidden sm:table-cell">
+                  <td className="px-5 py-3 text-xs text-dash-text-muted hidden sm:table-cell">
                     {m.last_login_at ? new Date(m.last_login_at + 'Z').toLocaleDateString() : 'Never'}
                   </td>
                   {isExec && (

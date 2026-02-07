@@ -1,32 +1,37 @@
 'use client';
 
 import { useAuth } from './AuthProvider';
+import ThemeToggle from './ThemeToggle';
+import { Menu } from 'lucide-react';
 
 export default function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
   const { member } = useAuth();
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-30 bg-dash-topbar border-b border-dash-border">
       <div className="flex items-center justify-between h-14 px-4 sm:px-6">
         <button
           onClick={onMenuToggle}
-          className="lg:hidden text-gray-500 hover:text-gray-700 transition-colors"
+          className="lg:hidden text-dash-text-secondary hover:text-dash-text transition-colors"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <Menu size={22} />
         </button>
 
         <div className="hidden lg:block" />
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <div className="text-right">
-            <p className="text-xs font-medium text-gray-900">{member?.first_name} {member?.last_name}</p>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider">{member?.role}</p>
+            <p className="text-xs font-medium text-dash-text">{member?.first_name} {member?.last_name}</p>
+            <p className="text-[10px] text-dash-text-muted uppercase tracking-wider">{member?.role}</p>
           </div>
-          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-xs font-semibold">
-            {member?.first_name?.[0]}{member?.last_name?.[0]}
-          </div>
+          {member?.avatar_url ? (
+            <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-dash-badge-bg flex items-center justify-center text-dash-text-secondary text-xs font-semibold">
+              {member?.first_name?.[0]}{member?.last_name?.[0]}
+            </div>
+          )}
         </div>
       </div>
     </header>

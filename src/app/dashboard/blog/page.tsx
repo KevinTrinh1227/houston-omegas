@@ -149,25 +149,25 @@ export default function ContentPage() {
   const statusColor: Record<string, string> = {
     published: 'bg-green-100 text-green-700',
     draft: 'bg-yellow-100 text-yellow-700',
-    archived: 'bg-gray-100 text-gray-600',
+    archived: 'bg-dash-badge-bg text-dash-text-secondary',
   };
 
   const priorityColor: Record<string, string> = {
     urgent: 'bg-red-100 text-red-700',
     high: 'bg-orange-100 text-orange-700',
     normal: 'bg-blue-100 text-blue-700',
-    low: 'bg-gray-100 text-gray-600',
+    low: 'bg-dash-badge-bg text-dash-text-secondary',
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
-  const selectClass = 'px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const selectClass = 'px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 outline-none transition-all';
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Content</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage blog posts and announcements</p>
+          <h1 className="text-xl font-semibold text-dash-text">Content</h1>
+          <p className="text-sm text-dash-text-secondary mt-1">Manage blog posts and announcements</p>
         </div>
         <div className="flex items-center gap-3">
           {tab === 'blog' && (isExec || member?.role === 'active' || member?.role === 'junior_active') && (
@@ -184,12 +184,12 @@ export default function ContentPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit">
-        <button onClick={() => setTab('blog')} className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'blog' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+      <div className="flex gap-1 mb-6 bg-dash-badge-bg rounded-lg p-1 w-fit">
+        <button onClick={() => setTab('blog')} className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'blog' ? 'bg-dash-card text-dash-text shadow-sm' : 'text-dash-text-secondary hover:text-dash-text'}`}>
           Blog Posts
         </button>
         {isExec && (
-          <button onClick={() => setTab('announcements')} className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'announcements' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          <button onClick={() => setTab('announcements')} className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${tab === 'announcements' ? 'bg-dash-card text-dash-text shadow-sm' : 'text-dash-text-secondary hover:text-dash-text'}`}>
             Announcements
           </button>
         )}
@@ -201,49 +201,49 @@ export default function ContentPage() {
           {postsLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
-                  <div className="h-4 bg-gray-100 rounded w-48 mb-2" />
-                  <div className="h-3 bg-gray-100 rounded w-72" />
+                <div key={i} className="bg-dash-card rounded-xl border border-dash-border p-5 animate-pulse">
+                  <div className="h-4 bg-dash-badge-bg rounded w-48 mb-2" />
+                  <div className="h-3 bg-dash-badge-bg rounded w-72" />
                 </div>
               ))}
             </div>
           ) : posts.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <p className="text-gray-400 text-sm mb-4">No blog posts yet.</p>
-              <Link href="/dashboard/blog/new" className="text-gray-600 text-xs hover:underline">Create your first post</Link>
+            <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
+              <p className="text-dash-text-muted text-sm mb-4">No blog posts yet.</p>
+              <Link href="/dashboard/blog/new" className="text-dash-text-secondary text-xs hover:underline">Create your first post</Link>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-dash-card rounded-xl border border-dash-border overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Title</th>
-                      <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Author</th>
-                      <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Status</th>
-                      <th className="text-right text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Views</th>
-                      <th className="text-right text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Actions</th>
+                    <tr className="border-b border-dash-border">
+                      <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Title</th>
+                      <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Author</th>
+                      <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Status</th>
+                      <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Views</th>
+                      <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {posts.map(post => (
-                      <tr key={post.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <tr key={post.id} className="border-b border-dash-border/50 hover:bg-dash-card-hover transition-colors">
                         <td className="px-5 py-3">
-                          <p className="text-sm font-medium text-gray-900 truncate max-w-xs">{post.title}</p>
-                          <p className="text-[11px] text-gray-400 mt-0.5">{post.published_at ? new Date(post.published_at + 'Z').toLocaleDateString() : 'Not published'}</p>
+                          <p className="text-sm font-medium text-dash-text truncate max-w-xs">{post.title}</p>
+                          <p className="text-[11px] text-dash-text-muted mt-0.5">{post.published_at ? new Date(post.published_at + 'Z').toLocaleDateString() : 'Not published'}</p>
                         </td>
                         <td className="px-5 py-3 hidden sm:table-cell">
-                          <p className="text-xs text-gray-500">{post.first_name} {post.last_name}</p>
+                          <p className="text-xs text-dash-text-secondary">{post.first_name} {post.last_name}</p>
                         </td>
                         <td className="px-5 py-3">
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${statusColor[post.status]}`}>{post.status}</span>
                         </td>
                         <td className="px-5 py-3 text-right hidden sm:table-cell">
-                          <span className="text-xs text-gray-500">{post.views}</span>
+                          <span className="text-xs text-dash-text-secondary">{post.views}</span>
                         </td>
                         <td className="px-5 py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Link href={`/dashboard/blog/edit?slug=${post.slug}`} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Edit</Link>
+                            <Link href={`/dashboard/blog/edit?slug=${post.slug}`} className="text-xs text-dash-text-muted hover:text-dash-text-secondary transition-colors">Edit</Link>
                             {(post.author_id === member?.id || isExec) && (
                               <button onClick={() => handleDeletePost(post.slug)} className="text-xs text-red-400 hover:text-red-600 transition-colors">Delete</button>
                             )}
@@ -264,22 +264,22 @@ export default function ContentPage() {
         <>
           {/* Form */}
           {showForm && (
-            <form onSubmit={handleSubmitAnnouncement} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
-              <h2 className="text-sm font-medium text-gray-900">{editingId ? 'Edit' : 'New'} Announcement</h2>
+            <form onSubmit={handleSubmitAnnouncement} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 space-y-4">
+              <h2 className="text-sm font-medium text-dash-text">{editingId ? 'Edit' : 'New'} Announcement</h2>
 
               <div>
-                <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Title</label>
+                <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Title</label>
                 <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required className={inputClass} />
               </div>
 
               <div>
-                <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Body</label>
+                <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Body</label>
                 <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} required rows={3} className={inputClass} />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Type</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Type</label>
                   <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className={selectClass}>
                     <option value="banner">Banner</option>
                     <option value="popup">Popup</option>
@@ -287,7 +287,7 @@ export default function ContentPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Display</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Display</label>
                   <select value={form.display_mode} onChange={e => setForm({ ...form, display_mode: e.target.value })} className={selectClass}>
                     <option value="toast">Toast</option>
                     <option value="center">Center Modal</option>
@@ -295,7 +295,7 @@ export default function ContentPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Priority</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Priority</label>
                   <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })} className={selectClass}>
                     <option value="low">Low</option>
                     <option value="normal">Normal</option>
@@ -304,33 +304,33 @@ export default function ContentPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Starts At</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Starts At</label>
                   <input type="datetime-local" value={form.starts_at} onChange={e => setForm({ ...form, starts_at: e.target.value })} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Ends At</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Ends At</label>
                   <input type="datetime-local" value={form.ends_at} onChange={e => setForm({ ...form, ends_at: e.target.value })} className={inputClass} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Link URL (optional)</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Link URL (optional)</label>
                   <input type="url" value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://..." className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Link Text (optional)</label>
+                  <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Link Text (optional)</label>
                   <input type="text" value={form.link_text} onChange={e => setForm({ ...form, link_text: e.target.value })} placeholder="Learn more" className={inputClass} />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Image URL (optional)</label>
+                <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Image URL (optional)</label>
                 <input type="url" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="https://... or /media/..." className={inputClass} />
               </div>
 
               <div>
-                <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Target Pages (leave unchecked for all pages)</label>
+                <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Target Pages (leave unchecked for all pages)</label>
                 <div className="flex items-center gap-4 flex-wrap mt-1">
                   {[
                     { label: 'Home', value: '/' },
@@ -351,7 +351,7 @@ export default function ContentPage() {
                         }}
                         className="rounded border-gray-300"
                       />
-                      <span className="text-xs text-gray-600">{page.label}</span>
+                      <span className="text-xs text-dash-text-secondary">{page.label}</span>
                     </label>
                   ))}
                 </div>
@@ -361,7 +361,7 @@ export default function ContentPage() {
                 <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
                   {saving ? 'Saving...' : editingId ? 'Update' : 'Create'}
                 </button>
-                <button type="button" onClick={resetForm} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">
+                <button type="button" onClick={resetForm} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">
                   Cancel
                 </button>
               </div>
@@ -372,37 +372,37 @@ export default function ContentPage() {
           {announcementsLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
-                  <div className="h-4 bg-gray-100 rounded w-48 mb-2" />
-                  <div className="h-3 bg-gray-100 rounded w-72" />
+                <div key={i} className="bg-dash-card rounded-xl border border-dash-border p-5 animate-pulse">
+                  <div className="h-4 bg-dash-badge-bg rounded w-48 mb-2" />
+                  <div className="h-3 bg-dash-badge-bg rounded w-72" />
                 </div>
               ))}
             </div>
           ) : announcements.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <p className="text-gray-400 text-sm">No announcements yet.</p>
+            <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
+              <p className="text-dash-text-muted text-sm">No announcements yet.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {announcements.map(a => (
-                <div key={a.id} className={`bg-white rounded-xl border border-gray-200 p-5 ${!a.is_active ? 'opacity-50' : ''}`}>
+                <div key={a.id} className={`bg-dash-card rounded-xl border border-dash-border p-5 ${!a.is_active ? 'opacity-50' : ''}`}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">{a.title}</h3>
+                        <h3 className="text-sm font-medium text-dash-text truncate">{a.title}</h3>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${priorityColor[a.priority]}`}>{a.priority}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase">{a.type}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 uppercase">{a.display_mode || 'toast'}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-dash-badge-bg text-dash-text-secondary uppercase">{a.type}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-dash-badge-bg text-dash-text-secondary uppercase">{a.display_mode || 'toast'}</span>
                         {!a.is_active && <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 uppercase">Inactive</span>}
                       </div>
-                      <p className="text-xs text-gray-500 line-clamp-2">{a.body}</p>
+                      <p className="text-xs text-dash-text-secondary line-clamp-2">{a.body}</p>
                       {a.link_url && <p className="text-xs text-blue-500 mt-1 truncate">{a.link_text || a.link_url}</p>}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <button onClick={() => toggleActive(a)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                      <button onClick={() => toggleActive(a)} className="text-xs text-dash-text-muted hover:text-dash-text-secondary transition-colors">
                         {a.is_active ? 'Disable' : 'Enable'}
                       </button>
-                      <button onClick={() => startEdit(a)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Edit</button>
+                      <button onClick={() => startEdit(a)} className="text-xs text-dash-text-muted hover:text-dash-text-secondary transition-colors">Edit</button>
                       <button onClick={() => handleDeleteAnnouncement(a.id)} className="text-xs text-red-400 hover:text-red-600 transition-colors">Delete</button>
                     </div>
                   </div>

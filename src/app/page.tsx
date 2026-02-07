@@ -94,7 +94,7 @@ export default function HomePage() {
       <QuickActions />
 
       {/* ═══════════ HERO — White sky ═══════════ */}
-      <section className="relative h-screen overflow-hidden bg-white">
+      <section className="relative h-[85vh] sm:h-[85vh] lg:h-screen overflow-hidden bg-white">
 
         {/* Texture overlay */}
         <Image src="/images/texture-dark.jpg" alt="" fill className="object-cover mix-blend-multiply opacity-[0.18] pointer-events-none z-[1]" />
@@ -153,9 +153,9 @@ export default function HomePage() {
         <Crow className="absolute top-[25%] left-[45%] z-[5] animate-crow-fly" style={{ animationDelay: '14s' }} size={14} fill="#3a3a3a" />
 
         {/* Circling crows near house */}
-        <Crow className="absolute bottom-[260px] left-[calc(50%-80px)] z-[5] animate-crow-circle" size={14} fill="#2a2a2a" />
-        <Crow className="absolute bottom-[280px] left-[calc(50%+50px)] z-[5] animate-crow-circle-reverse" style={{ animationDelay: '4s' }} size={12} fill="#444" />
-        <Crow className="absolute bottom-[200px] left-[calc(50%-30px)] z-[5] animate-crow-circle" style={{ animationDelay: '2s' }} size={10} fill="#555" />
+        <Crow className="absolute bottom-[260px] left-[calc(50%-80px)] z-[5] animate-crow-circle hidden sm:block" size={14} fill="#2a2a2a" />
+        <Crow className="absolute bottom-[280px] left-[calc(50%+50px)] z-[5] animate-crow-circle-reverse hidden sm:block" style={{ animationDelay: '4s' }} size={12} fill="#444" />
+        <Crow className="absolute bottom-[200px] left-[calc(50%-30px)] z-[5] animate-crow-circle hidden sm:block" style={{ animationDelay: '2s' }} size={10} fill="#555" />
 
         {/* Ground */}
         <div className="absolute bottom-0 left-0 right-0 z-[6]">
@@ -169,17 +169,17 @@ export default function HomePage() {
         </div>
 
         {/* House (not selectable / not draggable) */}
-        <div className="absolute bottom-[38px] left-1/2 -translate-x-1/2 w-full max-w-[42rem] lg:max-w-[46rem] z-[7] px-4 select-none pointer-events-none">
+        <div className="absolute bottom-[50px] sm:bottom-[38px] left-1/2 -translate-x-1/2 w-full max-w-[28rem] sm:max-w-[42rem] lg:max-w-[46rem] z-[7] px-4 select-none pointer-events-none">
           <Image src="/images/mansion-illustration.png" alt="Omega Mansion" width={1200} height={675} className="w-full h-auto brightness-[0.85]" draggable={false} priority />
         </div>
 
         {/* Title + CTAs */}
-        <div className="relative z-10 flex flex-col items-center pt-[14vh] sm:pt-[20vh] lg:pt-[32vh]">
+        <div className="relative z-10 flex flex-col items-center pt-[16vh] sm:pt-[18vh] lg:pt-[26vh]">
           <div className="animate-float">
             <p className="text-black/60 text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase mb-1 text-center" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Established 2004
             </p>
-            <h1 className="text-black text-5xl sm:text-6xl md:text-8xl tracking-[0.08em]" style={{ fontFamily: 'var(--font-metal-mania), serif' }}>
+            <h1 className="text-black text-[2.75rem] sm:text-6xl md:text-8xl tracking-[0.08em]" style={{ fontFamily: 'var(--font-metal-mania), serif' }}>
               Houston Omegas
             </h1>
           </div>

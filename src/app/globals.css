@@ -10,21 +10,64 @@
   --text-secondary: #555555;
   --text-muted: #999999;
   --border: #e5e5e5;
+
+  /* Dashboard theme tokens (light) */
+  --dash-bg: #f9fafb;
+  --dash-card: #ffffff;
+  --dash-card-hover: #ffffff;
+  --dash-border: #e5e7eb;
+  --dash-text: #111827;
+  --dash-text-secondary: #6b7280;
+  --dash-text-muted: #9ca3af;
+  --dash-sidebar: #0e1012;
+  --dash-topbar: #ffffff;
+  --dash-input: #ffffff;
+  --dash-input-border: #d1d5db;
+  --dash-badge-bg: #f3f4f6;
+}
+
+.dark {
+  --dash-bg: #0a0a0b;
+  --dash-card: #141416;
+  --dash-card-hover: #1a1a1d;
+  --dash-border: #27272a;
+  --dash-text: #fafafa;
+  --dash-text-secondary: #a1a1aa;
+  --dash-text-muted: #71717a;
+  --dash-sidebar: #09090b;
+  --dash-topbar: #141416;
+  --dash-input: #1a1a1d;
+  --dash-input-border: #3f3f46;
+  --dash-badge-bg: #27272a;
 }
 
 @theme inline {
   --color-primary: var(--black);
   --color-accent: var(--gold);
+  --color-dash-bg: var(--dash-bg);
+  --color-dash-card: var(--dash-card);
+  --color-dash-card-hover: var(--dash-card-hover);
+  --color-dash-border: var(--dash-border);
+  --color-dash-text: var(--dash-text);
+  --color-dash-text-secondary: var(--dash-text-secondary);
+  --color-dash-text-muted: var(--dash-text-muted);
+  --color-dash-sidebar: var(--dash-sidebar);
+  --color-dash-topbar: var(--dash-topbar);
+  --color-dash-input: var(--dash-input);
+  --color-dash-input-border: var(--dash-input-border);
+  --color-dash-badge-bg: var(--dash-badge-bg);
   --font-sans: var(--font-inter);
 }
 
 * { box-sizing: border-box; }
+html { overflow-x: hidden; }
 
 body {
   background: var(--white);
   color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 {
@@ -251,6 +294,11 @@ a { transition: color 0.2s ease; }
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+  background-size: 200% 100%;
 }
 
 /* Scrollbar for dark pages */

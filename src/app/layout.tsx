@@ -26,14 +26,36 @@ export const metadata: Metadata = {
     default: 'Houston Omegas',
     template: '%s | Houston Omegas',
   },
-  description: 'Houston Omegas, fraternity chapter in Houston, TX.',
+  description: 'Houston Omegas — Asian-interest fraternity in Houston, TX. Brotherhood, service, and tradition since 2004.',
   metadataBase: new URL('https://houstonomegas.com'),
+  openGraph: {
+    title: 'Houston Omegas',
+    description: 'Asian-interest fraternity in Houston, TX. Brotherhood, service, and tradition since 2004.',
+    url: 'https://houstonomegas.com',
+    siteName: 'Houston Omegas',
+    images: [
+      {
+        url: '/images/og-card.png',
+        width: 1200,
+        height: 630,
+        alt: 'Houston Omegas — Brotherhood, Service, Tradition',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Houston Omegas',
+    description: 'Asian-interest fraternity in Houston, TX. Brotherhood, service, and tradition since 2004.',
+    images: ['/images/og-card.png'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${cinzel.variable} ${metalMania.variable} antialiased`}>
+      <body className={`${inter.variable} ${cinzel.variable} ${metalMania.variable} antialiased overflow-x-hidden`}>
         <AnnouncementBanner />
         <AnnouncementPopup />
         <PageViewTracker />

@@ -9,13 +9,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    // Load initial state
     try {
       const saved = localStorage.getItem('sidebar-collapsed');
       if (saved === 'true') setCollapsed(true);
     } catch {}
 
-    // Listen for sidebar collapse events
     const handler = (e: Event) => {
       setCollapsed((e as CustomEvent).detail);
     };
@@ -24,7 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dash-bg">
       <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className={`transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-60'}`}>
         <TopBar onMenuToggle={() => setMobileOpen(!mobileOpen)} />

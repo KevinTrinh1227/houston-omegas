@@ -9,7 +9,7 @@ interface BadgeProps {
 }
 
 export default function Badge({
-  color = 'bg-gray-100 text-gray-600',
+  color = 'bg-dash-badge-bg text-dash-text-secondary',
   className = '',
   children,
 }: BadgeProps) {

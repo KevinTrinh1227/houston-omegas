@@ -114,13 +114,21 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
             </Link>
           </div>
 
-          <button onClick={() => setMobileOpen(!mobileOpen)} className={`lg:hidden relative z-[60] ${hamburgerColor} transition-colors`}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={mobileOpen ? 'white' : 'currentColor'} strokeWidth="2">
-              {mobileOpen ? <path d="M18 6L6 18M6 6l12 12" /> : <><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></>}
-            </svg>
-          </button>
+          {/* Mobile hamburger placeholder - actual button is fixed */}
+          <div className="lg:hidden w-[22px]" />
         </div>
       </nav>
+
+      {/* Fixed mobile hamburger/close button - always on top of overlay */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className={`lg:hidden fixed top-4 right-5 sm:right-10 z-[70] transition-colors ${mobileOpen ? 'text-white/80 hover:text-white' : hamburgerColor}`}
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          {mobileOpen ? <path d="M18 6L6 18M6 6l12 12" /> : <><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></>}
+        </svg>
+      </button>
 
       {/* Fullscreen mobile overlay */}
       <div

@@ -6,12 +6,16 @@ export interface Env {
   GOOGLE_CLIENT_SECRET: string;
   DISCORD_CLIENT_ID: string;
   DISCORD_CLIENT_SECRET: string;
+  RESEND_API_KEY: string;
 }
 
 export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
 
+export type ChairPosition = 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood';
+
 export const EXEC_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
 export const ALL_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary', 'junior_active', 'active', 'alumni', 'inactive'];
+export const VALID_CHAIR_POSITIONS: ChairPosition[] = ['recruitment', 'alumni', 'social', 'social_media', 'brotherhood'];
 
 export interface Member {
   id: string;
@@ -19,10 +23,12 @@ export interface Member {
   first_name: string;
   last_name: string;
   role: Role;
+  chair_position: ChairPosition | null;
   phone: string | null;
   class_year: string | null;
   major: string | null;
   instagram: string | null;
+  discord_id: string | null;
   avatar_url: string | null;
   invited_by: string | null;
   is_active: number;

@@ -9,7 +9,7 @@ interface BaseProps {
 
 export function Table({ className = '', children }: BaseProps) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+    <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
       <table className={`w-full min-w-[600px] ${className}`}>{children}</table>
     </div>
   );
@@ -30,7 +30,7 @@ interface TrProps extends HTMLAttributes<HTMLTableRowElement> {
 export function Tr({ className = '', children, ...rest }: TrProps) {
   return (
     <tr
-      className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${className}`}
+      className={`border-b border-dash-border/50 hover:bg-dash-card-hover transition-colors ${className}`}
       {...rest}
     >
       {children}
@@ -45,7 +45,7 @@ interface ThProps extends ThHTMLAttributes<HTMLTableCellElement> {
 export function Th({ className = '', children, ...rest }: ThProps) {
   return (
     <th
-      className={`text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3 ${className}`}
+      className={`text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 ${className}`}
       {...rest}
     >
       {children}
@@ -59,7 +59,7 @@ interface TdProps extends TdHTMLAttributes<HTMLTableCellElement> {
 
 export function Td({ className = '', children, ...rest }: TdProps) {
   return (
-    <td className={`px-5 py-3 text-xs text-gray-500 ${className}`} {...rest}>
+    <td className={`px-5 py-3 text-xs text-dash-text-secondary ${className}`} {...rest}>
       {children}
     </td>
   );

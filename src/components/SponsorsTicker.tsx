@@ -70,11 +70,11 @@ export default function SponsorsTicker() {
         >
           <Info size={14} className="text-white/30 hover:text-white/50 transition-colors cursor-default" />
           {/* Tooltip */}
-          <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-60 bg-[#151719]/95 backdrop-blur-xl border border-white/[0.1] rounded-xl p-4 shadow-2xl transition-all duration-300 pointer-events-none z-50 ${showTooltip ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <div className={`absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto mb-3 w-60 bg-[#151719]/95 backdrop-blur-xl border border-white/[0.1] rounded-xl p-4 shadow-2xl transition-all duration-300 pointer-events-none z-50 ${showTooltip ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <p className="text-white/90 text-xs font-semibold mb-1.5">Partner with Houston Omegas</p>
             <p className="text-white/40 text-[11px] leading-relaxed mb-3">We collaborate with local businesses and organizations. Interested in sponsoring events or becoming a partner?</p>
             <p className="text-[#B2BEB5] text-[10px] uppercase tracking-wider font-medium">Learn more &rarr;</p>
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[#151719]/95 border-r border-b border-white/[0.1] rotate-45 -mt-1" />
+            <div className="absolute top-full right-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-[#151719]/95 border-r border-b border-white/[0.1] rotate-45 -mt-1" />
           </div>
         </div>
       </div>

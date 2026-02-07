@@ -26,14 +26,14 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className={`${btnBase} text-gray-500 border border-gray-200 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed`}
+        className={`${btnBase} text-dash-text-secondary border border-dash-border hover:border-dash-text-muted disabled:opacity-30 disabled:cursor-not-allowed`}
       >
         Prev
       </button>
 
       {pages.map((p, idx) =>
         p === '...' ? (
-          <span key={`ellipsis-${idx}`} className="px-2 text-xs text-gray-400">
+          <span key={`ellipsis-${idx}`} className="px-2 text-xs text-dash-text-muted">
             ...
           </span>
         ) : (
@@ -42,8 +42,8 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
             onClick={() => onPageChange(p)}
             className={`${btnBase} ${
               p === page
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-500 border border-gray-200 hover:border-gray-300'
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                : 'text-dash-text-secondary border border-dash-border hover:border-dash-text-muted'
             }`}
           >
             {p}
@@ -54,7 +54,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className={`${btnBase} text-gray-500 border border-gray-200 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed`}
+        className={`${btnBase} text-dash-text-secondary border border-dash-border hover:border-dash-text-muted disabled:opacity-30 disabled:cursor-not-allowed`}
       >
         Next
       </button>

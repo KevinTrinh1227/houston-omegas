@@ -25,9 +25,9 @@ export function useToast() {
 let nextId = 0;
 
 const typeStyles: Record<ToastType, string> = {
-  success: 'bg-green-50 text-green-700 border-green-200',
-  error: 'bg-red-50 text-red-700 border-red-200',
-  info: 'bg-blue-50 text-blue-700 border-blue-200',
+  success: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
+  error: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
+  info: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
 };
 
 export default function ToastProvider({ children }: { children: ReactNode }) {
@@ -52,7 +52,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto px-4 py-2.5 rounded-lg border text-xs font-medium shadow-lg animate-in slide-in-from-right ${typeStyles[t.type]}`}
+            className={`pointer-events-auto px-4 py-2.5 rounded-lg border text-xs font-medium shadow-lg ${typeStyles[t.type]}`}
             onClick={() => removeToast(t.id)}
             role="alert"
           >

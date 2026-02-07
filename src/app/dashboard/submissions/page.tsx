@@ -3,22 +3,6 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-interface RecruitmentSubmission {
-  id: number;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  classification: string;
-  major: string | null;
-  instagram: string;
-  heard_from: string;
-  ip_address: string | null;
-  country: string | null;
-  city: string | null;
-  created_at: string;
-  is_reviewed: number;
-}
-
 interface InquirySubmission {
   id: number;
   name: string;
@@ -37,45 +21,19 @@ interface InquirySubmission {
 function SubmissionsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<'recruitment' | 'inquiries'>(
-    (searchParams.get('tab') as 'recruitment' | 'inquiries') || 'recruitment'
-  );
 
-  // Recruitment state
-  const [recruitments, setRecruitments] = useState<RecruitmentSubmission[]>([]);
-  const [recruitTotal, setRecruitTotal] = useState(0);
-  const [recruitLoading, setRecruitLoading] = useState(true);
-  const [recruitSearch, setRecruitSearch] = useState(searchParams.get('search') || '');
-  const recruitPage = parseInt(searchParams.get('page') || '1');
-
-  // Inquiry state
   const [inquiries, setInquiries] = useState<InquirySubmission[]>([]);
   const [inquiryTotal, setInquiryTotal] = useState(0);
-  const [inquiryLoading, setInquiryLoading] = useState(true);
-  const [inquirySearch, setInquirySearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
-  const inquiryPage = parseInt(searchParams.get('ipage') || '1');
-
-  const fetchRecruitment = useCallback(async () => {
-    setRecruitLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(recruitPage), limit: '25' });
-      if (recruitSearch) params.set('search', recruitSearch);
-      const res = await fetch(`/api/dashboard/recruitment?${params}`, { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setRecruitments(data.submissions);
-        setRecruitTotal(data.total);
-      }
-    } catch {}
-    finally { setRecruitLoading(false); }
-  }, [recruitPage, recruitSearch]);
+  const page = parseInt(searchParams.get('page') || '1');
 
   const fetchInquiries = useCallback(async () => {
-    setInquiryLoading(true);
+    setLoading(true);
     try {
-      const params = new URLSearchParams({ page: String(inquiryPage), limit: '25' });
-      if (inquirySearch) params.set('search', inquirySearch);
+      const params = new URLSearchParams({ page: String(page), limit: '25' });
+      if (search) params.set('search', search);
       const res = await fetch(`/api/dashboard/inquiries?${params}`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
@@ -83,185 +41,89 @@ function SubmissionsInner() {
         setInquiryTotal(data.total);
       }
     } catch {}
-    finally { setInquiryLoading(false); }
-  }, [inquiryPage, inquirySearch]);
+    finally { setLoading(false); }
+  }, [page, search]);
 
-  useEffect(() => { fetchRecruitment(); }, [fetchRecruitment]);
   useEffect(() => { fetchInquiries(); }, [fetchInquiries]);
 
-  const handleTabChange = (newTab: 'recruitment' | 'inquiries') => {
-    setTab(newTab);
-    router.push(`/dashboard/submissions?tab=${newTab}`);
-  };
-
-  const recruitTotalPages = Math.ceil(recruitTotal / 25);
-  const inquiryTotalPages = Math.ceil(inquiryTotal / 25);
+  const totalPages = Math.ceil(inquiryTotal / 25);
 
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Submissions</h1>
-          <p className="text-sm text-gray-500 mt-1">Recruitment applications and venue inquiries</p>
+          <h1 className="text-xl font-semibold text-dash-text">Inquiries</h1>
+          <p className="text-sm text-dash-text-secondary mt-1">Venue and event inquiry submissions</p>
         </div>
+        <span className="text-xs text-dash-text-muted">{inquiryTotal} total</span>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => handleTabChange('recruitment')}
-          className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${
-            tab === 'recruitment' ? 'bg-gray-900 text-white' : 'text-gray-500 border border-gray-200 hover:border-gray-300'
-          }`}
-        >
-          Recruitment ({recruitTotal})
-        </button>
-        <button
-          onClick={() => handleTabChange('inquiries')}
-          className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${
-            tab === 'inquiries' ? 'bg-gray-900 text-white' : 'text-gray-500 border border-gray-200 hover:border-gray-300'
-          }`}
-        >
-          Inquiries ({inquiryTotal})
-        </button>
-      </div>
+      <form onSubmit={(e) => { e.preventDefault(); }} className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name, email, event type..."
+          className="w-full max-w-sm px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all"
+        />
+      </form>
 
-      {/* Recruitment Tab */}
-      {tab === 'recruitment' && (
-        <>
-          <form onSubmit={(e) => { e.preventDefault(); router.push(`/dashboard/submissions?tab=recruitment${recruitSearch ? `&search=${recruitSearch}` : ''}`); }} className="mb-4">
-            <input
-              type="text"
-              value={recruitSearch}
-              onChange={e => setRecruitSearch(e.target.value)}
-              placeholder="Search by name, Instagram, phone..."
-              className="w-full max-w-sm px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all"
-            />
-          </form>
-
-          {recruitLoading ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
-            </div>
-          ) : recruitments.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <p className="text-gray-400 text-sm">No submissions found.</p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-              <table className="w-full min-w-[700px]">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    {['Name', 'Phone', 'Instagram', 'Classification', 'Major', 'Heard From', 'Location', 'Date'].map(h => (
-                      <th key={h} className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-4 py-3">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {recruitments.map(s => (
-                    <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-xs font-medium text-gray-900">{s.first_name} {s.last_name}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{s.phone}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{s.instagram}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{s.classification}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{s.major || '-'}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{s.heard_from}</td>
-                      <td className="px-4 py-3 text-xs text-gray-400">{[s.city, s.country].filter(Boolean).join(', ') || '-'}</td>
-                      <td className="px-4 py-3 text-xs text-gray-400">{new Date(s.created_at + 'Z').toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {recruitTotalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: recruitTotalPages }, (_, i) => i + 1).map(p => (
-                <button
-                  key={p}
-                  onClick={() => router.push(`/dashboard/submissions?tab=recruitment&page=${p}${recruitSearch ? `&search=${recruitSearch}` : ''}`)}
-                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${p === recruitPage ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Inquiries Tab */}
-      {tab === 'inquiries' && (
-        <>
-          <form onSubmit={(e) => { e.preventDefault(); }} className="mb-4">
-            <input
-              type="text"
-              value={inquirySearch}
-              onChange={e => setInquirySearch(e.target.value)}
-              placeholder="Search by name, email, event type..."
-              className="w-full max-w-sm px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all"
-            />
-          </form>
-
-          {inquiryLoading ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
-            </div>
-          ) : inquiries.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <p className="text-gray-400 text-sm">No inquiries found.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {inquiries.map(s => (
-                <div key={s.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 transition-colors">
-                  <button
-                    onClick={() => setExpanded(expanded === s.id ? null : s.id)}
-                    className="w-full text-left px-5 py-4 flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                      <p className="text-xs text-gray-400">{s.event_type} &middot; {new Date(s.created_at + 'Z').toLocaleDateString()}</p>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      {s.date && <span className="text-xs text-gray-500 hidden sm:inline">Event: {s.date}</span>}
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" className={`transition-transform ${expanded === s.id ? 'rotate-180' : ''}`}>
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </div>
-                  </button>
-                  {expanded === s.id && (
-                    <div className="px-5 pb-4 border-t border-gray-100 pt-3 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                      <div><span className="text-gray-400">Email:</span> <span className="text-gray-700">{s.email}</span></div>
-                      <div><span className="text-gray-400">Phone:</span> <span className="text-gray-700">{s.phone}</span></div>
-                      <div><span className="text-gray-400">Guests:</span> <span className="text-gray-700">{s.guest_count || '-'}</span></div>
-                      <div><span className="text-gray-400">Date:</span> <span className="text-gray-700">{s.date || '-'}</span></div>
-                      <div><span className="text-gray-400">Location:</span> <span className="text-gray-700">{[s.city, s.country].filter(Boolean).join(', ') || '-'}</span></div>
-                      {s.message && (
-                        <div className="col-span-full"><span className="text-gray-400">Message:</span> <span className="text-gray-700">{s.message}</span></div>
-                      )}
-                    </div>
+      {loading ? (
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
+          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
+        </div>
+      ) : inquiries.length === 0 ? (
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
+          <p className="text-dash-text-muted text-sm">No inquiries found.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {inquiries.map(s => (
+            <div key={s.id} className="bg-dash-card rounded-xl border border-dash-border overflow-hidden hover:border-gray-300 transition-colors">
+              <button
+                onClick={() => setExpanded(expanded === s.id ? null : s.id)}
+                className="w-full text-left px-5 py-4 flex items-center justify-between"
+              >
+                <div>
+                  <p className="text-sm font-medium text-dash-text">{s.name}</p>
+                  <p className="text-xs text-dash-text-muted">{s.event_type} &middot; {new Date(s.created_at + 'Z').toLocaleDateString()}</p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {s.date && <span className="text-xs text-dash-text-secondary hidden sm:inline">Event: {s.date}</span>}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" className={`transition-transform ${expanded === s.id ? 'rotate-180' : ''}`}>
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </div>
+              </button>
+              {expanded === s.id && (
+                <div className="px-5 pb-4 border-t border-dash-border pt-3 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                  <div><span className="text-dash-text-muted">Email:</span> <span className="text-dash-text">{s.email}</span></div>
+                  <div><span className="text-dash-text-muted">Phone:</span> <span className="text-dash-text">{s.phone}</span></div>
+                  <div><span className="text-dash-text-muted">Guests:</span> <span className="text-dash-text">{s.guest_count || '-'}</span></div>
+                  <div><span className="text-dash-text-muted">Date:</span> <span className="text-dash-text">{s.date || '-'}</span></div>
+                  <div><span className="text-dash-text-muted">Location:</span> <span className="text-dash-text">{[s.city, s.country].filter(Boolean).join(', ') || '-'}</span></div>
+                  {s.message && (
+                    <div className="col-span-full"><span className="text-dash-text-muted">Message:</span> <span className="text-dash-text">{s.message}</span></div>
                   )}
                 </div>
-              ))}
+              )}
             </div>
-          )}
+          ))}
+        </div>
+      )}
 
-          {inquiryTotalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: inquiryTotalPages }, (_, i) => i + 1).map(p => (
-                <button
-                  key={p}
-                  onClick={() => router.push(`/dashboard/submissions?tab=inquiries&ipage=${p}`)}
-                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${p === inquiryPage ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          )}
-        </>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              onClick={() => router.push(`/dashboard/submissions?page=${p}`)}
+              className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${p === page ? 'bg-gray-900 text-white' : 'text-dash-text-secondary hover:bg-dash-badge-bg'}`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

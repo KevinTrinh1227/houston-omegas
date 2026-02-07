@@ -4,14 +4,31 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isExecRole } from '@/lib/roles';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Event { id: string; title: string; description: string | null; event_type: string; location: string | null; start_time: string; end_time: string | null; semester_id: string | null; is_mandatory: number; points_value: number; creator_first: string; creator_last: string; }
 interface Semester { id: string; name: string; is_current: number; }
 interface AttendanceRecord { id: string; member_id: string; first_name: string; last_name: string; status: string; excuse_reason: string | null; }
 interface Member { id: string; first_name: string; last_name: string; }
 
+// Calendar interfaces
+interface CalendarEvent { id: string; title: string; event_type: string; start_time: string; is_mandatory: number; }
+interface Meeting { id: string; title: string; meeting_date: string; }
+
 const TYPE_LABELS: Record<string, string> = { general: 'General', chapter: 'Chapter', social: 'Social', community_service: 'Community Service', philanthropy: 'Philanthropy', brotherhood: 'Brotherhood', rush: 'Rush', other: 'Other' };
 const STATUS_COLORS: Record<string, string> = { present: 'bg-green-100 text-green-700', late: 'bg-yellow-100 text-yellow-700', excused: 'bg-blue-100 text-blue-700', absent: 'bg-red-100 text-red-700' };
+
+// Calendar constants
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 1).getDay();
+}
 
 export default function EventsPage() {
   const { member } = useAuth();
@@ -35,6 +52,13 @@ export default function EventsPage() {
   // New event form
   const [form, setForm] = useState({ title: '', description: '', event_type: 'general', location: '', start_time: '', end_time: '', is_mandatory: false, points_value: '0', slug: '', is_public: false, flyer_url: '', cover_url: '', address: '', age_requirement: '', dress_code: '', ticket_url: '', ticket_price: '', disclaimer: '', capacity: '', parking_info: '', contact_info: '' });
   const [showPublicFields, setShowPublicFields] = useState(false);
+
+  // Calendar state
+  const today = new Date();
+  const [calYear, setCalYear] = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
+  const [calMeetings, setCalMeetings] = useState<Meeting[]>([]);
 
   const fetchSemesters = useCallback(async () => {
     const res = await fetch('/api/semesters', { credentials: 'include' });
@@ -70,6 +94,18 @@ export default function EventsPage() {
     if (memRes.ok) setAllMembers(await memRes.json());
   }, []);
 
+  // Calendar data fetch
+  const fetchCalendarData = useCallback(async () => {
+    const evRes = await fetch('/api/events', { credentials: 'include' });
+    if (evRes.ok) setCalEvents(await evRes.json());
+
+    const mtRes = await fetch('/api/meetings', { credentials: 'include' });
+    if (mtRes.ok) {
+      const data = await mtRes.json();
+      setCalMeetings(Array.isArray(data) ? data : data.meetings || []);
+    }
+  }, []);
+
   useEffect(() => { fetchSemesters(); }, [fetchSemesters]);
   useEffect(() => { if (selectedSemester) fetchEvents(); }, [selectedSemester, fetchEvents]);
   useEffect(() => { if (eventId) fetchDetail(eventId); }, [eventId, fetchDetail]);
@@ -94,22 +130,22 @@ export default function EventsPage() {
     if (res.ok) { setMessage('Attendance saved.'); fetchDetail(eventId); }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
 
   // Event detail view
   if (eventId && detail) {
     return (
       <div>
         <div className="mb-6">
-          <a href="/dashboard/events" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">&larr; Back to Events</a>
-          <h1 className="text-xl font-semibold text-gray-900 mt-2">{detail.title}</h1>
-          <div className="flex gap-3 mt-1 text-xs text-gray-500">
-            <span className="bg-gray-100 px-2 py-0.5 rounded-full uppercase">{TYPE_LABELS[detail.event_type]}</span>
+          <a href="/dashboard/events" className="text-xs text-dash-text-muted hover:text-dash-text-secondary transition-colors">&larr; Back to Events</a>
+          <h1 className="text-xl font-semibold text-dash-text mt-2">{detail.title}</h1>
+          <div className="flex gap-3 mt-1 text-xs text-dash-text-secondary">
+            <span className="bg-dash-badge-bg px-2 py-0.5 rounded-full uppercase">{TYPE_LABELS[detail.event_type]}</span>
             {detail.is_mandatory ? <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Mandatory</span> : null}
             {detail.points_value > 0 && <span className="bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">{detail.points_value} pts</span>}
           </div>
-          {detail.description && <p className="text-sm text-gray-600 mt-3">{detail.description}</p>}
-          <div className="text-xs text-gray-500 mt-2">
+          {detail.description && <p className="text-sm text-dash-text-secondary mt-3">{detail.description}</p>}
+          <div className="text-xs text-dash-text-secondary mt-2">
             {detail.location && <span>{detail.location} &middot; </span>}
             {new Date(detail.start_time).toLocaleString()}
           </div>
@@ -118,22 +154,22 @@ export default function EventsPage() {
         {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
 
         {/* Attendance roll call */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-            <h2 className="text-sm font-medium text-gray-900">Attendance</h2>
+        <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-dash-border">
+            <h2 className="text-sm font-medium text-dash-text">Attendance</h2>
             {canMark && <button onClick={handleSaveAttendance} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg hover:bg-gray-800 transition-all">Save</button>}
           </div>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Member</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Status</th>
+              <tr className="border-b border-dash-border">
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Member</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Status</th>
               </tr>
             </thead>
             <tbody>
               {allMembers.filter(m => m.id !== undefined).map(m => (
-                <tr key={m.id} className="border-b border-gray-50">
-                  <td className="px-5 py-2.5 text-xs font-medium text-gray-900">{m.first_name} {m.last_name}</td>
+                <tr key={m.id} className="border-b border-dash-border/50">
+                  <td className="px-5 py-2.5 text-xs font-medium text-dash-text">{m.first_name} {m.last_name}</td>
                   <td className="px-5 py-2.5">
                     {canMark ? (
                       <select value={attendanceMap[m.id] || 'absent'} onChange={e => setAttendanceMap({ ...attendanceMap, [m.id]: e.target.value })} className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase border-0 cursor-pointer ${STATUS_COLORS[attendanceMap[m.id] || 'absent']}`}>
@@ -156,7 +192,7 @@ export default function EventsPage() {
   }
 
   // Attendance stats
-  const [attendanceTab, setAttendanceTab] = useState<'events' | 'attendance'>('events');
+  const [attendanceTab, setAttendanceTab] = useState<'events' | 'attendance' | 'calendar'>('events');
   const [attStats, setAttStats] = useState<{ id: string; first_name: string; last_name: string; present_count: number; late_count: number; excused_count: number; absent_count: number; attendance_pct: number | null }[]>([]);
   const [attLoading, setAttLoading] = useState(false);
 
@@ -169,60 +205,145 @@ export default function EventsPage() {
   }, [selectedSemester]);
 
   useEffect(() => { if (attendanceTab === 'attendance') fetchAttStats(); }, [attendanceTab, fetchAttStats]);
+  useEffect(() => { if (attendanceTab === 'calendar') fetchCalendarData(); }, [attendanceTab, fetchCalendarData]);
 
   const pctColor = (pct: number | null) => {
-    if (pct === null) return 'text-gray-400';
+    if (pct === null) return 'text-dash-text-muted';
     if (pct >= 80) return 'text-green-600';
     if (pct >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
 
+  // Calendar helpers
+  const prevMonth = () => {
+    if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); }
+    else setCalMonth(calMonth - 1);
+  };
+
+  const nextMonth = () => {
+    if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); }
+    else setCalMonth(calMonth + 1);
+  };
+
+  const goToToday = () => {
+    setCalYear(today.getFullYear());
+    setCalMonth(today.getMonth());
+  };
+
+  // Calendar grid computation
+  const daysInMonth = getDaysInMonth(calYear, calMonth);
+  const firstDay = getFirstDayOfMonth(calYear, calMonth);
+  const isToday = (day: number) => day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+
+  const eventsByDay: Record<number, { type: 'event' | 'meeting'; title: string; color: string; id: string; mandatory?: boolean }[]> = {};
+  calEvents.forEach(ev => {
+    const d = new Date(ev.start_time);
+    if (d.getFullYear() === calYear && d.getMonth() === calMonth) {
+      const day = d.getDate();
+      if (!eventsByDay[day]) eventsByDay[day] = [];
+      eventsByDay[day].push({
+        type: 'event',
+        title: ev.title,
+        color: ev.is_mandatory ? 'bg-red-500' : 'bg-blue-500',
+        id: ev.id,
+        mandatory: !!ev.is_mandatory,
+      });
+    }
+  });
+  calMeetings.forEach(mt => {
+    const d = new Date(mt.meeting_date);
+    if (d.getFullYear() === calYear && d.getMonth() === calMonth) {
+      const day = d.getDate();
+      if (!eventsByDay[day]) eventsByDay[day] = [];
+      eventsByDay[day].push({
+        type: 'meeting',
+        title: mt.title,
+        color: 'bg-green-500',
+        id: mt.id,
+      });
+    }
+  });
+
+  const calCells = [];
+  for (let i = 0; i < firstDay; i++) {
+    calCells.push(<div key={`empty-${i}`} className="min-h-[80px] sm:min-h-[100px] border-b border-r border-dash-border" />);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayEvents = eventsByDay[day] || [];
+    calCells.push(
+      <div key={day} className={`min-h-[80px] sm:min-h-[100px] border-b border-r border-dash-border p-1.5 ${isToday(day) ? 'bg-blue-50/50' : 'hover:bg-dash-card-hover'} transition-colors`}>
+        <div className="flex items-center justify-between mb-1">
+          <span className={`text-xs font-medium ${isToday(day) ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center' : 'text-dash-text-secondary'}`}>
+            {day}
+          </span>
+        </div>
+        <div className="space-y-0.5">
+          {dayEvents.slice(0, 3).map((ev, i) => (
+            <a
+              key={i}
+              href={ev.type === 'event' ? `/dashboard/events?id=${ev.id}` : `/dashboard/meetings`}
+              className={`block text-[9px] sm:text-[10px] text-white px-1.5 py-0.5 rounded truncate ${ev.color} hover:opacity-80 transition-opacity`}
+            >
+              {ev.title}
+            </a>
+          ))}
+          {dayEvents.length > 3 && (
+            <span className="text-[9px] text-dash-text-muted">+{dayEvents.length - 3} more</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Events</h1>
-          <p className="text-sm text-gray-500 mt-1">{events.length} event{events.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-xl font-semibold text-dash-text">Events</h1>
+          <p className="text-sm text-dash-text-secondary mt-1">{events.length} event{events.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-3">
-          <select value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)} className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
-            {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-          {isExec && <button onClick={() => setShowNew(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">New Event</button>}
+          {attendanceTab === 'events' && (
+            <select value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)} className="px-3 py-2 bg-dash-card border border-dash-border rounded-lg text-sm">
+              {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          )}
+          {isExec && attendanceTab === 'events' && <button onClick={() => setShowNew(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">New Event</button>}
         </div>
       </div>
 
       {/* Tabs */}
-      {isExec && (
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setAttendanceTab('events')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'events' ? 'bg-gray-900 text-white' : 'text-gray-500 border border-gray-200 hover:border-gray-300'}`}>Events</button>
-          <button onClick={() => setAttendanceTab('attendance')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'attendance' ? 'bg-gray-900 text-white' : 'text-gray-500 border border-gray-200 hover:border-gray-300'}`}>Attendance Stats</button>
-        </div>
-      )}
+      <div className="flex gap-2 mb-6">
+        <button onClick={() => setAttendanceTab('events')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'events' ? 'bg-gray-900 text-white' : 'text-dash-text-secondary border border-dash-border hover:border-gray-300'}`}>Events</button>
+        {isExec && (
+          <button onClick={() => setAttendanceTab('attendance')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'attendance' ? 'bg-gray-900 text-white' : 'text-dash-text-secondary border border-dash-border hover:border-gray-300'}`}>Attendance Stats</button>
+        )}
+        <button onClick={() => setAttendanceTab('calendar')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'calendar' ? 'bg-gray-900 text-white' : 'text-dash-text-secondary border border-dash-border hover:border-gray-300'}`}>Calendar</button>
+      </div>
 
       {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
 
       {/* Attendance Stats Tab */}
       {attendanceTab === 'attendance' && isExec && (
         attLoading ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+          <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Member</th>
-                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Present</th>
-                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Late</th>
-                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Excused</th>
-                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Absent</th>
-                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">%</th>
+                <tr className="border-b border-dash-border">
+                  <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Member</th>
+                  <th className="text-center text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-3 py-3">Present</th>
+                  <th className="text-center text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-3 py-3">Late</th>
+                  <th className="text-center text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-3 py-3">Excused</th>
+                  <th className="text-center text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-3 py-3">Absent</th>
+                  <th className="text-center text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-3 py-3">%</th>
                 </tr>
               </thead>
               <tbody>
                 {attStats.map(s => (
-                  <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 text-xs font-medium text-gray-900">{s.first_name} {s.last_name}</td>
+                  <tr key={s.id} className="border-b border-dash-border/50 hover:bg-dash-bg transition-colors">
+                    <td className="px-5 py-3 text-xs font-medium text-dash-text">{s.first_name} {s.last_name}</td>
                     <td className="px-3 py-3 text-xs text-center text-green-600">{s.present_count}</td>
                     <td className="px-3 py-3 text-xs text-center text-yellow-600">{s.late_count}</td>
                     <td className="px-3 py-3 text-xs text-center text-blue-600">{s.excused_count}</td>
@@ -236,73 +357,107 @@ export default function EventsPage() {
         )
       )}
 
-      {attendanceTab === 'events' && showNew && isExec && (
-        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
-          <h2 className="text-sm font-medium text-gray-900">Create Event</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Title</label><input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Type</label><select value={form.event_type} onChange={e => setForm({ ...form, event_type: e.target.value })} className={inputClass}>{Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Start Time</label><input type="datetime-local" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} required className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">End Time</label><input type="datetime-local" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Location</label><input type="text" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className={inputClass} /></div>
-            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Points</label><input type="number" value={form.points_value} onChange={e => setForm({ ...form, points_value: e.target.value })} min="0" className={inputClass} /></div>
+      {/* Calendar Tab */}
+      {attendanceTab === 'calendar' && (
+        <>
+          {/* Month Navigation */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-dash-badge-bg text-dash-text-secondary transition-colors"><ChevronLeft size={18} /></button>
+              <h2 className="text-sm font-semibold text-dash-text min-w-[160px] text-center">{MONTHS[calMonth]} {calYear}</h2>
+              <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-dash-badge-bg text-dash-text-secondary transition-colors"><ChevronRight size={18} /></button>
+            </div>
+            <button onClick={goToToday} className="text-[11px] uppercase tracking-[0.15em] font-semibold text-dash-text-secondary border border-dash-border px-4 py-2 rounded-lg hover:border-gray-300 transition-all">Today</button>
           </div>
-          <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Description</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className={inputClass} /></div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-blue-500" /><span className="text-[10px] text-dash-text-secondary">Event</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-green-500" /><span className="text-[10px] text-dash-text-secondary">Meeting</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /><span className="text-[10px] text-dash-text-secondary">Mandatory</span></div>
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="bg-dash-card rounded-xl border border-dash-border overflow-hidden">
+            <div className="grid grid-cols-7 border-b border-dash-border">
+              {WEEKDAYS.map(d => (
+                <div key={d} className="text-center text-[10px] text-dash-text-muted uppercase tracking-wider font-semibold py-2.5 border-r border-dash-border last:border-r-0">{d}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7">
+              {calCells}
+            </div>
+          </div>
+        </>
+      )}
+
+      {attendanceTab === 'events' && showNew && isExec && (
+        <form onSubmit={handleCreate} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 space-y-4">
+          <h2 className="text-sm font-medium text-dash-text">Create Event</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Title</label><input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Type</label><select value={form.event_type} onChange={e => setForm({ ...form, event_type: e.target.value })} className={inputClass}>{Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Start Time</label><input type="datetime-local" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} required className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">End Time</label><input type="datetime-local" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Location</label><input type="text" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className={inputClass} /></div>
+            <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Points</label><input type="number" value={form.points_value} onChange={e => setForm({ ...form, points_value: e.target.value })} min="0" className={inputClass} /></div>
+          </div>
+          <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Description</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className={inputClass} /></div>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_mandatory} onChange={e => setForm({ ...form, is_mandatory: e.target.checked })} /> Mandatory event</label>
-            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_public} onChange={e => setForm({ ...form, is_public: e.target.checked })} /> Public event page</label>
+            <label className="flex items-center gap-2 text-sm text-dash-text"><input type="checkbox" checked={form.is_mandatory} onChange={e => setForm({ ...form, is_mandatory: e.target.checked })} /> Mandatory event</label>
+            <label className="flex items-center gap-2 text-sm text-dash-text"><input type="checkbox" checked={form.is_public} onChange={e => setForm({ ...form, is_public: e.target.checked })} /> Public event page</label>
           </div>
 
           {/* Public event fields toggle */}
-          <button type="button" onClick={() => setShowPublicFields(!showPublicFields)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <button type="button" onClick={() => setShowPublicFields(!showPublicFields)} className="text-xs text-dash-text-muted hover:text-dash-text-secondary transition-colors">
             {showPublicFields ? '▾ Hide public page fields' : '▸ Show public page fields (flyer, address, rules, etc.)'}
           </button>
 
           {showPublicFields && (
-            <div className="border border-gray-100 rounded-lg p-4 space-y-4 bg-gray-50/50">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Public Event Page Fields</p>
+            <div className="border border-dash-border rounded-lg p-4 space-y-4 bg-dash-card-hover">
+              <p className="text-[10px] text-dash-text-muted uppercase tracking-wider font-medium">Public Event Page Fields</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">URL Slug</label><input type="text" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated from title" className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Flyer Image URL</label><input type="text" value={form.flyer_url} onChange={e => setForm({ ...form, flyer_url: e.target.value })} className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Cover Image URL</label><input type="text" value={form.cover_url} onChange={e => setForm({ ...form, cover_url: e.target.value })} className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Full Address</label><input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Age Requirement</label><input type="text" value={form.age_requirement} onChange={e => setForm({ ...form, age_requirement: e.target.value })} placeholder="e.g. 18+ to enter, 21+ to drink" className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Dress Code</label><input type="text" value={form.dress_code} onChange={e => setForm({ ...form, dress_code: e.target.value })} className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Ticket URL</label><input type="text" value={form.ticket_url} onChange={e => setForm({ ...form, ticket_url: e.target.value })} className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Ticket Price</label><input type="text" value={form.ticket_price} onChange={e => setForm({ ...form, ticket_price: e.target.value })} placeholder="e.g. $15 presale / $20 door" className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Capacity</label><input type="text" value={form.capacity} onChange={e => setForm({ ...form, capacity: e.target.value })} className={inputClass} /></div>
-                <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Contact Info</label><input type="text" value={form.contact_info} onChange={e => setForm({ ...form, contact_info: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">URL Slug</label><input type="text" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated from title" className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Flyer Image URL</label><input type="text" value={form.flyer_url} onChange={e => setForm({ ...form, flyer_url: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Cover Image URL</label><input type="text" value={form.cover_url} onChange={e => setForm({ ...form, cover_url: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Full Address</label><input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Age Requirement</label><input type="text" value={form.age_requirement} onChange={e => setForm({ ...form, age_requirement: e.target.value })} placeholder="e.g. 18+ to enter, 21+ to drink" className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Dress Code</label><input type="text" value={form.dress_code} onChange={e => setForm({ ...form, dress_code: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Ticket URL</label><input type="text" value={form.ticket_url} onChange={e => setForm({ ...form, ticket_url: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Ticket Price</label><input type="text" value={form.ticket_price} onChange={e => setForm({ ...form, ticket_price: e.target.value })} placeholder="e.g. $15 presale / $20 door" className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Capacity</label><input type="text" value={form.capacity} onChange={e => setForm({ ...form, capacity: e.target.value })} className={inputClass} /></div>
+                <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Contact Info</label><input type="text" value={form.contact_info} onChange={e => setForm({ ...form, contact_info: e.target.value })} className={inputClass} /></div>
               </div>
-              <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Parking Info</label><input type="text" value={form.parking_info} onChange={e => setForm({ ...form, parking_info: e.target.value })} className={inputClass} /></div>
-              <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Disclaimer / Legal</label><textarea value={form.disclaimer} onChange={e => setForm({ ...form, disclaimer: e.target.value })} rows={2} className={inputClass} /></div>
+              <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Parking Info</label><input type="text" value={form.parking_info} onChange={e => setForm({ ...form, parking_info: e.target.value })} className={inputClass} /></div>
+              <div><label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Disclaimer / Legal</label><textarea value={form.disclaimer} onChange={e => setForm({ ...form, disclaimer: e.target.value })} rows={2} className={inputClass} /></div>
             </div>
           )}
 
           <div className="flex gap-3">
             <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Create</button>
-            <button type="button" onClick={() => setShowNew(false)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">Cancel</button>
+            <button type="button" onClick={() => setShowNew(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
           </div>
         </form>
       )}
 
       {attendanceTab === 'events' && (
         loading ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
         ) : events.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-sm text-gray-400">No events yet.</div>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center text-sm text-dash-text-muted">No events yet.</div>
         ) : (
           <div className="space-y-3">
             {events.map(ev => (
-              <a key={ev.id} href={`/dashboard/events?id=${ev.id}`} className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md transition-all">
+              <a key={ev.id} href={`/dashboard/events?id=${ev.id}`} className="block bg-dash-card rounded-xl border border-dash-border p-5 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">{ev.title}</h3>
+                    <h3 className="text-sm font-medium text-dash-text">{ev.title}</h3>
                     <div className="flex gap-2 mt-1">
-                      <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full uppercase">{TYPE_LABELS[ev.event_type]}</span>
+                      <span className="text-[10px] bg-dash-badge-bg text-dash-text-secondary px-2 py-0.5 rounded-full uppercase">{TYPE_LABELS[ev.event_type]}</span>
                       {ev.is_mandatory ? <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Mandatory</span> : null}
                     </div>
                   </div>
-                  <div className="text-xs text-gray-400 text-right">
+                  <div className="text-xs text-dash-text-muted text-right">
                     <p>{new Date(ev.start_time).toLocaleDateString()}</p>
                     {ev.location && <p className="mt-0.5">{ev.location}</p>}
                   </div>

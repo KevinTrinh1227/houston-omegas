@@ -74,12 +74,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.redirect(`${loginUrl}?error=not_registered`, 302);
   }
 
-  // Save avatar from Discord if member doesn't have one
-  if (!member.avatar_url && userInfo.id && userInfo.avatar) {
-    const discordAvatar = `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}.png?size=256`;
+  // Save discord_id and avatar from Discord
+  if (userInfo.id) {
+    const updates: string[] = [`discord_id = ?`];
+    const binds: (string | null)[] = [userInfo.id];
+    if (!member.avatar_url && userInfo.avatar) {
+      updates.push(`avatar_url = ?`);
+      binds.push(`https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}.png?size=256`);
+    }
+    updates.push(`updated_at = datetime('now')`);
+    binds.push(member.id as string);
     await context.env.DB.prepare(
-      `UPDATE members SET avatar_url = ?, updated_at = datetime('now') WHERE id = ?`
-    ).bind(discordAvatar, member.id).run();
+      `UPDATE members SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...binds).run();
   }
 
   return createOAuthSession(

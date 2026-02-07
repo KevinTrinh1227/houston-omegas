@@ -10,7 +10,7 @@ interface CardProps {
 
 export default function Card({ className = '', padding = 'p-5', children }: CardProps) {
   return (
-    <div className={`bg-white rounded-xl border border-gray-200 ${padding} ${className}`}>
+    <div className={`bg-dash-card rounded-xl border border-dash-border ${padding} ${className}`}>
       {children}
     </div>
   );

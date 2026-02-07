@@ -91,7 +91,7 @@ function EditPostInner() {
     } catch { /* */ }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
 
   if (loading) {
     return (
@@ -105,12 +105,12 @@ function EditPostInner() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Edit Post</h1>
-          <p className="text-sm text-gray-500 mt-1">{form.title || 'Untitled'}</p>
+          <h1 className="text-xl font-semibold text-dash-text">Edit Post</h1>
+          <p className="text-sm text-dash-text-secondary mt-1">{form.title || 'Untitled'}</p>
         </div>
         <button
           onClick={() => setPreview(!preview)}
-          className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all"
+          className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all"
         >
           {preview ? 'Edit' : 'Preview'}
         </button>
@@ -120,36 +120,36 @@ function EditPostInner() {
         <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs text-center">{error}</div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <div className="bg-dash-card rounded-xl border border-dash-border p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Title</label>
+            <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Title</label>
             <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className={inputClass} />
           </div>
           <div>
-            <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Slug</label>
+            <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Slug</label>
             <input type="text" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} className={inputClass} />
           </div>
         </div>
 
         <div>
-          <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Excerpt</label>
+          <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Excerpt</label>
           <input type="text" value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} className={inputClass} />
         </div>
 
         <div>
-          <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Cover Image</label>
+          <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Cover Image</label>
           <div className="flex items-center gap-3">
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="text-xs text-gray-500" />
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="text-xs text-dash-text-secondary" />
             {form.cover_image_url && <span className="text-xs text-green-600">Image set</span>}
           </div>
         </div>
 
         <div>
-          <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Content (Markdown)</label>
+          <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Content (Markdown)</label>
           {preview ? (
-            <div className="border border-gray-200 rounded-lg p-4 min-h-[300px] bg-gray-50">
-              <pre className="whitespace-pre-wrap text-sm text-gray-700">{form.body || 'Nothing to preview...'}</pre>
+            <div className="border border-dash-border rounded-lg p-4 min-h-[300px] bg-dash-bg">
+              <pre className="whitespace-pre-wrap text-sm text-dash-text">{form.body || 'Nothing to preview...'}</pre>
             </div>
           ) : (
             <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={16} className={`${inputClass} font-mono text-[13px] leading-relaxed`} />
@@ -157,7 +157,7 @@ function EditPostInner() {
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button onClick={() => handleSubmit()} disabled={saving} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50">
+          <button onClick={() => handleSubmit()} disabled={saving} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all disabled:opacity-50">
             {saving ? 'Saving...' : 'Save'}
           </button>
           {form.status !== 'published' && (

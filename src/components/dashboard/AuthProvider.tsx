@@ -9,6 +9,7 @@ export interface AuthMember {
   first_name: string;
   last_name: string;
   role: 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
+  chair_position: 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood' | null;
   phone: string | null;
   class_year: string | null;
   major: string | null;

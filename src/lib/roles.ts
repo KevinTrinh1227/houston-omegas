@@ -1,5 +1,7 @@
 export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
 
+export type ChairPosition = 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood' | null;
+
 export const EXEC_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -16,18 +18,94 @@ export const ROLE_LABELS: Record<Role, string> = {
 };
 
 export const ROLE_COLORS: Record<Role, string> = {
-  admin: 'bg-red-100 text-red-700',
-  president: 'bg-purple-100 text-purple-700',
-  vpi: 'bg-indigo-100 text-indigo-700',
-  vpx: 'bg-indigo-100 text-indigo-700',
-  treasurer: 'bg-amber-100 text-amber-700',
-  secretary: 'bg-pink-100 text-pink-700',
-  junior_active: 'bg-teal-100 text-teal-700',
-  active: 'bg-green-100 text-green-700',
-  alumni: 'bg-blue-100 text-blue-700',
-  inactive: 'bg-gray-100 text-gray-500',
+  admin: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  president: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  vpi: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  vpx: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  treasurer: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  secretary: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  junior_active: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  alumni: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  inactive: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500',
 };
+
+export const CHAIR_LABELS: Record<string, string> = {
+  recruitment: 'Recruitment Chair',
+  alumni: 'Alumni Chair',
+  social: 'Social Chair',
+  social_media: 'Social Media Chair',
+  brotherhood: 'Brotherhood Chair',
+};
+
+export const CHAIR_COLORS: Record<string, string> = {
+  recruitment: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  alumni: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  social: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  social_media: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+  brotherhood: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+};
+
+// Pages that chairs can access (beyond the shared pages everyone gets)
+export const CHAIR_PAGE_ACCESS: Record<string, string[]> = {
+  recruitment: ['/dashboard/recruitment'],
+  alumni: ['/dashboard/alumni'],
+  social: ['/dashboard/events'],
+  social_media: ['/dashboard/analytics'],
+  brotherhood: ['/dashboard/points'],
+};
+
+// Pages every authenticated member can access
+const SHARED_PAGES = [
+  '/dashboard',
+  '/dashboard/calendar',
+  '/dashboard/wiki',
+  '/dashboard/blog',
+  '/dashboard/files',
+  '/dashboard/settings',
+];
+
+// Pages only exec can access
+const EXEC_PAGES = [
+  '/dashboard/members',
+  '/dashboard/finance',
+  '/dashboard/meetings',
+  '/dashboard/submissions',
+  '/dashboard/partners',
+  '/dashboard/announcements',
+  '/dashboard/attendance',
+];
 
 export function isExecRole(role: string): boolean {
   return EXEC_ROLES.includes(role as Role);
+}
+
+export function isChairHolder(chairPosition: string | null | undefined): boolean {
+  return !!chairPosition && chairPosition in CHAIR_PAGE_ACCESS;
+}
+
+export function canAccessPage(role: string, chairPosition: string | null | undefined, page: string): boolean {
+  // Shared pages — everyone can access
+  if (SHARED_PAGES.some(p => page === p || (p !== '/dashboard' && page.startsWith(p + '/')))) {
+    return true;
+  }
+
+  // Exec can access everything
+  if (isExecRole(role)) return true;
+
+  // Check chair position access
+  if (chairPosition && CHAIR_PAGE_ACCESS[chairPosition]) {
+    const allowed = CHAIR_PAGE_ACCESS[chairPosition];
+    if (allowed.some(p => page === p || page.startsWith(p + '/'))) {
+      return true;
+    }
+  }
+
+  // Check exec-only pages
+  if (EXEC_PAGES.some(p => page === p || page.startsWith(p + '/'))) {
+    return false;
+  }
+
+  // Default allow for any unrecognized pages (new blog post, etc.)
+  return true;
 }

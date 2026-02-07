@@ -8,10 +8,10 @@ import { useAuth } from './AuthProvider';
 import { isExecRole, ROLE_LABELS, type Role } from '@/lib/roles';
 import {
   Home, DollarSign, Users, Calendar, Star,
-  FileText, Building2, FolderOpen, Mail, BarChart3,
-  Settings, Megaphone, Image as ImageIcon,
-  BookOpen, Handshake, ChevronLeft, ChevronDown, Info,
-  LogOut, CalendarDays,
+  FileText, FolderOpen, Mail, BarChart3,
+  Settings, UserPlus, BookOpen, Handshake,
+  ChevronLeft, ChevronDown, Info, LogOut,
+  GraduationCap, PartyPopper, Camera, HeartHandshake,
 } from 'lucide-react';
 
 const EXEC = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
@@ -21,6 +21,7 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   roles?: string[];
+  chairPositions?: string[];
 }
 
 interface NavGroup {
@@ -39,34 +40,32 @@ const navGroups: NavGroup[] = [
     title: 'Executive Board',
     items: [
       { label: 'Members', href: '/dashboard/members', icon: <Users size={18} />, roles: EXEC },
-      { label: 'Finance', href: '/dashboard/finance', icon: <DollarSign size={18} />, roles: EXEC },
+      { label: 'Finance & Sponsors', href: '/dashboard/finance', icon: <DollarSign size={18} />, roles: EXEC },
       { label: 'Meetings', href: '/dashboard/meetings', icon: <FileText size={18} />, roles: EXEC },
-      { label: 'Submissions', href: '/dashboard/submissions', icon: <Mail size={18} />, roles: EXEC },
-      { label: 'Analytics', href: '/dashboard/analytics', icon: <BarChart3 size={18} />, roles: EXEC },
+      { label: 'Inquiries', href: '/dashboard/submissions', icon: <Mail size={18} />, roles: EXEC },
     ],
   },
   {
-    title: 'Brotherhood',
+    title: 'Chairs',
     items: [
-      { label: 'Events', href: '/dashboard/events', icon: <Calendar size={18} /> },
-      { label: 'Points', href: '/dashboard/points', icon: <Star size={18} /> },
-      { label: 'Greek Orgs', href: '/dashboard/greek-orgs', icon: <Building2 size={18} />, roles: EXEC },
+      { label: 'Recruitment', href: '/dashboard/recruitment', icon: <UserPlus size={18} />, roles: EXEC, chairPositions: ['recruitment'] },
+      { label: 'Alumni Relations', href: '/dashboard/alumni', icon: <GraduationCap size={18} />, roles: EXEC, chairPositions: ['alumni'] },
+      { label: 'Events & Socials', href: '/dashboard/events', icon: <PartyPopper size={18} />, roles: EXEC, chairPositions: ['social'] },
+      { label: 'Social Media', href: '/dashboard/analytics', icon: <Camera size={18} />, roles: EXEC, chairPositions: ['social_media'] },
+      { label: 'Brotherhood', href: '/dashboard/points', icon: <HeartHandshake size={18} />, roles: EXEC, chairPositions: ['brotherhood'] },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      { label: 'Events', href: '/dashboard/calendar', icon: <Calendar size={18} /> },
       { label: 'Wiki', href: '/dashboard/wiki', icon: <BookOpen size={18} /> },
-      { label: 'Calendar', href: '/dashboard/calendar', icon: <CalendarDays size={18} /> },
-    ],
-  },
-  {
-    title: 'External',
-    items: [
-      { label: 'Content', href: '/dashboard/blog', icon: <Megaphone size={18} /> },
-      { label: 'Partners', href: '/dashboard/partners', icon: <Handshake size={18} />, roles: EXEC },
-      { label: 'Media', href: '/dashboard/media', icon: <ImageIcon size={18} /> },
-      { label: 'Documents', href: '/dashboard/documents', icon: <FolderOpen size={18} /> },
+      { label: 'Blog', href: '/dashboard/blog', icon: <BarChart3 size={18} /> },
+      { label: 'Files', href: '/dashboard/files', icon: <FolderOpen size={18} /> },
     ],
   },
 ];
 
-// Changelog modal content
 function ChangelogModal({ onClose }: { onClose: () => void }) {
   const [commits, setCommits] = useState<{ sha: string; message: string; author: string; date: string; url: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,27 +80,27 @@ function ChangelogModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[70vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-medium text-gray-900">Changelog</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+      <div className="bg-dash-card rounded-xl shadow-xl max-w-lg w-full max-h-[70vh] overflow-hidden border border-dash-border" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-dash-border">
+          <h2 className="text-sm font-medium text-dash-text">Changelog</h2>
+          <button onClick={onClose} className="text-dash-text-muted hover:text-dash-text transition-colors">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
         </div>
         <div className="overflow-y-auto max-h-[55vh] p-5">
           {loading ? (
-            <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" /></div>
+            <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" /></div>
           ) : commits.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">No recent changes.</p>
+            <p className="text-sm text-dash-text-muted text-center py-8">No recent changes.</p>
           ) : (
             <div className="space-y-3">
               {commits.slice(0, 20).map((c, i) => (
                 <div key={i} className="flex gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-dash-text-muted mt-1.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-900 break-words">{(c.message as string)?.split('\n')[0]}</p>
-                    <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
-                      <code className="bg-gray-100 px-1 py-0.5 rounded">{c.sha}</code>
+                    <p className="text-xs text-dash-text break-words">{(c.message as string)?.split('\n')[0]}</p>
+                    <div className="flex items-center gap-2 text-[10px] text-dash-text-muted mt-0.5">
+                      <code className="bg-dash-badge-bg px-1 py-0.5 rounded">{c.sha}</code>
                       <span>{new Date(c.date).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -122,7 +121,6 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [showChangelog, setShowChangelog] = useState(false);
 
-  // Load collapsed state from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem('sidebar-collapsed');
@@ -132,7 +130,6 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
     } catch {}
   }, []);
 
-  // Persist collapsed state
   useEffect(() => {
     try { localStorage.setItem('sidebar-collapsed', String(collapsed)); } catch {}
   }, [collapsed]);
@@ -141,7 +138,6 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
     try { localStorage.setItem('sidebar-groups', JSON.stringify(collapsedGroups)); } catch {}
   }, [collapsedGroups]);
 
-  // Broadcast collapse state to other components
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('sidebar-collapse', { detail: collapsed }));
   }, [collapsed]);
@@ -155,20 +151,28 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
     setCollapsedGroups(prev => ({ ...prev, [title]: !prev[title] }));
   };
 
+  const canSeeItem = (item: NavItem): boolean => {
+    if (!member) return false;
+    if (!item.roles && !item.chairPositions) return true;
+    if (isExecRole(member.role)) return true;
+    if (item.chairPositions && member.chair_position) {
+      if (item.chairPositions.includes(member.chair_position)) return true;
+    }
+    if (item.roles && !item.chairPositions && item.roles.includes(member.role)) return true;
+    return false;
+  };
+
   const filteredGroups = navGroups
     .map(group => ({
       ...group,
-      items: group.items.filter(item => {
-        if (!item.roles) return true;
-        return member && item.roles.includes(member.role);
-      }),
+      items: group.items.filter(canSeeItem),
     }))
     .filter(group => group.items.length > 0);
 
   const sidebarContent = (isMobile: boolean) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className={`py-5 border-b border-gray-800 ${collapsed && !isMobile ? 'px-3' : 'px-5'}`}>
+      <div className={`py-5 border-b border-white/10 ${collapsed && !isMobile ? 'px-3' : 'px-5'}`}>
         <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
           <Image src="/images/omega-logo.jpg" alt="Logo" width={28} height={28} className="rounded-full shrink-0" />
           {(!collapsed || isMobile) && (
@@ -229,7 +233,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
       </nav>
 
       {/* Bottom section */}
-      <div className={`border-t border-gray-800 ${collapsed && !isMobile ? 'px-2 py-3' : 'px-4 py-4'}`}>
+      <div className={`mt-auto border-t border-white/10 ${collapsed && !isMobile ? 'px-2 py-3' : 'px-4 py-4'}`}>
         {/* Settings + Info */}
         <div className={`flex items-center mb-3 ${collapsed && !isMobile ? 'flex-col gap-2' : 'gap-2'}`}>
           <Link
@@ -283,7 +287,6 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
             <LogOut size={14} />
             {(!collapsed || isMobile) && 'Sign Out'}
           </button>
-          {/* Collapse toggle - desktop only */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -301,7 +304,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className={`hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-[#0e1012] z-40 transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'}`}>
+      <aside className={`hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-dash-sidebar z-40 transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'}`}>
         {sidebarContent(false)}
       </aside>
 
@@ -309,7 +312,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
       {mobileOpen && (
         <>
           <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
-          <aside className="fixed left-0 top-0 bottom-0 w-60 bg-[#0e1012] z-50 lg:hidden">
+          <aside className="fixed left-0 top-0 bottom-0 w-60 bg-dash-sidebar z-50 lg:hidden">
             {sidebarContent(true)}
           </aside>
         </>

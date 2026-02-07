@@ -13,7 +13,7 @@ const STATUS_COLORS: Record<string, string> = {
   partial: 'bg-yellow-100 text-yellow-700',
   unpaid: 'bg-red-100 text-red-700',
   waived: 'bg-blue-100 text-blue-700',
-  exempt: 'bg-gray-100 text-gray-500',
+  exempt: 'bg-dash-badge-bg text-dash-text-secondary',
 };
 
 export default function FinancePage() {
@@ -139,17 +139,17 @@ export default function FinancePage() {
   };
 
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
-  const inputClass = 'w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
+  const inputClass = 'w-full px-3 py-2.5 bg-dash-card border border-dash-border rounded-lg text-dash-text text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all';
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Finance</h1>
-          <p className="text-sm text-gray-500 mt-1">Dues tracking and payments</p>
+          <h1 className="text-xl font-semibold text-dash-text">Finance</h1>
+          <p className="text-sm text-dash-text-secondary mt-1">Dues tracking and payments</p>
         </div>
         <div className="flex items-center gap-3">
-          <select value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)} className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
+          <select value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)} className="px-3 py-2 bg-dash-card border border-dash-border rounded-lg text-sm">
             {semesters.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
           {canManage && (
@@ -169,33 +169,33 @@ export default function FinancePage() {
 
       {/* New Semester Form */}
       {showNewSemester && canManage && (
-        <form onSubmit={handleCreateSemester} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
-          <h2 className="text-sm font-medium text-gray-900">Create Semester</h2>
+        <form onSubmit={handleCreateSemester} className="bg-dash-card rounded-xl border border-dash-border p-6 mb-6 space-y-4">
+          <h2 className="text-sm font-medium text-dash-text">Create Semester</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Name</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Name</label>
               <input type="text" value={semesterForm.name} onChange={e => setSemesterForm({ ...semesterForm, name: e.target.value })} placeholder="Spring 2026" required className={inputClass} />
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Dues Amount ($)</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Dues Amount ($)</label>
               <input type="number" step="0.01" min="0" value={semesterForm.dues_amount} onChange={e => setSemesterForm({ ...semesterForm, dues_amount: e.target.value })} required className={inputClass} />
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Start Date</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Start Date</label>
               <input type="date" value={semesterForm.start_date} onChange={e => setSemesterForm({ ...semesterForm, start_date: e.target.value })} required className={inputClass} />
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">End Date</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">End Date</label>
               <input type="date" value={semesterForm.end_date} onChange={e => setSemesterForm({ ...semesterForm, end_date: e.target.value })} required className={inputClass} />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm text-gray-700">
+          <label className="flex items-center gap-2 text-sm text-dash-text">
             <input type="checkbox" checked={semesterForm.is_current} onChange={e => setSemesterForm({ ...semesterForm, is_current: e.target.checked })} />
             Set as current semester
           </label>
           <div className="flex gap-3">
             <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Create</button>
-            <button type="button" onClick={() => setShowNewSemester(false)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">Cancel</button>
+            <button type="button" onClick={() => setShowNewSemester(false)} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
           </div>
         </form>
       )}
@@ -203,21 +203,21 @@ export default function FinancePage() {
       {/* Stats Cards */}
       {isExec && stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Total Due</p>
-            <p className="text-lg font-semibold text-gray-900">{fmt(stats.total_due)}</p>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-4">
+            <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Total Due</p>
+            <p className="text-lg font-semibold text-dash-text">{fmt(stats.total_due)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Collected</p>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-4">
+            <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Collected</p>
             <p className="text-lg font-semibold text-green-600">{fmt(stats.total_paid)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Outstanding</p>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-4">
+            <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Outstanding</p>
             <p className="text-lg font-semibold text-red-600">{fmt(stats.total_due - stats.total_paid)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">% Paid</p>
-            <p className="text-lg font-semibold text-gray-900">{stats.total_records ? Math.round((stats.paid_count / stats.total_records) * 100) : 0}%</p>
+          <div className="bg-dash-card rounded-xl border border-dash-border p-4">
+            <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">% Paid</p>
+            <p className="text-lg font-semibold text-dash-text">{stats.total_records ? Math.round((stats.paid_count / stats.total_records) * 100) : 0}%</p>
           </div>
         </div>
       )}
@@ -225,7 +225,7 @@ export default function FinancePage() {
       {/* Bulk create button */}
       {canManage && selectedSemester && (
         <div className="mb-4">
-          <button onClick={handleBulkCreate} className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 hover:text-gray-700 transition-colors">
+          <button onClick={handleBulkCreate} className="text-[11px] uppercase tracking-[0.15em] font-semibold text-dash-text-secondary hover:text-dash-text transition-colors">
             + Create dues for all active members
           </button>
         </div>
@@ -234,14 +234,14 @@ export default function FinancePage() {
       {/* Payment modal */}
       {payingDuesId && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <form onSubmit={handlePayment} className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 space-y-4">
-            <h2 className="text-sm font-medium text-gray-900">Record Payment</h2>
+          <form onSubmit={handlePayment} className="bg-dash-card rounded-xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <h2 className="text-sm font-medium text-dash-text">Record Payment</h2>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Amount ($)</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Amount ($)</label>
               <input type="number" step="0.01" min="0.01" value={payForm.amount} onChange={e => setPayForm({ ...payForm, amount: e.target.value })} required className={inputClass} />
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Method</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Method</label>
               <select value={payForm.method} onChange={e => setPayForm({ ...payForm, method: e.target.value })} className={inputClass}>
                 <option value="venmo">Venmo</option>
                 <option value="zelle">Zelle</option>
@@ -251,12 +251,12 @@ export default function FinancePage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Notes</label>
+              <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Notes</label>
               <input type="text" value={payForm.notes} onChange={e => setPayForm({ ...payForm, notes: e.target.value })} className={inputClass} />
             </div>
             <div className="flex gap-3">
               <button type="submit" className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all">Record</button>
-              <button type="button" onClick={() => setPayingDuesId('')} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">Cancel</button>
+              <button type="button" onClick={() => setPayingDuesId('')} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-dash-border hover:border-gray-300 transition-all">Cancel</button>
             </div>
           </form>
         </div>
@@ -264,34 +264,34 @@ export default function FinancePage() {
 
       {/* Dues Table */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
           <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" />
         </div>
       ) : dues.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-sm text-gray-400">
+        <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center text-sm text-dash-text-muted">
           No dues records for this semester.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
           <table className="w-full min-w-[600px]">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Member</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Due</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Paid</th>
-                <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Status</th>
-                {canManage && <th className="text-right text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Actions</th>}
+              <tr className="border-b border-dash-border">
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Member</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Due</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Paid</th>
+                <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Status</th>
+                {canManage && <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {dues.map(d => (
-                <tr key={d.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="px-5 py-3 text-xs font-medium text-gray-900">{d.first_name} {d.last_name}</td>
-                  <td className="px-5 py-3 text-xs text-gray-700">{fmt(d.amount_due)}</td>
-                  <td className="px-5 py-3 text-xs text-gray-700">{fmt(d.amount_paid)}</td>
+                <tr key={d.id} className="border-b border-dash-border/50 hover:bg-dash-card-hover transition-colors">
+                  <td className="px-5 py-3 text-xs font-medium text-dash-text">{d.first_name} {d.last_name}</td>
+                  <td className="px-5 py-3 text-xs text-dash-text">{fmt(d.amount_due)}</td>
+                  <td className="px-5 py-3 text-xs text-dash-text">{fmt(d.amount_paid)}</td>
                   <td className="px-5 py-3">
                     {canManage ? (
-                      <select value={d.status} onChange={e => handleStatusChange(d.id, e.target.value)} className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase border-0 cursor-pointer ${STATUS_COLORS[d.status] || 'bg-gray-100 text-gray-500'}`}>
+                      <select value={d.status} onChange={e => handleStatusChange(d.id, e.target.value)} className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase border-0 cursor-pointer ${STATUS_COLORS[d.status] || 'bg-dash-badge-bg text-dash-text-secondary'}`}>
                         <option value="unpaid">Unpaid</option>
                         <option value="partial">Partial</option>
                         <option value="paid">Paid</option>
@@ -299,12 +299,12 @@ export default function FinancePage() {
                         <option value="exempt">Exempt</option>
                       </select>
                     ) : (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${STATUS_COLORS[d.status] || 'bg-gray-100 text-gray-500'}`}>{d.status}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${STATUS_COLORS[d.status] || 'bg-dash-badge-bg text-dash-text-secondary'}`}>{d.status}</span>
                     )}
                   </td>
                   {canManage && (
                     <td className="px-5 py-3 text-right">
-                      <button onClick={() => { setPayingDuesId(d.id); setPayForm({ amount: ((d.amount_due - d.amount_paid) / 100).toFixed(2), method: 'venmo', notes: '' }); }} className="text-xs text-gray-500 hover:text-gray-700 transition-colors">
+                      <button onClick={() => { setPayingDuesId(d.id); setPayForm({ amount: ((d.amount_due - d.amount_paid) / 100).toFixed(2), method: 'venmo', notes: '' }); }} className="text-xs text-dash-text-secondary hover:text-dash-text transition-colors">
                         Record Payment
                       </button>
                     </td>

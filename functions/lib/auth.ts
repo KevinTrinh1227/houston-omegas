@@ -1,4 +1,5 @@
-import type { Env, Member, Session, AuthenticatedContext } from '../types';
+import type { Env, Member, Session, AuthenticatedContext, ChairPosition } from '../types';
+import { EXEC_ROLES } from '../types';
 
 export function generateToken(): string {
   const bytes = new Uint8Array(32);
@@ -35,8 +36,8 @@ export async function authenticate(
   if (!token) return null;
 
   const row = await db.prepare(
-    `SELECT s.*, m.id as m_id, m.email, m.first_name, m.last_name, m.role,
-            m.phone, m.class_year, m.major, m.instagram, m.avatar_url,
+    `SELECT s.*, m.id as m_id, m.email, m.first_name, m.last_name, m.role, m.chair_position,
+            m.phone, m.class_year, m.major, m.instagram, m.discord_id, m.avatar_url,
             m.invited_by, m.is_active, m.has_completed_onboarding,
             m.created_at as m_created_at, m.updated_at as m_updated_at, m.last_login_at
      FROM sessions s
@@ -58,10 +59,12 @@ export async function authenticate(
     first_name: row.first_name as string,
     last_name: row.last_name as string,
     role: row.role as Member['role'],
+    chair_position: (row.chair_position as ChairPosition | null) ?? null,
     phone: row.phone as string | null,
     class_year: row.class_year as string | null,
     major: row.major as string | null,
     instagram: row.instagram as string | null,
+    discord_id: row.discord_id as string | null,
     avatar_url: row.avatar_url as string | null,
     invited_by: row.invited_by as string | null,
     is_active: row.is_active as number,
@@ -131,6 +134,39 @@ export async function logAudit(
     details ? JSON.stringify(details) : null,
     ipAddress
   ).run();
+}
+
+export async function requireChairOrExec(
+  request: Request,
+  db: D1Database,
+  allowedChairPositions: ChairPosition[]
+): Promise<{ auth: AuthenticatedContext; errorResponse?: never } | { auth?: never; errorResponse: Response }> {
+  const auth = await authenticate(request, db);
+  if (!auth) {
+    return {
+      errorResponse: new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    };
+  }
+
+  // Exec roles always have access
+  if (EXEC_ROLES.includes(auth.member.role)) {
+    return { auth };
+  }
+
+  // Check chair position
+  if (auth.member.chair_position && allowedChairPositions.includes(auth.member.chair_position)) {
+    return { auth };
+  }
+
+  return {
+    errorResponse: new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  };
 }
 
 export async function createOAuthSession(
