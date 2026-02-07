@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 interface Partner {
   id: string;
@@ -53,25 +54,28 @@ export default function PartnersPage() {
       .then(res => res.ok ? res.json() : null)
       .then((data: Partner[] | null) => {
         if (data && data.length > 0) {
-          setPartners(data.filter(p => p.is_current));
+          setPartners(data);
         }
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
   }, []);
 
-  // Group partners by tier
+  const currentPartners = partners.filter(p => p.is_current);
+  const pastPartners = partners.filter(p => !p.is_current);
+
+  // Group current partners by tier
   const groupedByTier = TIER_ORDER.map(tier => ({
     tier: tier.charAt(0).toUpperCase() + tier.slice(1),
     tierKey: tier,
-    partners: partners.filter(p => p.tier === tier),
+    partners: currentPartners.filter(p => p.tier === tier),
   })).filter(g => g.partners.length > 0);
 
   // Use fallback if no API data
   const showPartners = loaded && partners.length === 0 ? fallbackPartners : null;
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       <section className="pt-28 pb-20 px-6 sm:px-10 max-w-4xl mx-auto text-center">
@@ -179,6 +183,32 @@ export default function PartnersPage() {
         )}
       </section>
 
+      {/* Past Partners */}
+      {pastPartners.length > 0 && (
+        <>
+          <div className="h-px bg-gray-200 mx-10" />
+          <section className="py-20 px-6 sm:px-10 max-w-4xl mx-auto">
+            <h2 className="text-center text-2xl sm:text-3xl text-gray-900 mb-12 tracking-[0.06em]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              Past Partners
+            </h2>
+            <div className="flex items-center justify-center gap-10 flex-wrap opacity-60">
+              {pastPartners.map((p) => (
+                <Link key={p.id} href={`/partners/profile?slug=${p.slug}`} className="flex flex-col items-center gap-3 group">
+                  {p.logo_url ? (
+                    <Image src={p.logo_url} alt={p.name} width={64} height={64} className="w-16 h-16 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-bold">
+                      {p.name[0]}
+                    </div>
+                  )}
+                  <span className="text-gray-400 text-xs group-hover:text-gray-700 transition-colors">{p.name}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
       <div className="h-px bg-gray-200 mx-10" />
 
       <section className="py-20 px-6 sm:px-10 max-w-2xl mx-auto text-center">
@@ -192,6 +222,6 @@ export default function PartnersPage() {
       </section>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }

@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 interface BlogPost {
   id: number;
@@ -43,31 +44,31 @@ function BlogPostInner() {
 
   if (loading) {
     return (
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 flex items-center justify-center min-h-[70vh]">
           <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     );
   }
 
   if (notFound || !post) {
     return (
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <section className="pt-28 pb-20 px-6 text-center min-h-[70vh] flex flex-col items-center justify-center">
           <h1 className="text-2xl text-gray-900 mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Post Not Found</h1>
           <Link href="/blog" className="text-gray-500 text-xs hover:underline">Back to Blog</Link>
         </section>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       <article className="pt-28 pb-20 px-6 sm:px-10 max-w-3xl mx-auto">
@@ -109,20 +110,20 @@ function BlogPostInner() {
       </article>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }
 
 export default function BlogPostPage() {
   return (
     <Suspense fallback={
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 flex items-center justify-center min-h-[70vh]">
           <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     }>
       <BlogPostInner />
     </Suspense>

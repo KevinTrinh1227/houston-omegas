@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 export const metadata: Metadata = {
   title: 'Merch',
@@ -38,7 +39,7 @@ const merchFaqs = [
 
 export default function MerchPage() {
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       {/* Hero */}
@@ -153,6 +154,6 @@ export default function MerchPage() {
       </section>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }

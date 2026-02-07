@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 function useCountdown(targetTime: number) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -100,7 +101,7 @@ export default function RecruitmentPage() {
   const selectClass = 'w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors appearance-none';
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       {/* Hero */}
@@ -345,6 +346,6 @@ export default function RecruitmentPage() {
       </section>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }

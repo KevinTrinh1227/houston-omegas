@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 const galleryImages = [
   { src: '/images/gallery-5.jpg', alt: 'Brotherhood', category: 'brotherhood' },
@@ -25,7 +26,7 @@ export default function MediaPage() {
   const filtered = filter === 'all' ? galleryImages : galleryImages.filter(img => img.category === filter);
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       {/* Hero */}
@@ -126,6 +127,6 @@ export default function MediaPage() {
       )}
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }

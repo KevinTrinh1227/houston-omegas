@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SchemaMarkup from '@/components/SchemaMarkup';
+import PageWrapper from '@/components/PageWrapper';
 
 export const metadata: Metadata = {
   title: 'Rent Omega Mansion | Event Venue in Houston, TX',
@@ -59,7 +60,7 @@ const galleryImages = [
 
 export default function RentPage() {
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <SchemaMarkup />
       <Navbar variant="light" />
 
@@ -244,6 +245,6 @@ export default function RentPage() {
       </section>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }

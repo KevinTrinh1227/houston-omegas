@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 import { Instagram, Youtube, Facebook, Twitter, Globe, Mail, Phone, ArrowLeft } from 'lucide-react';
 
 interface Partner {
@@ -79,7 +80,7 @@ function PartnerProfileContent() {
 
   if (loading) {
     return (
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 px-6 sm:px-10 max-w-3xl mx-auto">
           <div className="animate-pulse space-y-6">
@@ -94,25 +95,25 @@ function PartnerProfileContent() {
           </div>
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     );
   }
 
   if (notFound || !partner) {
     return (
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 px-6 sm:px-10 max-w-3xl mx-auto text-center">
           <p className="text-gray-400 text-lg mb-4">Partner not found</p>
           <Link href="/partners" className="text-gray-600 text-sm hover:underline">Back to Partners</Link>
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       <div className="pt-28 pb-20 px-6 sm:px-10 max-w-3xl mx-auto">
@@ -198,14 +199,14 @@ function PartnerProfileContent() {
       </div>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }
 
 export default function PartnerProfilePage() {
   return (
     <Suspense fallback={
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 px-6 sm:px-10 max-w-3xl mx-auto">
           <div className="animate-pulse space-y-6">
@@ -217,7 +218,7 @@ export default function PartnerProfilePage() {
           </div>
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     }>
       <PartnerProfileContent />
     </Suspense>

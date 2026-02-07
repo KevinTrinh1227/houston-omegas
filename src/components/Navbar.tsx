@@ -73,10 +73,14 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
             <span className={`${nameColor} ${nameHover} text-xs sm:text-sm uppercase tracking-[0.04em] font-bold transition-colors`} style={{ fontFamily: 'var(--font-cinzel), serif' }}>Houston Omegas</span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-7">
-            {mainLinks.map((l) => (
-              <Link key={l.label} href={l.href} className={`${textColor} text-xs uppercase tracking-[0.12em] font-semibold transition-colors duration-300`}>{l.label}</Link>
+          <div className="hidden lg:flex items-center gap-5">
+            {mainLinks.map((l, i) => (
+              <span key={l.label} className="flex items-center gap-5">
+                {i > 0 && <span className={`w-px h-3 ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />}
+                <Link href={l.href} className={`${textColor} text-xs uppercase tracking-[0.12em] font-semibold transition-colors duration-300`}>{l.label}</Link>
+              </span>
             ))}
+            <span className={`w-px h-3 ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />
             <div
               ref={moreRef}
               className="relative"

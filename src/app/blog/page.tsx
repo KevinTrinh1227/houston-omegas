@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 interface BlogPost {
   id: number;
@@ -38,7 +39,7 @@ export default function BlogPage() {
   const totalPages = Math.ceil(total / 12);
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       <section className="pt-28 pb-20 px-6 sm:px-10 max-w-5xl mx-auto min-h-[70vh]">
@@ -122,6 +123,6 @@ export default function BlogPage() {
       </section>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }

@@ -56,12 +56,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.redirect(`${loginUrl}?error=no_email`, 302);
   }
 
-  // Check if member exists and is active
+  // Check if member exists (active or pending)
   const member = await context.env.DB.prepare(
-    'SELECT id, is_active, avatar_url FROM members WHERE email = ? AND is_active = 1'
+    'SELECT id, is_active, avatar_url, status FROM members WHERE email = ?'
   ).bind(email).first();
 
   if (!member) {
+    return Response.redirect(`${loginUrl}?error=not_registered`, 302);
+  }
+
+  // Activate pending members on first login
+  if (member.status === 'pending' || (member.is_active !== 1 && member.status === 'pending')) {
+    await context.env.DB.prepare(
+      `UPDATE members SET status = 'active', is_active = 1, updated_at = datetime('now') WHERE id = ?`
+    ).bind(member.id).run();
+  } else if (member.is_active !== 1) {
     return Response.redirect(`${loginUrl}?error=not_registered`, 302);
   }
 

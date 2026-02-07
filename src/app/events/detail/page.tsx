@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 import { Calendar, MapPin, Clock, Ticket, ArrowLeft, ExternalLink, ShieldCheck, Users, Car, Phone, ChevronDown } from 'lucide-react';
 
 interface EventDetail {
@@ -128,7 +129,7 @@ function EventDetailContent() {
 
   if (loading) {
     return (
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 px-6 sm:px-10 max-w-4xl mx-auto">
           <div className="animate-pulse space-y-6">
@@ -139,25 +140,25 @@ function EventDetailContent() {
           </div>
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     );
   }
 
   if (notFound || !event) {
     return (
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 px-6 sm:px-10 max-w-3xl mx-auto text-center">
           <p className="text-gray-400 text-lg mb-4">Event not found</p>
           <Link href="/events" className="text-gray-600 text-sm hover:underline">Back to Events</Link>
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       <div className="pt-28 pb-20 px-6 sm:px-10 max-w-4xl mx-auto">
@@ -398,14 +399,14 @@ function EventDetailContent() {
           url: event.ticket_url || undefined,
         } : undefined,
       })}} />
-    </div>
+    </PageWrapper>
   );
 }
 
 export default function EventDetailPage() {
   return (
     <Suspense fallback={
-      <div className="relative bg-white text-gray-900 min-h-screen">
+      <PageWrapper>
         <Navbar variant="light" />
         <div className="pt-28 pb-20 px-6 sm:px-10 max-w-4xl mx-auto">
           <div className="animate-pulse space-y-6">
@@ -414,7 +415,7 @@ export default function EventDetailPage() {
           </div>
         </div>
         <Footer variant="light" />
-      </div>
+      </PageWrapper>
     }>
       <EventDetailContent />
     </Suspense>

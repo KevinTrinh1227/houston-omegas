@@ -155,8 +155,30 @@ export default function EventsPage() {
     );
   }
 
+  // Attendance stats
+  const [attendanceTab, setAttendanceTab] = useState<'events' | 'attendance'>('events');
+  const [attStats, setAttStats] = useState<{ id: string; first_name: string; last_name: string; present_count: number; late_count: number; excused_count: number; absent_count: number; attendance_pct: number | null }[]>([]);
+  const [attLoading, setAttLoading] = useState(false);
+
+  const fetchAttStats = useCallback(async () => {
+    if (!selectedSemester) return;
+    setAttLoading(true);
+    const res = await fetch(`/api/attendance/stats?semester_id=${selectedSemester}`, { credentials: 'include' });
+    if (res.ok) setAttStats(await res.json());
+    setAttLoading(false);
+  }, [selectedSemester]);
+
+  useEffect(() => { if (attendanceTab === 'attendance') fetchAttStats(); }, [attendanceTab, fetchAttStats]);
+
+  const pctColor = (pct: number | null) => {
+    if (pct === null) return 'text-gray-400';
+    if (pct >= 80) return 'text-green-600';
+    if (pct >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
   return (
-    <div>
+    <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Events</h1>
@@ -170,9 +192,51 @@ export default function EventsPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      {isExec && (
+        <div className="flex gap-2 mb-6">
+          <button onClick={() => setAttendanceTab('events')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'events' ? 'bg-gray-900 text-white' : 'text-gray-500 border border-gray-200 hover:border-gray-300'}`}>Events</button>
+          <button onClick={() => setAttendanceTab('attendance')} className={`text-[11px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg transition-all ${attendanceTab === 'attendance' ? 'bg-gray-900 text-white' : 'text-gray-500 border border-gray-200 hover:border-gray-300'}`}>Attendance Stats</button>
+        </div>
+      )}
+
       {message && <div className="mb-4 p-3 rounded-lg text-xs text-center bg-green-50 text-green-600 border border-green-200">{message}</div>}
 
-      {showNew && isExec && (
+      {/* Attendance Stats Tab */}
+      {attendanceTab === 'attendance' && isExec && (
+        attLoading ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left text-[10px] text-gray-400 uppercase tracking-wider font-medium px-5 py-3">Member</th>
+                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Present</th>
+                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Late</th>
+                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Excused</th>
+                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">Absent</th>
+                  <th className="text-center text-[10px] text-gray-400 uppercase tracking-wider font-medium px-3 py-3">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attStats.map(s => (
+                  <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="px-5 py-3 text-xs font-medium text-gray-900">{s.first_name} {s.last_name}</td>
+                    <td className="px-3 py-3 text-xs text-center text-green-600">{s.present_count}</td>
+                    <td className="px-3 py-3 text-xs text-center text-yellow-600">{s.late_count}</td>
+                    <td className="px-3 py-3 text-xs text-center text-blue-600">{s.excused_count}</td>
+                    <td className="px-3 py-3 text-xs text-center text-red-600">{s.absent_count}</td>
+                    <td className={`px-3 py-3 text-xs text-center font-semibold ${pctColor(s.attendance_pct)}`}>{s.attendance_pct !== null ? `${s.attendance_pct}%` : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+
+      {attendanceTab === 'events' && showNew && isExec && (
         <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
           <h2 className="text-sm font-medium text-gray-900">Create Event</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -221,30 +285,32 @@ export default function EventsPage() {
         </form>
       )}
 
-      {loading ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
-      ) : events.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-sm text-gray-400">No events yet.</div>
-      ) : (
-        <div className="space-y-3">
-          {events.map(ev => (
-            <a key={ev.id} href={`/dashboard/events?id=${ev.id}`} className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 transition-colors">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">{ev.title}</h3>
-                  <div className="flex gap-2 mt-1">
-                    <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full uppercase">{TYPE_LABELS[ev.event_type]}</span>
-                    {ev.is_mandatory ? <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Mandatory</span> : null}
+      {attendanceTab === 'events' && (
+        loading ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto" /></div>
+        ) : events.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-sm text-gray-400">No events yet.</div>
+        ) : (
+          <div className="space-y-3">
+            {events.map(ev => (
+              <a key={ev.id} href={`/dashboard/events?id=${ev.id}`} className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">{ev.title}</h3>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full uppercase">{TYPE_LABELS[ev.event_type]}</span>
+                      {ev.is_mandatory ? <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Mandatory</span> : null}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-400 text-right">
+                    <p>{new Date(ev.start_time).toLocaleDateString()}</p>
+                    {ev.location && <p className="mt-0.5">{ev.location}</p>}
                   </div>
                 </div>
-                <div className="text-xs text-gray-400 text-right">
-                  <p>{new Date(ev.start_time).toLocaleDateString()}</p>
-                  {ev.location && <p className="mt-0.5">{ev.location}</p>}
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
+              </a>
+            ))}
+          </div>
+        )
       )}
     </div>
   );

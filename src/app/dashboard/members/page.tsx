@@ -26,8 +26,10 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', first_name: '', last_name: '', role: 'active' });
+  const [createForm, setCreateForm] = useState({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '' });
   const [message, setMessage] = useState('');
 
   const fetchMembers = useCallback(async () => {
@@ -81,6 +83,28 @@ export default function MembersPage() {
     } catch { /* */ }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/members/create', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify(createForm),
+      });
+      if (res.ok) {
+        setCreateForm({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '' });
+        setShowCreate(false);
+        setMessage('Profile created (pending). Member can now log in to activate.');
+        fetchMembers();
+      } else {
+        const data = await res.json();
+        setMessage(data.error || 'Failed to create profile.');
+      }
+    } catch { setMessage('Connection error.'); }
+    finally { setSaving(false); }
+  };
+
   const handleDeactivate = async (id: string, name: string) => {
     if (!confirm(`Deactivate ${name}? They will be logged out immediately.`)) return;
     try {
@@ -100,10 +124,15 @@ export default function MembersPage() {
           <h1 className="text-xl font-semibold text-gray-900">Members</h1>
           <p className="text-sm text-gray-500 mt-1">{members.length} total member{members.length !== 1 ? 's' : ''}</p>
         </div>
-        {isExec && !showInvite && (
-          <button onClick={() => setShowInvite(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">
-            Invite Member
-          </button>
+        {isExec && !showInvite && !showCreate && (
+          <div className="flex gap-2">
+            <button onClick={() => setShowCreate(true)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">
+              Create Profile
+            </button>
+            <button onClick={() => setShowInvite(true)} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-all">
+              Invite Member
+            </button>
+          </div>
         )}
       </div>
 
@@ -155,6 +184,43 @@ export default function MembersPage() {
         </form>
       )}
 
+      {/* Create Profile form */}
+      {showCreate && isExec && (
+        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-6 mb-6 space-y-4">
+          <h2 className="text-sm font-medium text-gray-900">Create Member Profile</h2>
+          <p className="text-[10px] text-gray-400">Creates a pending profile. The member will activate when they first log in.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">First Name</label><input type="text" value={createForm.first_name} onChange={e => setCreateForm({ ...createForm, first_name: e.target.value })} required className={inputClass} /></div>
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Last Name</label><input type="text" value={createForm.last_name} onChange={e => setCreateForm({ ...createForm, last_name: e.target.value })} required className={inputClass} /></div>
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Role</label>
+              <select value={createForm.role} onChange={e => setCreateForm({ ...createForm, role: e.target.value })} className={inputClass}>
+                <option value="active">Active</option>
+                <option value="junior_active">J.A.</option>
+                <option value="president">President</option>
+                <option value="vpi">VP Internal</option>
+                <option value="vpx">VP External</option>
+                <option value="treasurer">Treasurer</option>
+                <option value="secretary">Secretary</option>
+                <option value="alumni">Alumni</option>
+              </select>
+            </div>
+          </div>
+          <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Email</label><input type="email" value={createForm.email} onChange={e => setCreateForm({ ...createForm, email: e.target.value })} required className={inputClass} /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Class Year</label><input type="text" value={createForm.class_year} onChange={e => setCreateForm({ ...createForm, class_year: e.target.value })} placeholder="e.g. 2026" className={inputClass} /></div>
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Major</label><input type="text" value={createForm.major} onChange={e => setCreateForm({ ...createForm, major: e.target.value })} className={inputClass} /></div>
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Phone</label><input type="text" value={createForm.phone} onChange={e => setCreateForm({ ...createForm, phone: e.target.value })} className={inputClass} /></div>
+            <div><label className="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Instagram</label><input type="text" value={createForm.instagram} onChange={e => setCreateForm({ ...createForm, instagram: e.target.value })} placeholder="@handle" className={inputClass} /></div>
+          </div>
+          <div className="flex gap-3">
+            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50">
+              {saving ? 'Creating...' : 'Create Profile'}
+            </button>
+            <button type="button" onClick={() => setShowCreate(false)} className="text-gray-500 text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-2.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">Cancel</button>
+          </div>
+        </form>
+      )}
+
       {/* Member list */}
       {loading ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
@@ -185,6 +251,9 @@ export default function MembersPage() {
                         </div>
                       )}
                       <span className="text-xs font-medium text-gray-900">{m.first_name} {m.last_name}</span>
+                      {(m as Member & { status?: string }).status === 'pending' && (
+                        <span className="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full uppercase font-medium">Pending</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-5 py-3 text-xs text-gray-500">{m.email}</td>

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 import { Calendar, MapPin, Clock, Ticket } from 'lucide-react';
 
 interface PublicEvent {
@@ -60,7 +61,7 @@ export default function EventsPage() {
   const past = filtered.filter(e => isPast(e.start_time));
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       {/* Hero */}
@@ -208,6 +209,6 @@ export default function EventsPage() {
           numberOfItems: events.length,
         },
       })}} />
-    </div>
+    </PageWrapper>
   );
 }

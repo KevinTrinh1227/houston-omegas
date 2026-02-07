@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageWrapper from '@/components/PageWrapper';
 
 const subjects = ['General Inquiry', 'Event Booking', 'Sponsorship', 'Recruitment', 'Media / Press', 'Other'];
 
@@ -38,7 +39,7 @@ export default function ContactPage() {
   const inputClass = 'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all text-sm';
 
   return (
-    <div className="relative bg-white text-gray-900 min-h-screen">
+    <PageWrapper>
       <Navbar variant="light" />
 
       <section className="pt-28 pb-20 px-6 sm:px-10 max-w-2xl mx-auto">
@@ -94,6 +95,6 @@ export default function ContactPage() {
       </section>
 
       <Footer variant="light" />
-    </div>
+    </PageWrapper>
   );
 }
