@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isExecRole, ROLE_LABELS, ROLE_COLORS, type Role } from '@/lib/roles';
 
@@ -19,6 +19,83 @@ interface Member {
   is_active: number;
   created_at: string;
   last_login_at: string | null;
+}
+
+function ActionsMenu({ member, currentMemberId, onAction }: {
+  member: Member;
+  currentMemberId: string;
+  onAction: (action: string, member: Member) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  if (member.id === currentMemberId) return null;
+
+  const neverLoggedIn = !member.last_login_at;
+  const isActive = member.is_active === 1;
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="p-1.5 rounded-md hover:bg-dash-card-hover text-dash-text-muted hover:text-dash-text transition-colors"
+      >
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="3" r="1.5" />
+          <circle cx="8" cy="8" r="1.5" />
+          <circle cx="8" cy="13" r="1.5" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-dash-card border border-dash-border rounded-lg shadow-lg z-50 min-w-[160px] py-1">
+          {neverLoggedIn && (
+            <button
+              onClick={() => { setOpen(false); onAction('resend', member); }}
+              className="w-full text-left px-3 py-2 text-xs text-dash-text hover:bg-dash-card-hover transition-colors flex items-center gap-2"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+              Resend Invite
+            </button>
+          )}
+          {isActive && (
+            <button
+              onClick={() => { setOpen(false); onAction('deactivate', member); }}
+              className="w-full text-left px-3 py-2 text-xs text-yellow-600 dark:text-yellow-400 hover:bg-dash-card-hover transition-colors flex items-center gap-2"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              Deactivate
+            </button>
+          )}
+          {!isActive && (
+            <button
+              onClick={() => { setOpen(false); onAction('reactivate', member); }}
+              className="w-full text-left px-3 py-2 text-xs text-green-600 dark:text-green-400 hover:bg-dash-card-hover transition-colors flex items-center gap-2"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Reactivate
+            </button>
+          )}
+          {neverLoggedIn && (
+            <button
+              onClick={() => { setOpen(false); onAction('remove', member); }}
+              className="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-dash-card-hover transition-colors flex items-center gap-2"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              Remove
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function MembersPage() {
@@ -43,6 +120,11 @@ export default function MembersPage() {
 
   useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
+  const showMsg = (text: string) => {
+    setMessage(text);
+    setTimeout(() => setMessage(''), 4000);
+  };
+
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -57,16 +139,24 @@ export default function MembersPage() {
       });
 
       if (res.ok) {
+        const newMember = await res.json();
+        // Auto-send invite email
+        await fetch('/api/members/send-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ member_id: newMember.id }),
+        });
         setInviteForm({ email: '', first_name: '', last_name: '', role: 'active' });
         setShowInvite(false);
-        setMessage('Member invited successfully.');
+        showMsg('Member invited and email sent successfully.');
         fetchMembers();
       } else {
         const data = await res.json();
-        setMessage(data.error || 'Failed to invite member.');
+        showMsg(data.error || 'Failed to invite member.');
       }
     } catch {
-      setMessage('Connection error.');
+      showMsg('Connection error.');
     } finally {
       setSaving(false);
     }
@@ -96,22 +186,72 @@ export default function MembersPage() {
       if (res.ok) {
         setCreateForm({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '', discord_id: '' });
         setShowCreate(false);
-        setMessage('Profile created (pending). Member can now log in to activate.');
+        showMsg('Profile created (pending). Member can now log in to activate.');
         fetchMembers();
       } else {
         const data = await res.json();
-        setMessage(data.error || 'Failed to create profile.');
+        showMsg(data.error || 'Failed to create profile.');
       }
-    } catch { setMessage('Connection error.'); }
+    } catch { showMsg('Connection error.'); }
     finally { setSaving(false); }
   };
 
-  const handleDeactivate = async (id: string, name: string) => {
-    if (!confirm(`Deactivate ${name}? They will be logged out immediately.`)) return;
-    try {
-      await fetch(`/api/members/${id}`, { method: 'DELETE', credentials: 'include' });
-      fetchMembers();
-    } catch { /* */ }
+  const handleAction = async (action: string, member: Member) => {
+    const name = `${member.first_name} ${member.last_name}`;
+
+    if (action === 'resend') {
+      try {
+        const res = await fetch('/api/members/send-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ member_id: member.id }),
+        });
+        if (res.ok) {
+          showMsg(`Invite email resent to ${member.email}.`);
+        } else {
+          const data = await res.json();
+          showMsg(data.error || 'Failed to resend invite.');
+        }
+      } catch { showMsg('Connection error.'); }
+    }
+
+    if (action === 'deactivate') {
+      if (!confirm(`Deactivate ${name}? They will be logged out immediately.`)) return;
+      try {
+        await fetch(`/api/members/${member.id}`, { method: 'DELETE', credentials: 'include' });
+        showMsg(`${name} has been deactivated.`);
+        fetchMembers();
+      } catch { showMsg('Failed to deactivate.'); }
+    }
+
+    if (action === 'reactivate') {
+      if (!confirm(`Reactivate ${name}? They will be able to log in again.`)) return;
+      try {
+        await fetch(`/api/members/${member.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ is_active: true, role: 'active' }),
+        });
+        showMsg(`${name} has been reactivated.`);
+        fetchMembers();
+      } catch { showMsg('Failed to reactivate.'); }
+    }
+
+    if (action === 'remove') {
+      if (!confirm(`Permanently remove ${name}? This cannot be undone.`)) return;
+      try {
+        const res = await fetch(`/api/members/${member.id}?permanent=true`, { method: 'DELETE', credentials: 'include' });
+        if (res.ok) {
+          showMsg(`${name} has been removed.`);
+          fetchMembers();
+        } else {
+          const data = await res.json();
+          showMsg(data.error || 'Failed to remove member.');
+        }
+      } catch { showMsg('Connection error.'); }
+    }
   };
 
   const roleColor = ROLE_COLORS;
@@ -138,7 +278,7 @@ export default function MembersPage() {
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'}`}>
+        <div className={`mb-4 p-3 rounded-lg text-xs text-center ${message.includes('success') || message.includes('sent') || message.includes('reactivated') || message.includes('removed') || message.includes('deactivated') ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'}`}>
           {message}
         </div>
       )}
@@ -237,7 +377,7 @@ export default function MembersPage() {
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Email</th>
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Role</th>
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Last Login</th>
-                {isExec && <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Actions</th>}
+                {isExec && <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 w-12"></th>}
               </tr>
             </thead>
             <tbody>
@@ -252,10 +392,15 @@ export default function MembersPage() {
                           {m.first_name[0]}{m.last_name[0]}
                         </div>
                       )}
-                      <span className="text-xs font-medium text-dash-text">{m.first_name} {m.last_name}</span>
-                      {(m as Member & { status?: string }).status === 'pending' && (
-                        <span className="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full uppercase font-medium">Pending</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-dash-text">{m.first_name} {m.last_name}</span>
+                        {!m.last_login_at && m.is_active === 1 && (
+                          <span className="text-[9px] bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full uppercase font-medium">Invited</span>
+                        )}
+                        {!m.is_active && (
+                          <span className="text-[9px] bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full uppercase font-medium">Inactive</span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="px-5 py-3 text-xs text-dash-text-secondary">{m.email}</td>
@@ -286,11 +431,7 @@ export default function MembersPage() {
                   </td>
                   {isExec && (
                     <td className="px-5 py-3 text-right">
-                      {m.id !== currentMember?.id && m.is_active === 1 && (
-                        <button onClick={() => handleDeactivate(m.id, `${m.first_name} ${m.last_name}`)} className="text-xs text-red-400 hover:text-red-600 transition-colors">
-                          Deactivate
-                        </button>
-                      )}
+                      <ActionsMenu member={m} currentMemberId={currentMember?.id || ''} onAction={handleAction} />
                     </td>
                   )}
                 </tr>

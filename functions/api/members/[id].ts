@@ -87,35 +87,42 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 };
 
-// DELETE: Exec only - deactivate member
+// DELETE: Exec only - deactivate or permanently remove member
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   try {
     const result = await requireAuth(context.request, context.env.DB, EXEC_ROLES);
     if (result.errorResponse) return result.errorResponse;
 
     const id = (context.params as { id: string }).id;
+    const url = new URL(context.request.url);
+    const permanent = url.searchParams.get('permanent') === 'true';
 
-    // Can't deactivate yourself
-    if (id === result.auth.member.id) return error('Cannot deactivate yourself');
+    // Can't remove yourself
+    if (id === result.auth.member.id) return error('Cannot remove yourself');
 
     const existing = await context.env.DB.prepare(
-      `SELECT id FROM members WHERE id = ?`
+      `SELECT id, last_login_at, email FROM members WHERE id = ?`
     ).bind(id).first();
 
     if (!existing) return error('Member not found', 404);
 
-    // Deactivate (don't delete)
-    await context.env.DB.prepare(
-      `UPDATE members SET is_active = 0, role = 'inactive', updated_at = datetime('now') WHERE id = ?`
-    ).bind(id).run();
-
-    // Delete all sessions for this member
-    await context.env.DB.prepare(
-      `DELETE FROM sessions WHERE member_id = ?`
-    ).bind(id).run();
-
     const ip = getClientIP(context.request);
-    await logAudit(context.env.DB, result.auth.member.id, 'deactivate_member', 'member', id, null, ip);
+
+    if (permanent) {
+      // Only allow permanent delete for members who never logged in
+      if (existing.last_login_at) return error('Cannot permanently remove a member who has logged in. Deactivate instead.');
+
+      await context.env.DB.prepare(`DELETE FROM sessions WHERE member_id = ?`).bind(id).run();
+      await context.env.DB.prepare(`DELETE FROM members WHERE id = ?`).bind(id).run();
+      await logAudit(context.env.DB, result.auth.member.id, 'remove_member', 'member', id, { email: existing.email }, ip);
+    } else {
+      // Deactivate (don't delete)
+      await context.env.DB.prepare(
+        `UPDATE members SET is_active = 0, role = 'inactive', updated_at = datetime('now') WHERE id = ?`
+      ).bind(id).run();
+      await context.env.DB.prepare(`DELETE FROM sessions WHERE member_id = ?`).bind(id).run();
+      await logAudit(context.env.DB, result.auth.member.id, 'deactivate_member', 'member', id, null, ip);
+    }
 
     return json({ success: true });
   } catch {
