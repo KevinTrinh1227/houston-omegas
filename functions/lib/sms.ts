@@ -23,11 +23,12 @@ export async function sendSMS(to: string, body: string, env: Env): Promise<boole
   const url = `https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`;
   const auth = btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`);
 
-  const params = new URLSearchParams({
-    To: to,
-    From: env.TWILIO_PHONE_NUMBER,
-    Body: body,
-  });
+  const params = new URLSearchParams({ To: to, Body: body });
+  if (env.TWILIO_MESSAGING_SERVICE_SID) {
+    params.set('MessagingServiceSid', env.TWILIO_MESSAGING_SERVICE_SID);
+  } else {
+    params.set('From', env.TWILIO_PHONE_NUMBER);
+  }
 
   const res = await fetch(url, {
     method: 'POST',
