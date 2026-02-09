@@ -27,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       phone_verified: !!member.phone_verified,
       created_at: member.created_at,
       last_login_at: member.last_login_at,
-      needs_phone_verification: !member.phone || !member.phone_verified,
+      needs_phone_verification: false,
       needs_onboarding: !member.has_completed_onboarding && member.is_active === 1,
     });
   } catch {

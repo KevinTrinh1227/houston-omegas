@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Calendar, Star, FolderOpen, BookOpen, Bell, Check, Share } from 'lucide-react';
 import { useAuth } from './AuthProvider';
@@ -68,6 +68,7 @@ export default function WelcomeModal() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
+          phone: phone || undefined,
           major: major || undefined,
           class_year: classYear || undefined,
           instagram: instagram || undefined,
@@ -136,236 +137,43 @@ export default function WelcomeModal() {
     </div>
   );
 
-  const Step2 = () => {
-    const [verifyPhase, setVerifyPhase] = useState<'input' | 'code' | 'verified'>(
-      member.phone_verified ? 'verified' : 'input'
-    );
-    const [smsCode, setSmsCode] = useState('');
-    const [sendingCode, setSendingCode] = useState(false);
-    const [verifyingCode, setVerifyingCode] = useState(false);
-    const [cooldown, setCooldown] = useState(0);
-    const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const [localErr, setLocalErr] = useState('');
-
-    useEffect(() => {
-      return () => {
-        if (cooldownRef.current) clearInterval(cooldownRef.current);
-      };
-    }, []);
-
-    const startCooldown = () => {
-      setCooldown(60);
-      if (cooldownRef.current) clearInterval(cooldownRef.current);
-      cooldownRef.current = setInterval(() => {
-        setCooldown(prev => {
-          if (prev <= 1) {
-            if (cooldownRef.current) clearInterval(cooldownRef.current);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    };
-
-    const handleSendCode = async () => {
-      const cleaned = phone.replace(/\D/g, '');
-      if (cleaned.length < 10) {
-        setLocalErr('Please enter a valid 10-digit phone number.');
-        return;
-      }
-      setSendingCode(true);
-      setLocalErr('');
-      try {
-        const res = await fetch('/api/phone/send-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ phone }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setVerifyPhase('code');
-          setSmsCode('');
-          startCooldown();
-        } else {
-          setLocalErr(data.error || 'Failed to send code.');
-        }
-      } catch {
-        setLocalErr('Connection error.');
-      } finally {
-        setSendingCode(false);
-      }
-    };
-
-    const handleVerifyCode = async () => {
-      const cleaned = smsCode.replace(/\D/g, '');
-      if (cleaned.length !== 6) {
-        setLocalErr('Please enter the 6-digit code.');
-        return;
-      }
-      setVerifyingCode(true);
-      setLocalErr('');
-      try {
-        const res = await fetch('/api/phone/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ phone, code: cleaned }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setVerifyPhase('verified');
-          await refresh();
-        } else {
-          setLocalErr(data.error || 'Verification failed.');
-        }
-      } catch {
-        setLocalErr('Connection error.');
-      } finally {
-        setVerifyingCode(false);
-      }
-    };
-
-    const handleResend = async () => {
-      if (cooldown > 0) return;
-      setSendingCode(true);
-      setLocalErr('');
-      try {
-        const res = await fetch('/api/phone/send-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ phone }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          startCooldown();
-          setSmsCode('');
-        } else {
-          setLocalErr(data.error || 'Failed to resend.');
-        }
-      } catch {
-        setLocalErr('Connection error.');
-      } finally {
-        setSendingCode(false);
-      }
-    };
-
-    return (
-      <div className="px-8 pb-8 pt-4">
-        <h2 className="text-lg font-semibold text-dash-text mb-1">Complete Your Profile</h2>
-        <p className="text-sm text-dash-text-secondary mb-5">Help your brothers know more about you.</p>
-        {(localErr || err) && (
-          <div className="mb-3 p-2.5 rounded-lg text-xs text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800">
-            {localErr || err}
-          </div>
-        )}
-        <div className="space-y-3 mb-6">
-          {/* Phone with inline verification */}
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">
-              Phone <span className="text-red-400">*</span>
-            </label>
-            {verifyPhase === 'verified' ? (
-              <div className="flex items-center gap-2">
-                <input type="tel" value={phone} disabled className="flex-1 px-3 py-2.5 bg-dash-bg border border-dash-border rounded-lg text-dash-text text-sm cursor-not-allowed" />
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full whitespace-nowrap">
-                  Verified
-                </span>
-              </div>
-            ) : verifyPhase === 'code' ? (
-              <div className="space-y-2">
-                <p className="text-[11px] text-dash-text-secondary">Code sent to {phone}</p>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={smsCode}
-                  onChange={e => setSmsCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  autoFocus
-                  className="w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text placeholder-dash-text-muted focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 outline-none transition-all text-sm text-center tracking-[0.3em] font-mono"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleVerifyCode}
-                    disabled={verifyingCode}
-                    className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] uppercase tracking-[0.12em] font-semibold px-3 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
-                  >
-                    {verifyingCode ? 'Verifying...' : 'Verify'}
-                  </button>
-                  <button
-                    onClick={() => { setVerifyPhase('input'); setLocalErr(''); setSmsCode(''); }}
-                    className="text-[10px] text-dash-text-secondary hover:text-dash-text px-2 transition-colors"
-                  >
-                    Change
-                  </button>
-                  <button
-                    onClick={handleResend}
-                    disabled={cooldown > 0 || sendingCode}
-                    className="text-[10px] text-dash-text-secondary hover:text-dash-text px-2 transition-colors disabled:opacity-50"
-                  >
-                    {cooldown > 0 ? `${cooldown}s` : 'Resend'}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  placeholder="(123) 456-7890"
-                  className={`flex-1 ${INPUT_CLASS}`}
-                />
-                <button
-                  onClick={handleSendCode}
-                  disabled={sendingCode}
-                  className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] uppercase tracking-[0.12em] font-semibold px-3 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50 whitespace-nowrap"
-                >
-                  {sendingCode ? 'Sending...' : 'Verify'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Major</label>
-            <input type="text" value={major} onChange={(e) => setMajor(e.target.value)} placeholder="e.g. Computer Science" className={INPUT_CLASS} />
-          </div>
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Class Year</label>
-            <input type="text" value={classYear} onChange={(e) => setClassYear(e.target.value)} placeholder="e.g. Spring 2025" className={INPUT_CLASS} />
-          </div>
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Instagram</label>
-            <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@handle" className={INPUT_CLASS} />
-          </div>
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Discord ID</label>
-            <input type="text" value={discordId} onChange={(e) => setDiscordId(e.target.value)} placeholder="username#1234" className={INPUT_CLASS} />
-          </div>
+  const Step2 = () => (
+    <div className="px-8 pb-8 pt-4">
+      <h2 className="text-lg font-semibold text-dash-text mb-1">Complete Your Profile</h2>
+      <p className="text-sm text-dash-text-secondary mb-5">Help your brothers know more about you.</p>
+      {err && (
+        <div className="mb-3 p-2.5 rounded-lg text-xs text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800">
+          {err}
         </div>
-        <div className="flex gap-3">
-          <button type="button" onClick={() => { setErr(''); setStep(1); }} className={SECONDARY_BTN}>Back</button>
-          <button
-            type="button"
-            onClick={() => {
-              if (verifyPhase !== 'verified') {
-                setLocalErr('Please verify your phone number to continue.');
-                return;
-              }
-              setErr('');
-              setStep(3);
-            }}
-            className={`flex-1 ${PRIMARY_BTN}`}
-          >
-            Continue
-          </button>
+      )}
+      <div className="space-y-3 mb-6">
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Phone</label>
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(123) 456-7890" className={INPUT_CLASS} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Major</label>
+          <input type="text" value={major} onChange={(e) => setMajor(e.target.value)} placeholder="e.g. Computer Science" className={INPUT_CLASS} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Class Year</label>
+          <input type="text" value={classYear} onChange={(e) => setClassYear(e.target.value)} placeholder="e.g. Spring 2025" className={INPUT_CLASS} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Instagram</label>
+          <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@handle" className={INPUT_CLASS} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider text-dash-text-muted mb-1">Discord ID</label>
+          <input type="text" value={discordId} onChange={(e) => setDiscordId(e.target.value)} placeholder="username#1234" className={INPUT_CLASS} />
         </div>
       </div>
-    );
-  };
+      <div className="flex gap-3">
+        <button type="button" onClick={() => { setErr(''); setStep(1); }} className={SECONDARY_BTN}>Back</button>
+        <button type="button" onClick={() => { setErr(''); setStep(3); }} className={`flex-1 ${PRIMARY_BTN}`}>Continue</button>
+      </div>
+    </div>
+  );
 
   const Step3 = () => (
     <div className="px-8 pb-8 pt-4">
