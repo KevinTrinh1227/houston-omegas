@@ -16,9 +16,10 @@ export interface AuthMember {
   instagram: string | null;
   discord_id: string | null;
   avatar_url: string | null;
+  phone_verified: boolean;
   created_at: string;
   last_login_at: string | null;
-  needs_phone: boolean;
+  needs_phone_verification: boolean;
   needs_onboarding: boolean;
 }
 

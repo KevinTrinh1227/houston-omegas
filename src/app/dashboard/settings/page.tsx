@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isPushSupported, isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/lib/push';
 
@@ -68,11 +68,145 @@ function PushNotificationSettings() {
   );
 }
 
+function PhoneVerifyInline({ phone, onVerified }: { phone: string; onVerified: () => void }) {
+  const [phase, setPhase] = useState<'idle' | 'code'>('idle');
+  const [code, setCode] = useState('');
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [err, setErr] = useState('');
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, []);
+
+  const startCooldown = () => {
+    setCooldown(60);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleSendCode = async () => {
+    setSending(true);
+    setErr('');
+    try {
+      const res = await fetch('/api/phone/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPhase('code');
+        setCode('');
+        startCooldown();
+      } else {
+        setErr(data.error || 'Failed to send code.');
+      }
+    } catch {
+      setErr('Connection error.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    const cleaned = code.replace(/\D/g, '');
+    if (cleaned.length !== 6) {
+      setErr('Enter the 6-digit code.');
+      return;
+    }
+    setVerifying(true);
+    setErr('');
+    try {
+      const res = await fetch('/api/phone/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ phone, code: cleaned }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onVerified();
+      } else {
+        setErr(data.error || 'Verification failed.');
+      }
+    } catch {
+      setErr('Connection error.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <div className="mt-2 p-3 rounded-lg bg-dash-bg border border-dash-border">
+      {err && (
+        <div className="mb-2 text-xs text-red-600 dark:text-red-400">{err}</div>
+      )}
+      {phase === 'idle' ? (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-dash-text-secondary">Phone not verified. Verify to continue.</p>
+          <button
+            onClick={handleSendCode}
+            disabled={sending}
+            className="text-[10px] uppercase tracking-[0.12em] font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
+          >
+            {sending ? 'Sending...' : 'Send Code'}
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs text-dash-text-secondary">Enter the 6-digit code sent to {phone}</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              autoFocus
+              className="flex-1 px-3 py-2 bg-dash-input border border-dash-input-border rounded-lg text-dash-text placeholder-dash-text-muted focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 outline-none text-sm text-center tracking-[0.3em] font-mono"
+            />
+            <button
+              onClick={handleVerify}
+              disabled={verifying}
+              className="text-[10px] uppercase tracking-[0.12em] font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
+            >
+              {verifying ? '...' : 'Verify'}
+            </button>
+          </div>
+          <button
+            onClick={handleSendCode}
+            disabled={cooldown > 0 || sending}
+            className="text-[10px] text-dash-text-secondary hover:text-dash-text transition-colors disabled:opacity-50"
+          >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { member, refresh } = useAuth();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [phoneChanged, setPhoneChanged] = useState(false);
   const [form, setForm] = useState({
     first_name: member?.first_name || '',
     last_name: member?.last_name || '',
@@ -82,6 +216,15 @@ export default function SettingsPage() {
     instagram: member?.instagram || '',
     discord_id: member?.discord_id || '',
   });
+
+  const handlePhoneChange = (value: string) => {
+    setForm({ ...form, phone: value });
+    if (value !== (member?.phone || '')) {
+      setPhoneChanged(true);
+    } else {
+      setPhoneChanged(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +241,7 @@ export default function SettingsPage() {
 
       if (res.ok) {
         setMessage('Profile updated successfully.');
+        setPhoneChanged(form.phone !== (member?.phone || ''));
         await refresh();
       } else {
         const data = await res.json();
@@ -109,6 +253,8 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
+
+  const isPhoneVerified = member?.phone_verified && !phoneChanged;
 
   const inputClass = 'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text placeholder-dash-text-muted focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 outline-none transition-all text-sm';
 
@@ -174,7 +320,7 @@ export default function SettingsPage() {
         <form onSubmit={handleSubmit} className="bg-dash-card rounded-xl border border-dash-border p-6 space-y-4">
           {message && (
             <div className={`p-3 rounded-lg text-xs text-center ${message.includes('success') ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'}`}>
-              {message}
+                {message}
             </div>
           )}
 
@@ -195,8 +341,31 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] text-dash-text-muted mb-1.5 uppercase tracking-wider">Phone</label>
-            <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="(123) 456-7890" className={inputClass} />
+            <div className="flex items-center gap-2 mb-1.5">
+              <label className="block text-[10px] text-dash-text-muted uppercase tracking-wider">Phone</label>
+              {member?.phone && (
+                isPhoneVerified ? (
+                  <span className="text-[9px] uppercase tracking-wider font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded-full">
+                    Verified
+                  </span>
+                ) : (
+                  <span className="text-[9px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
+                    Not Verified
+                  </span>
+                )
+              )}
+            </div>
+            <input type="tel" value={form.phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(123) 456-7890" className={inputClass} />
+            {member?.phone && !isPhoneVerified && form.phone && (
+              <PhoneVerifyInline
+                phone={form.phone}
+                onVerified={async () => {
+                  setPhoneChanged(false);
+                  setMessage('Phone verified successfully.');
+                  await refresh();
+                }}
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

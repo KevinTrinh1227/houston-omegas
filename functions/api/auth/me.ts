@@ -24,9 +24,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       instagram: member.instagram,
       discord_id: member.discord_id,
       avatar_url: member.avatar_url,
+      phone_verified: !!member.phone_verified,
       created_at: member.created_at,
       last_login_at: member.last_login_at,
-      needs_phone: !member.phone,
+      needs_phone_verification: !member.phone || !member.phone_verified,
       needs_onboarding: !member.has_completed_onboarding && member.is_active === 1,
     });
   } catch {

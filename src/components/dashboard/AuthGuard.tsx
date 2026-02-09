@@ -48,7 +48,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {member.needs_phone && <PhoneRequiredModal />}
+      {member.needs_phone_verification && <PhoneRequiredModal />}
       {children}
     </>
   );

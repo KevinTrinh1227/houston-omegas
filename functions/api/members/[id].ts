@@ -47,7 +47,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     // Everyone can update their own profile fields
     if (body.first_name !== undefined) { fields.push('first_name = ?'); values.push(sanitize(body.first_name as string)); }
     if (body.last_name !== undefined) { fields.push('last_name = ?'); values.push(sanitize(body.last_name as string)); }
-    if (body.phone !== undefined) { fields.push('phone = ?'); values.push(sanitize(body.phone as string) || null); }
+    if (body.phone !== undefined) {
+      fields.push('phone = ?'); values.push(sanitize(body.phone as string) || null);
+      fields.push('phone_verified = ?'); values.push(0);
+    }
     if (body.class_year !== undefined) { fields.push('class_year = ?'); values.push(sanitize(body.class_year as string) || null); }
     if (body.major !== undefined) { fields.push('major = ?'); values.push(sanitize(body.major as string) || null); }
     if (body.instagram !== undefined) { fields.push('instagram = ?'); values.push(sanitize(body.instagram as string) || null); }

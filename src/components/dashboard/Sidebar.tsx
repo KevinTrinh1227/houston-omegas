@@ -192,7 +192,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={`h-14 flex items-center border-b border-dash-sidebar-border ${collapsed && !isMobile ? 'px-3' : 'px-5'}`}>
-        <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
+        <Link href="/dashboard" className="flex items-center gap-2.5 group" onClick={onClose}>
           <Image src="/images/omega-logo.jpg" alt="Logo" width={28} height={28} className="rounded-full shrink-0" />
           {(!collapsed || isMobile) && (
             <span className="text-dash-sidebar-text-active text-xs uppercase tracking-[0.06em] font-bold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>

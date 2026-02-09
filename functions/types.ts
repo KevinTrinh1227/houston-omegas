@@ -9,6 +9,9 @@ export interface Env {
   RESEND_API_KEY: string;
   VAPID_PUBLIC_KEY: string;
   VAPID_PRIVATE_KEY: string;
+  TWILIO_ACCOUNT_SID: string;
+  TWILIO_AUTH_TOKEN: string;
+  TWILIO_PHONE_NUMBER: string;
 }
 
 export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
@@ -33,6 +36,7 @@ export interface Member {
   discord_id: string | null;
   avatar_url: string | null;
   invited_by: string | null;
+  phone_verified: number;
   is_active: number;
   has_completed_onboarding: number;
   created_at: string;

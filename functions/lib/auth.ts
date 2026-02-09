@@ -38,7 +38,7 @@ export async function authenticate(
   const row = await db.prepare(
     `SELECT s.*, m.id as m_id, m.email, m.first_name, m.last_name, m.role, m.chair_position,
             m.phone, m.class_year, m.major, m.instagram, m.discord_id, m.avatar_url,
-            m.invited_by, m.is_active, m.has_completed_onboarding,
+            m.invited_by, m.phone_verified, m.is_active, m.has_completed_onboarding,
             m.created_at as m_created_at, m.updated_at as m_updated_at, m.last_login_at
      FROM sessions s
      JOIN members m ON s.member_id = m.id
@@ -67,6 +67,7 @@ export async function authenticate(
     discord_id: row.discord_id as string | null,
     avatar_url: row.avatar_url as string | null,
     invited_by: row.invited_by as string | null,
+    phone_verified: (row.phone_verified as number) ?? 0,
     is_active: row.is_active as number,
     has_completed_onboarding: (row.has_completed_onboarding as number) ?? 1,
     created_at: row.m_created_at as string,

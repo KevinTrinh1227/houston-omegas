@@ -8,6 +8,9 @@ compatibility_date = "2024-09-23"
 # npx wrangler pages secret put GOOGLE_CLIENT_SECRET --project-name=houston-omegas
 # npx wrangler pages secret put DISCORD_CLIENT_ID --project-name=houston-omegas
 # npx wrangler pages secret put DISCORD_CLIENT_SECRET --project-name=houston-omegas
+# npx wrangler pages secret put TWILIO_ACCOUNT_SID --project-name=houston-omegas
+# npx wrangler pages secret put TWILIO_AUTH_TOKEN --project-name=houston-omegas
+# npx wrangler pages secret put TWILIO_PHONE_NUMBER --project-name=houston-omegas
 
 # D1 Database
 [[d1_databases]]

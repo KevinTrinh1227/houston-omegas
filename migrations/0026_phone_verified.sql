@@ -1,0 +1,1 @@
+ALTER TABLE members ADD COLUMN phone_verified INTEGER NOT NULL DEFAULT 0;
