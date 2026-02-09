@@ -2,7 +2,24 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/components/dashboard/AuthProvider';
-import { isExecRole, ROLE_LABELS, ROLE_COLORS, type Role } from '@/lib/roles';
+import { isExecRole, ROLE_LABELS, ROLE_COLORS, CHAIR_LABELS, CHAIR_COLORS, type Role } from '@/lib/roles';
+import {
+  Shield, Crown, UserCog, Globe, Wallet, ClipboardList,
+  Sprout, UserCheck, GraduationCap, UserX,
+} from 'lucide-react';
+
+const ROLE_ICONS: Record<string, React.ReactNode> = {
+  admin: <Shield size={10} />,
+  president: <Crown size={10} />,
+  vpi: <UserCog size={10} />,
+  vpx: <Globe size={10} />,
+  treasurer: <Wallet size={10} />,
+  secretary: <ClipboardList size={10} />,
+  junior_active: <Sprout size={10} />,
+  active: <UserCheck size={10} />,
+  alumni: <GraduationCap size={10} />,
+  inactive: <UserX size={10} />,
+};
 
 interface Member {
   id: string;
@@ -10,6 +27,7 @@ interface Member {
   first_name: string;
   last_name: string;
   role: string;
+  chair_position: string | null;
   phone: string | null;
   class_year: string | null;
   major: string | null;
@@ -21,21 +39,33 @@ interface Member {
   last_login_at: string | null;
 }
 
+type FilterTab = 'all' | 'active' | 'alumni' | 'inactive';
+
 function ActionsMenu({ member, currentMemberId, onAction }: {
   member: Member;
   currentMemberId: string;
   onAction: (action: string, member: Member) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node) && btnRef.current && !btnRef.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const toggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.right });
+    }
+    setOpen(!open);
+  };
 
   if (member.id === currentMemberId) return null;
 
@@ -43,9 +73,10 @@ function ActionsMenu({ member, currentMemberId, onAction }: {
   const isActive = member.is_active === 1;
 
   return (
-    <div className="relative" ref={ref}>
+    <>
       <button
-        onClick={() => setOpen(!open)}
+        ref={btnRef}
+        onClick={toggle}
         className="p-1.5 rounded-md hover:bg-dash-card-hover text-dash-text-muted hover:text-dash-text transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
@@ -55,7 +86,11 @@ function ActionsMenu({ member, currentMemberId, onAction }: {
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-dash-card border border-dash-border rounded-lg shadow-lg z-50 min-w-[160px] py-1">
+        <div
+          ref={menuRef}
+          className="fixed bg-dash-card border border-dash-border rounded-lg shadow-lg z-50 min-w-[160px] py-1"
+          style={{ top: pos.top, left: pos.left, transform: 'translateX(-100%)' }}
+        >
           {neverLoggedIn && (
             <button
               onClick={() => { setOpen(false); onAction('resend', member); }}
@@ -94,7 +129,7 @@ function ActionsMenu({ member, currentMemberId, onAction }: {
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -109,6 +144,7 @@ export default function MembersPage() {
   const [inviteForm, setInviteForm] = useState({ email: '', first_name: '', last_name: '', role: 'active' });
   const [createForm, setCreateForm] = useState({ email: '', first_name: '', last_name: '', role: 'active', class_year: '', major: '', phone: '', instagram: '', discord_id: '' });
   const [message, setMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
   const fetchMembers = useCallback(async () => {
     try {
@@ -140,7 +176,6 @@ export default function MembersPage() {
 
       if (res.ok) {
         const newMember = await res.json();
-        // Auto-send invite email
         await fetch('/api/members/send-invite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -169,6 +204,18 @@ export default function MembersPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ role }),
+      });
+      fetchMembers();
+    } catch { /* */ }
+  };
+
+  const handleChairChange = async (id: string, chair_position: string | null) => {
+    try {
+      await fetch(`/api/members/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ chair_position }),
       });
       fetchMembers();
     } catch { /* */ }
@@ -252,6 +299,22 @@ export default function MembersPage() {
         }
       } catch { showMsg('Connection error.'); }
     }
+  };
+
+  // Filter logic
+  const filteredMembers = members.filter(m => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'active') return m.is_active === 1 && m.role !== 'alumni' && m.role !== 'inactive';
+    if (activeTab === 'alumni') return m.role === 'alumni';
+    if (activeTab === 'inactive') return m.role === 'inactive' || m.is_active === 0;
+    return true;
+  });
+
+  const tabCounts = {
+    all: members.length,
+    active: members.filter(m => m.is_active === 1 && m.role !== 'alumni' && m.role !== 'inactive').length,
+    alumni: members.filter(m => m.role === 'alumni').length,
+    inactive: members.filter(m => m.role === 'inactive' || m.is_active === 0).length,
   };
 
   const roleColor = ROLE_COLORS;
@@ -363,6 +426,26 @@ export default function MembersPage() {
         </form>
       )}
 
+      {/* Filter tabs */}
+      <div className="flex gap-1 mb-4 bg-dash-card rounded-lg border border-dash-border p-1">
+        {(['all', 'active', 'alumni', 'inactive'] as FilterTab[]).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 text-[11px] uppercase tracking-wider font-medium px-3 py-2 rounded-md transition-all ${
+              activeTab === tab
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                : 'text-dash-text-secondary hover:text-dash-text hover:bg-dash-card-hover'
+            }`}
+          >
+            {tab === 'all' ? 'All' : tab === 'active' ? 'Active' : tab === 'alumni' ? 'Alumni' : 'Inactive'}
+            <span className={`ml-1.5 text-[10px] ${activeTab === tab ? 'opacity-70' : 'text-dash-text-muted'}`}>
+              {tabCounts[tab]}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {/* Member list */}
       {loading ? (
         <div className="bg-dash-card rounded-xl border border-dash-border p-12 text-center">
@@ -370,18 +453,19 @@ export default function MembersPage() {
         </div>
       ) : (
         <div className="bg-dash-card rounded-xl border border-dash-border overflow-x-auto">
-          <table className="w-full min-w-[600px]">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-dash-border">
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Name</th>
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Email</th>
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Role</th>
+                {isExec && <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3">Chair</th>}
                 <th className="text-left text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 hidden sm:table-cell">Last Login</th>
                 {isExec && <th className="text-right text-[10px] text-dash-text-muted uppercase tracking-wider font-medium px-5 py-3 w-12"></th>}
               </tr>
             </thead>
             <tbody>
-              {members.map(m => (
+              {filteredMembers.map(m => (
                 <tr key={m.id} className={`border-b border-dash-border/50 hover:bg-dash-card-hover transition-colors ${!m.is_active ? 'opacity-50' : ''}`}>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
@@ -423,9 +507,41 @@ export default function MembersPage() {
                         <option value="inactive">Inactive</option>
                       </select>
                     ) : (
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase ${roleColor[m.role as Role] || 'bg-dash-badge-bg text-dash-text-secondary'}`}>{ROLE_LABELS[m.role as Role] || m.role}</span>
+                      <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded font-medium uppercase ${roleColor[m.role as Role] || 'bg-dash-badge-bg text-dash-text-secondary'}`}>
+                        {ROLE_ICONS[m.role]}
+                        {ROLE_LABELS[m.role as Role] || m.role}
+                      </span>
                     )}
                   </td>
+                  {isExec && (
+                    <td className="px-5 py-3">
+                      {m.id !== currentMember?.id ? (
+                        <select
+                          value={m.chair_position || ''}
+                          onChange={e => handleChairChange(m.id, e.target.value || null)}
+                          className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase border-0 cursor-pointer ${
+                            m.chair_position ? (CHAIR_COLORS[m.chair_position] || 'bg-dash-badge-bg text-dash-text-secondary') : 'bg-transparent text-dash-text-muted'
+                          }`}
+                        >
+                          <option value="">None</option>
+                          <option value="recruitment">Recruitment</option>
+                          <option value="alumni">Alumni</option>
+                          <option value="social">Social</option>
+                          <option value="social_media">Social Media</option>
+                          <option value="brotherhood">Brotherhood</option>
+                          <option value="historian">Historian</option>
+                        </select>
+                      ) : (
+                        m.chair_position ? (
+                          <span className={`text-[10px] px-2 py-0.5 rounded font-medium uppercase ${CHAIR_COLORS[m.chair_position] || 'bg-dash-badge-bg text-dash-text-secondary'}`}>
+                            {CHAIR_LABELS[m.chair_position] || m.chair_position}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-dash-text-muted">&mdash;</span>
+                        )
+                      )}
+                    </td>
+                  )}
                   <td className="px-5 py-3 text-xs text-dash-text-muted hidden sm:table-cell">
                     {m.last_login_at ? new Date(m.last_login_at + 'Z').toLocaleDateString() : 'Never'}
                   </td>
@@ -436,6 +552,13 @@ export default function MembersPage() {
                   )}
                 </tr>
               ))}
+              {filteredMembers.length === 0 && (
+                <tr>
+                  <td colSpan={isExec ? 6 : 4} className="px-5 py-8 text-center text-xs text-dash-text-muted">
+                    No members found in this category.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

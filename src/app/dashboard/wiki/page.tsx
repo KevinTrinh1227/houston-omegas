@@ -13,6 +13,8 @@ interface WikiPage {
   body: string;
   category: string;
   role_tag: string | null;
+  source: string | null;
+  github_path: string | null;
   created_by: string;
   author_first: string;
   author_last: string;
@@ -42,6 +44,7 @@ export default function WikiPage() {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', body: '', category: 'General', role_tag: '' });
   const [showPreview, setShowPreview] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const fetchPages = useCallback(async () => {
     setLoading(true);
@@ -152,6 +155,27 @@ export default function WikiPage() {
     } catch { setMessage('Delete failed.'); }
   };
 
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch('/api/wiki/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({}),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessage(`Synced ${data.synced} of ${data.total} docs from GitHub.${data.errors?.length ? ` (${data.errors.length} errors)` : ''}`);
+        fetchPages();
+      } else {
+        const data = await res.json();
+        setMessage(data.error || 'Sync failed.');
+      }
+    } catch { setMessage('Connection error.'); }
+    finally { setSyncing(false); }
+  };
+
   // Group pages by category, filtered by search
   const groupedPages = useMemo(() => {
     const filtered = search
@@ -180,7 +204,12 @@ export default function WikiPage() {
           <p className="text-sm text-dash-text-secondary mt-1">Internal documentation and guides</p>
         </div>
         {isExec && (
-          <button onClick={() => { setShowCreate(true); setEditing(false); }} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">New Page</button>
+          <div className="flex gap-2">
+            <button onClick={handleSync} disabled={syncing} className="text-dash-text-secondary text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg border border-dash-border hover:border-dash-text-muted transition-all disabled:opacity-50">
+              {syncing ? 'Syncing...' : 'Sync from GitHub'}
+            </button>
+            <button onClick={() => { setShowCreate(true); setEditing(false); }} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">New Page</button>
+          </div>
         )}
       </div>
 
@@ -262,6 +291,9 @@ export default function WikiPage() {
                             className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate ${selectedSlug === p.slug ? 'bg-dash-badge-bg text-dash-text font-medium' : 'text-dash-text-secondary hover:text-dash-text hover:bg-dash-bg'}`}
                           >
                             {p.title}
+                            {p.source === 'github' && (
+                              <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-medium">GH</span>
+                            )}
                             {p.role_tag && (
                               <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-dash-badge-bg text-dash-text-muted uppercase">{p.role_tag}</span>
                             )}
@@ -373,7 +405,7 @@ export default function WikiPage() {
                         By {currentPage.author_first} {currentPage.author_last} &middot; Updated {new Date(currentPage.updated_at).toLocaleDateString()}
                       </p>
                     </div>
-                    {isExec && (
+                    {isExec && currentPage.source !== 'github' && (
                       <div className="flex gap-2 shrink-0">
                         <button
                           onClick={() => {
@@ -396,6 +428,9 @@ export default function WikiPage() {
                           Delete
                         </button>
                       </div>
+                    )}
+                    {currentPage.source === 'github' && (
+                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-medium uppercase tracking-wider">Synced from GitHub</span>
                     )}
                   </div>
                 </div>

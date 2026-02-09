@@ -1,6 +1,6 @@
 export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
 
-export type ChairPosition = 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood' | null;
+export type ChairPosition = 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood' | 'historian' | null;
 
 export const EXEC_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
 
@@ -19,11 +19,11 @@ export const ROLE_LABELS: Record<Role, string> = {
 
 export const ROLE_COLORS: Record<Role, string> = {
   admin: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  president: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  vpi: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  vpx: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  treasurer: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  secretary: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  president: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  vpi: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  vpx: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  treasurer: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  secretary: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
   junior_active: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
   active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   alumni: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
@@ -36,6 +36,7 @@ export const CHAIR_LABELS: Record<string, string> = {
   social: 'Social Chair',
   social_media: 'Social Media Chair',
   brotherhood: 'Brotherhood Chair',
+  historian: 'Historian',
 };
 
 export const CHAIR_COLORS: Record<string, string> = {
@@ -44,6 +45,7 @@ export const CHAIR_COLORS: Record<string, string> = {
   social: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   social_media: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
   brotherhood: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  historian: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
 };
 
 // Pages that chairs can access (beyond the shared pages everyone gets)
@@ -51,8 +53,9 @@ export const CHAIR_PAGE_ACCESS: Record<string, string[]> = {
   recruitment: ['/dashboard/recruitment'],
   alumni: ['/dashboard/alumni'],
   social: ['/dashboard/events'],
-  social_media: ['/dashboard/analytics'],
+  social_media: ['/dashboard/analytics', '/dashboard/blog'],
   brotherhood: ['/dashboard/points'],
+  historian: ['/dashboard/historian', '/dashboard/meetings'],
 };
 
 // Pages every authenticated member can access

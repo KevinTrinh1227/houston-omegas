@@ -1,8 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isExecRole } from '@/lib/roles';
+import {
+  PenSquare, LayoutGrid, Users, Settings, Calendar, BookOpen,
+  ArrowRight, FileText, FolderOpen, Star, ClipboardList,
+} from 'lucide-react';
 import {
   BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -82,16 +87,32 @@ export default function DashboardOverview() {
 
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
+  const quickActions = [
+    { label: 'New Blog Post', href: '/dashboard/blog/new', icon: <PenSquare size={16} />, check: (r: string) => isExecRole(r) || r === 'active' || r === 'junior_active' },
+    { label: 'Manage Content', href: '/dashboard/blog', icon: <LayoutGrid size={16} />, check: (r: string) => isExecRole(r) },
+    { label: 'View Members', href: '/dashboard/members', icon: <Users size={16} />, check: (r: string) => isExecRole(r) },
+    { label: 'Edit Profile', href: '/dashboard/settings', icon: <Settings size={16} />, check: () => true },
+    { label: 'Events', href: '/dashboard/calendar', icon: <Calendar size={16} />, check: () => true },
+    { label: 'Wiki', href: '/dashboard/wiki', icon: <BookOpen size={16} />, check: () => true },
+  ];
+
   const statCards = [
-    { label: 'Active Members', value: stats?.active_members ?? '-', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' },
-    { label: 'Blog Posts', value: stats?.published_posts ?? '-', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2' },
-    { label: 'Announcements', value: stats?.active_announcements ?? '-', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6' },
+    { label: 'Active Members', value: stats?.active_members ?? '-', href: '/dashboard/members', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' },
+    { label: 'Blog Posts', value: stats?.published_posts ?? '-', href: '/dashboard/blog', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2' },
+    { label: 'Announcements', value: stats?.active_announcements ?? '-', href: '/dashboard/announcements', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6' },
     ...(isExec ? [
-      { label: 'Recruitment', value: stats?.recruitment_submissions ?? '-', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2' },
-      { label: 'Venue Inquiries', value: stats?.inquiry_submissions ?? '-', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-      { label: 'Total Members', value: stats?.total_members ?? '-', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0' },
+      { label: 'Recruitment', value: stats?.recruitment_submissions ?? '-', href: '/dashboard/recruitment', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2' },
+      { label: 'Venue Inquiries', value: stats?.inquiry_submissions ?? '-', href: '/dashboard/submissions', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+      { label: 'Total Members', value: stats?.total_members ?? '-', href: '/dashboard/members', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0' },
     ] : []),
   ];
+
+  const sectionCards = isExec ? [
+    { label: 'Events', href: '/dashboard/calendar', icon: <Calendar size={18} />, count: analyticsData?.total_events },
+    { label: 'Meetings', href: '/dashboard/meetings', icon: <ClipboardList size={18} />, count: analyticsData?.total_meetings },
+    { label: 'Files', href: '/dashboard/files', icon: <FolderOpen size={18} />, count: analyticsData?.total_documents },
+    { label: 'Points', href: '/dashboard/points', icon: <Star size={18} />, count: analyticsData?.total_points },
+  ] : [];
 
   return (
     <div>
@@ -102,8 +123,27 @@ export default function DashboardOverview() {
         <p className="text-sm text-dash-text-secondary mt-1">Here&apos;s what&apos;s happening with Houston Omegas</p>
       </div>
 
+      {/* Quick actions */}
+      <div className="mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {quickActions
+            .filter(a => a.check(member?.role || ''))
+            .map((action) => (
+              <Link
+                key={action.label}
+                href={action.href}
+                className="flex items-center gap-2.5 bg-dash-card rounded-lg border border-dash-border px-4 py-3 text-xs font-medium text-dash-text-secondary hover:border-dash-text-muted/50 hover:text-dash-text transition-all"
+              >
+                <span className="text-dash-text-muted">{action.icon}</span>
+                {action.label}
+              </Link>
+            ))}
+        </div>
+      </div>
+
+      {/* Stat cards */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (
             <div key={i} className="bg-dash-card rounded-xl border border-dash-border p-5 animate-pulse">
               <div className="h-4 bg-dash-badge-bg rounded w-24 mb-3" />
@@ -112,17 +152,40 @@ export default function DashboardOverview() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {statCards.map((card) => (
-            <div key={card.label} className="bg-dash-card rounded-xl border border-dash-border p-5 hover:border-dash-text-muted/30 transition-colors">
+            <Link key={card.label} href={card.href} className="bg-dash-card rounded-xl border border-dash-border p-5 hover:border-dash-text-muted/30 transition-colors group">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-dash-text-secondary uppercase tracking-wider font-medium">{card.label}</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-dash-text-muted">
                   <path d={card.icon} />
                 </svg>
               </div>
-              <p className="text-2xl font-semibold text-dash-text">{card.value}</p>
-            </div>
+              <div className="flex items-end justify-between">
+                <p className="text-2xl font-semibold text-dash-text">{card.value}</p>
+                <ArrowRight size={14} className="text-dash-text-muted opacity-0 group-hover:opacity-100 transition-opacity mb-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Section summary cards (exec) */}
+      {isExec && !analyticsLoading && analyticsData && sectionCards.length > 0 && (
+        <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {sectionCards.map(card => (
+            <Link
+              key={card.label}
+              href={card.href}
+              className="flex items-center gap-3 bg-dash-card rounded-lg border border-dash-border px-4 py-3 hover:border-dash-text-muted/30 transition-colors group"
+            >
+              <span className="text-dash-text-muted">{card.icon}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-dash-text">{card.label}</p>
+                <p className="text-[10px] text-dash-text-muted">{card.count ?? 0} total</p>
+              </div>
+              <ArrowRight size={14} className="text-dash-text-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            </Link>
           ))}
         </div>
       )}
@@ -195,30 +258,6 @@ export default function DashboardOverview() {
           )}
         </div>
       )}
-
-      {/* Quick actions */}
-      <div className="mt-8">
-        <h2 className="text-sm font-medium text-dash-text mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'New Blog Post', href: '/dashboard/blog/new', check: (r: string) => isExecRole(r) || r === 'active' || r === 'junior_active' },
-            { label: 'Manage Content', href: '/dashboard/blog', check: (r: string) => isExecRole(r) },
-            { label: 'View Members', href: '/dashboard/members', check: (r: string) => isExecRole(r) },
-            { label: 'Edit Profile', href: '/dashboard/settings', check: (r: string) => isExecRole(r) || r === 'active' || r === 'alumni' || r === 'junior_active' },
-          ]
-            .filter(a => a.check(member?.role || ''))
-            .map((action) => (
-              <a
-                key={action.label}
-                href={action.href}
-                className="block bg-dash-card rounded-lg border border-dash-border px-4 py-3 text-xs font-medium text-dash-text-secondary hover:border-dash-text-muted/50 hover:text-dash-text transition-all"
-              >
-                {action.label}
-                <span className="float-right text-dash-text-muted">&rarr;</span>
-              </a>
-            ))}
-        </div>
-      </div>
     </div>
   );
 }

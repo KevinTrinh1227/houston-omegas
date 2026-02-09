@@ -1,5 +1,5 @@
 import type { Env } from '../../types';
-import { EXEC_ROLES, ALL_ROLES } from '../../types';
+import { EXEC_ROLES, ALL_ROLES, VALID_CHAIR_POSITIONS } from '../../types';
 import { requireAuth, logAudit } from '../../lib/auth';
 import { getClientIP } from '../../lib/rate-limit';
 import { json, error, options } from '../../lib/response';
@@ -54,7 +54,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (body.discord_id !== undefined) { fields.push('discord_id = ?'); values.push(sanitize(body.discord_id as string) || null); }
     if (body.has_completed_onboarding !== undefined) { fields.push('has_completed_onboarding = ?'); values.push(body.has_completed_onboarding ? 1 : 0); }
 
-    // Only exec can change role and active status
+    // Only exec can change role, active status, and chair position
     if (isExec && !isSelf) {
       if (body.role !== undefined) {
         if (!ALL_ROLES.includes(body.role as typeof ALL_ROLES[number])) return error('Invalid role');
@@ -65,6 +65,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         fields.push('is_active = ?');
         values.push(body.is_active ? 1 : 0);
       }
+      if (body.chair_position !== undefined) {
+        const cp = body.chair_position as string | null;
+        if (cp !== null && !VALID_CHAIR_POSITIONS.includes(cp as typeof VALID_CHAIR_POSITIONS[number])) return error('Invalid chair position');
+        fields.push('chair_position = ?');
+        values.push(cp);
+      }
     }
 
     if (fields.length === 0) return error('No fields to update');
@@ -73,7 +79,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     values.push(id);
 
     const updated = await context.env.DB.prepare(
-      `UPDATE members SET ${fields.join(', ')} WHERE id = ? RETURNING id, email, first_name, last_name, role, phone, class_year, major, instagram, discord_id, avatar_url, is_active, created_at, updated_at`
+      `UPDATE members SET ${fields.join(', ')} WHERE id = ? RETURNING id, email, first_name, last_name, role, chair_position, phone, class_year, major, instagram, discord_id, avatar_url, is_active, created_at, updated_at`
     ).bind(...values).first();
 
     if (!updated) return error('Member not found', 404);

@@ -7,15 +7,17 @@ export interface Env {
   DISCORD_CLIENT_ID: string;
   DISCORD_CLIENT_SECRET: string;
   RESEND_API_KEY: string;
+  VAPID_PUBLIC_KEY: string;
+  VAPID_PRIVATE_KEY: string;
 }
 
 export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
 
-export type ChairPosition = 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood';
+export type ChairPosition = 'recruitment' | 'alumni' | 'social' | 'social_media' | 'brotherhood' | 'historian';
 
 export const EXEC_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary'];
 export const ALL_ROLES: Role[] = ['admin', 'president', 'vpi', 'vpx', 'treasurer', 'secretary', 'junior_active', 'active', 'alumni', 'inactive'];
-export const VALID_CHAIR_POSITIONS: ChairPosition[] = ['recruitment', 'alumni', 'social', 'social_media', 'brotherhood'];
+export const VALID_CHAIR_POSITIONS: ChairPosition[] = ['recruitment', 'alumni', 'social', 'social_media', 'brotherhood', 'historian'];
 
 export interface Member {
   id: string;

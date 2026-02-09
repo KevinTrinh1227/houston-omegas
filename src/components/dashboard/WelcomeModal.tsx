@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Calendar, Star, FolderOpen, BookOpen } from 'lucide-react';
+import { Calendar, Star, FolderOpen, BookOpen, Bell, Check, Share } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { ROLE_LABELS, ROLE_COLORS } from '@/lib/roles';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const INPUT_CLASS =
   'w-full px-3 py-2.5 bg-dash-input border border-dash-input-border rounded-lg text-dash-text placeholder-dash-text-muted focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all text-sm';
@@ -201,12 +201,108 @@ export default function WelcomeModal() {
       <div className="flex gap-3">
         <button type="button" onClick={() => setStep(2)} className={SECONDARY_BTN}>Back</button>
         <button type="button" onClick={() => { setAvatarUrl(''); setStep(4); }} className={SECONDARY_BTN}>Skip</button>
-        <button type="button" onClick={() => setStep(4)} className={`flex-1 ${PRIMARY_BTN}`}>Continue</button>
+        <button type="button" onClick={() => setStep(4)} className={`flex-1 ${PRIMARY_BTN}`}>Next</button>
       </div>
     </div>
   );
 
-  const Step4 = () => (
+  const Step4 = () => {
+    const [pushState, setPushState] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'unsupported'>('idle');
+    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isPWA = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as unknown as { standalone?: boolean }).standalone === true);
+    const supported = typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+    const handleEnable = async () => {
+      setPushState('requesting');
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const { subscribeToPush } = await import('@/lib/push');
+          const success = await subscribeToPush();
+          if (success) {
+            setPushState('granted');
+            setTimeout(() => setStep(5), 1200);
+          } else {
+            setPushState('denied');
+          }
+        } else {
+          setPushState('denied');
+        }
+      } catch {
+        setPushState('denied');
+      }
+    };
+
+    return (
+      <div className="px-8 pb-8 pt-4">
+        <div className="text-center mb-5">
+          <div className="mx-auto w-12 h-12 rounded-full bg-dash-bg flex items-center justify-center mb-3">
+            <Bell className="w-6 h-6 text-dash-text" />
+          </div>
+          <h2 className="text-lg font-semibold text-dash-text mb-1">Stay in the Loop</h2>
+          <p className="text-sm text-dash-text-secondary">Get notified about events, announcements, and updates.</p>
+        </div>
+
+        {(!supported || (isIOS && !isPWA)) ? (
+          <>
+            {isIOS && !isPWA ? (
+              <div className="bg-dash-bg rounded-lg p-4 mb-5 text-xs text-dash-text-secondary space-y-2">
+                <p className="font-medium text-dash-text">iPhone requires an extra step:</p>
+                <ol className="space-y-1 ml-3 list-decimal">
+                  <li>Tap the <Share className="w-3.5 h-3.5 inline -mt-0.5" /> Share button in Safari</li>
+                  <li>Tap &quot;Add to Home Screen&quot;</li>
+                  <li>Open the app from your home screen</li>
+                  <li>Enable notifications in Settings</li>
+                </ol>
+              </div>
+            ) : (
+              <p className="text-sm text-dash-text-secondary text-center mb-5">
+                Your browser doesn&apos;t support push notifications. You can still check the dashboard for updates.
+              </p>
+            )}
+            <button onClick={() => setStep(5)} className={`w-full ${PRIMARY_BTN}`}>Continue</button>
+          </>
+        ) : pushState === 'idle' ? (
+          <>
+            <div className="bg-dash-bg rounded-lg p-4 mb-5 text-xs text-dash-text-secondary space-y-1.5">
+              <p>You&apos;ll receive notifications for:</p>
+              <ul className="space-y-1 ml-3">
+                <li>&bull; New announcements from exec</li>
+                <li>&bull; Event reminders</li>
+                <li>&bull; Important chapter updates</li>
+              </ul>
+            </div>
+            <button onClick={handleEnable} className={`w-full ${PRIMARY_BTN}`}>Enable Notifications</button>
+            <button onClick={() => setStep(5)} className="w-full mt-2 text-dash-text-muted text-[11px] py-2 hover:text-dash-text transition-colors">
+              Skip for now
+            </button>
+          </>
+        ) : pushState === 'requesting' ? (
+          <div className="flex justify-center py-6">
+            <div className="w-6 h-6 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" />
+          </div>
+        ) : pushState === 'granted' ? (
+          <div className="text-center py-4">
+            <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
+            <p className="text-sm text-dash-text">Notifications enabled!</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-dash-text-secondary text-center mb-5">
+              No worries! You can enable notifications later in Settings.
+            </p>
+            <button onClick={() => setStep(5)} className={`w-full ${PRIMARY_BTN}`}>Continue</button>
+          </>
+        )}
+
+        <div className="mt-3">
+          <button type="button" onClick={() => setStep(3)} className={SECONDARY_BTN}>Back</button>
+        </div>
+      </div>
+    );
+  };
+
+  const Step5 = () => (
     <div className="px-8 pb-8 pt-4">
       <div className="text-center mb-6">
         <h2 className="text-lg font-semibold text-dash-text mb-1">You&apos;re All Set!</h2>
@@ -236,6 +332,7 @@ export default function WelcomeModal() {
         {step === 2 && <Step2 />}
         {step === 3 && <Step3 />}
         {step === 4 && <Step4 />}
+        {step === 5 && <Step5 />}
       </div>
     </div>
   );

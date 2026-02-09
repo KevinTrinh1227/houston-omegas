@@ -7,12 +7,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './AuthProvider';
 import { isExecRole, ROLE_LABELS, type Role } from '@/lib/roles';
 import {
-  Home, DollarSign, Users, Calendar, Star,
+  Home, DollarSign, Users, Calendar,
   FileText, FolderOpen, Mail, BarChart3,
-  Settings, UserPlus, BookOpen, Handshake,
+  Settings, UserPlus, BookOpen,
   ChevronLeft, ChevronDown, Info, LogOut,
   GraduationCap, PartyPopper, Camera, HeartHandshake,
-  Sun, Moon,
+  Sun, Moon, Archive,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -55,6 +55,7 @@ const navGroups: NavGroup[] = [
       { label: 'Events & Socials', href: '/dashboard/events', icon: <PartyPopper size={18} />, roles: EXEC, chairPositions: ['social'] },
       { label: 'Social Media', href: '/dashboard/analytics', icon: <Camera size={18} />, roles: EXEC, chairPositions: ['social_media'] },
       { label: 'Brotherhood', href: '/dashboard/points', icon: <HeartHandshake size={18} />, roles: EXEC, chairPositions: ['brotherhood'] },
+      { label: 'Historian', href: '/dashboard/historian', icon: <Archive size={18} />, roles: EXEC, chairPositions: ['historian'] },
     ],
   },
   {
@@ -125,7 +126,7 @@ function SidebarThemeToggle() {
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
+      className="flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
     >
       {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
     </button>
@@ -190,11 +191,11 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
   const sidebarContent = (isMobile: boolean) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className={`py-5 border-b border-white/10 ${collapsed && !isMobile ? 'px-3' : 'px-5'}`}>
+      <div className={`h-14 flex items-center border-b border-dash-sidebar-border ${collapsed && !isMobile ? 'px-3' : 'px-5'}`}>
         <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
           <Image src="/images/omega-logo.jpg" alt="Logo" width={28} height={28} className="rounded-full shrink-0" />
           {(!collapsed || isMobile) && (
-            <span className="text-white text-xs uppercase tracking-[0.06em] font-bold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <span className="text-dash-sidebar-text-active text-xs uppercase tracking-[0.06em] font-bold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Houston Omegas
             </span>
           )}
@@ -208,7 +209,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
             {group.title && (
               <button
                 onClick={() => toggleGroup(group.title)}
-                className={`w-full flex items-center justify-between text-[9px] text-gray-500 uppercase tracking-[0.15em] font-semibold pt-4 pb-1 hover:text-gray-300 transition-colors ${collapsed && !isMobile ? 'px-1 justify-center' : 'px-3'}`}
+                className={`w-full flex items-center justify-between text-[9px] text-dash-sidebar-text-muted uppercase tracking-[0.15em] font-semibold pt-4 pb-1 hover:text-dash-sidebar-text transition-colors ${collapsed && !isMobile ? 'px-1 justify-center' : 'px-3'}`}
               >
                 {collapsed && !isMobile ? (
                   <span className="text-[8px]">&middot;&middot;&middot;</span>
@@ -237,8 +238,8 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
                     collapsed && !isMobile ? 'justify-center px-2' : 'px-3'
                   } ${
                     isActive(item.href)
-                      ? 'bg-white/10 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-dash-sidebar-active text-dash-sidebar-text-active'
+                      : 'text-dash-sidebar-text hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover'
                   }`}
                 >
                   {item.icon}
@@ -251,20 +252,20 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
       </nav>
 
       {/* Bottom section */}
-      <div className={`mt-auto border-t border-white/10 ${collapsed && !isMobile ? 'px-2 py-3' : 'px-3 py-3'}`}>
+      <div className={`mt-auto border-t border-dash-sidebar-border ${collapsed && !isMobile ? 'px-2 py-3' : 'px-3 py-3'}`}>
         {/* User profile */}
         {(!collapsed || isMobile) ? (
           <div className="flex items-center gap-3 px-2 mb-3">
             {member?.avatar_url ? (
               <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-dash-sidebar-active flex items-center justify-center text-dash-sidebar-text-active text-xs font-semibold shrink-0">
                 {member?.first_name?.[0]}{member?.last_name?.[0]}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-medium truncate">{member?.first_name} {member?.last_name}</p>
-              <p className="text-gray-500 text-[10px] uppercase tracking-wider">{ROLE_LABELS[member?.role as Role] || member?.role}</p>
+              <p className="text-dash-sidebar-text-active text-xs font-medium truncate">{member?.first_name} {member?.last_name}</p>
+              <p className="text-dash-sidebar-text-muted text-[10px] uppercase tracking-wider">{ROLE_LABELS[member?.role as Role] || member?.role}</p>
             </div>
           </div>
         ) : (
@@ -272,7 +273,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
             {member?.avatar_url ? (
               <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs font-semibold">
+              <div className="w-8 h-8 rounded-full bg-dash-sidebar-active flex items-center justify-center text-dash-sidebar-text-active text-xs font-semibold">
                 {member?.first_name?.[0]}{member?.last_name?.[0]}
               </div>
             )}
@@ -287,8 +288,8 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
             title="Settings"
             className={`flex items-center justify-center p-2 rounded-lg transition-all ${
               isActive('/dashboard/settings')
-                ? 'bg-white/10 text-white'
-                : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                ? 'bg-dash-sidebar-active text-dash-sidebar-text-active'
+                : 'text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover'
             }`}
           >
             <Settings size={15} />
@@ -297,14 +298,14 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
           <button
             onClick={() => setShowChangelog(true)}
             title="Changelog"
-            className="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
+            className="flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
           >
             <Info size={15} />
           </button>
           <button
             onClick={logout}
             title="Sign Out"
-            className="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-white/5 transition-all"
+            className="flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-red-400 hover:bg-dash-sidebar-hover transition-all"
           >
             <LogOut size={15} />
           </button>
@@ -312,7 +313,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
           <button
             onClick={() => setCollapsed(!collapsed)}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="hidden lg:flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
+            className="hidden lg:flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
           >
             <ChevronLeft size={15} className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
           </button>
@@ -326,7 +327,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className={`hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-dash-sidebar z-40 transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'}`}>
+      <aside className={`hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-dash-sidebar border-r border-dash-sidebar-border z-40 transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'}`}>
         {sidebarContent(false)}
       </aside>
 
@@ -334,7 +335,7 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
       {mobileOpen && (
         <>
           <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
-          <aside className="fixed left-0 top-0 bottom-0 w-60 bg-dash-sidebar z-50 lg:hidden">
+          <aside className="fixed left-0 top-0 bottom-0 w-60 bg-dash-sidebar border-r border-dash-sidebar-border z-50 lg:hidden">
             {sidebarContent(true)}
           </aside>
         </>

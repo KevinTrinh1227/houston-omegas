@@ -18,6 +18,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setCollapsed((e as CustomEvent).detail);
     };
     window.addEventListener('sidebar-collapse', handler);
+
+    // Register service worker for push notifications
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     return () => window.removeEventListener('sidebar-collapse', handler);
   }, []);
 

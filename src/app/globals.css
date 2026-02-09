@@ -19,7 +19,13 @@
   --dash-text: #111827;
   --dash-text-secondary: #6b7280;
   --dash-text-muted: #9ca3af;
-  --dash-sidebar: #0e1012;
+  --dash-sidebar: #ffffff;
+  --dash-sidebar-text: #4b5563;
+  --dash-sidebar-text-muted: #9ca3af;
+  --dash-sidebar-text-active: #111827;
+  --dash-sidebar-hover: #f3f4f6;
+  --dash-sidebar-active: #f3f4f6;
+  --dash-sidebar-border: #e5e7eb;
   --dash-topbar: #ffffff;
   --dash-input: #ffffff;
   --dash-input-border: #d1d5db;
@@ -35,6 +41,12 @@
   --dash-text-secondary: #a1a1aa;
   --dash-text-muted: #71717a;
   --dash-sidebar: #09090b;
+  --dash-sidebar-text: #a1a1aa;
+  --dash-sidebar-text-muted: #71717a;
+  --dash-sidebar-text-active: #fafafa;
+  --dash-sidebar-hover: rgba(255,255,255,0.05);
+  --dash-sidebar-active: rgba(255,255,255,0.1);
+  --dash-sidebar-border: rgba(255,255,255,0.1);
   --dash-topbar: #141416;
   --dash-input: #1a1a1d;
   --dash-input-border: #3f3f46;
@@ -52,6 +64,12 @@
   --color-dash-text-secondary: var(--dash-text-secondary);
   --color-dash-text-muted: var(--dash-text-muted);
   --color-dash-sidebar: var(--dash-sidebar);
+  --color-dash-sidebar-text: var(--dash-sidebar-text);
+  --color-dash-sidebar-text-muted: var(--dash-sidebar-text-muted);
+  --color-dash-sidebar-text-active: var(--dash-sidebar-text-active);
+  --color-dash-sidebar-hover: var(--dash-sidebar-hover);
+  --color-dash-sidebar-active: var(--dash-sidebar-active);
+  --color-dash-sidebar-border: var(--dash-sidebar-border);
   --color-dash-topbar: var(--dash-topbar);
   --color-dash-input: var(--dash-input);
   --color-dash-input-border: var(--dash-input-border);
@@ -299,6 +317,13 @@ a { transition: color 0.2s ease; }
 .dark .animate-shimmer {
   background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
   background-size: 200% 100%;
+}
+
+/* Dark mode dropdown fix */
+.dark select,
+.dark option {
+  background-color: var(--dash-input);
+  color: var(--dash-text);
 }
 
 /* Scrollbar for dark pages */

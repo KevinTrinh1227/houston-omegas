@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Cinzel, Metal_Mania } from 'next/font/google';
 import AnnouncementBanner from '@/components/AnnouncementBanner';
 import AnnouncementPopup from '@/components/AnnouncementPopup';
@@ -20,6 +20,12 @@ const metalMania = Metal_Mania({
   subsets: ['latin'],
   variable: '--font-metal-mania',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +61,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body className={`${inter.variable} ${cinzel.variable} ${metalMania.variable} antialiased overflow-x-hidden`}>
         <AnnouncementBanner />
         <AnnouncementPopup />

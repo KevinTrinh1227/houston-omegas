@@ -1,0 +1,21 @@
+{
+  "name": "Houston Omegas",
+  "short_name": "Omegas",
+  "description": "Houston Omegas Brotherhood Dashboard",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/images/omega-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/omega-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

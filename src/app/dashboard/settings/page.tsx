@@ -1,7 +1,72 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/dashboard/AuthProvider';
+import { isPushSupported, isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/lib/push';
+
+function PushNotificationSettings() {
+  const [supported, setSupported] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState(false);
+
+  useEffect(() => {
+    const check = async () => {
+      const sup = isPushSupported();
+      setSupported(sup);
+      if (sup) {
+        const sub = await isPushSubscribed();
+        setSubscribed(sub);
+      }
+      setLoading(false);
+    };
+    check();
+  }, []);
+
+  const handleToggle = async () => {
+    setToggling(true);
+    try {
+      if (subscribed) {
+        await unsubscribeFromPush();
+        setSubscribed(false);
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const success = await subscribeToPush();
+          setSubscribed(success);
+        }
+      }
+    } catch { /* ignore */ }
+    setToggling(false);
+  };
+
+  if (loading) return null;
+
+  return (
+    <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
+      <h2 className="text-sm font-medium text-dash-text mb-3">Push Notifications</h2>
+      {!supported ? (
+        <p className="text-xs text-dash-text-secondary">
+          Push notifications are not supported in this browser. On iPhone, add this site to your home screen first.
+        </p>
+      ) : (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-dash-text">Receive push notifications</p>
+            <p className="text-[11px] text-dash-text-muted mt-0.5">Announcements, events, and chapter updates</p>
+          </div>
+          <button
+            onClick={handleToggle}
+            disabled={toggling}
+            className={`relative w-10 h-5 rounded-full transition-colors ${subscribed ? 'bg-green-500' : 'bg-dash-border'} ${toggling ? 'opacity-50' : ''}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${subscribed ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const { member, refresh } = useAuth();
@@ -162,6 +227,9 @@ export default function SettingsPage() {
             </button>
           </div>
         </form>
+
+        {/* Notifications */}
+        <PushNotificationSettings />
 
         {/* Account info */}
         <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
