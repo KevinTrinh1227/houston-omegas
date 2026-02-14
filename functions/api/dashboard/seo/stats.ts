@@ -1,15 +1,14 @@
 import type { Env } from '../../../types';
 import { json, error, options } from '../../../lib/response';
-import { verifySession, EXEC_ROLES } from '../../../lib/auth';
+import { requireAuth } from '../../../lib/auth';
+import { EXEC_ROLES } from '../../../types';
 import { createSEOEngine } from '../../../lib/seo-engine';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { env, request } = context;
 
-  const session = await verifySession(request, env);
-  if (!session || !EXEC_ROLES.includes(session.role)) {
-    return error('Unauthorized', 401);
-  }
+  const result = await requireAuth(request, env.DB, [...EXEC_ROLES]);
+  if (result.errorResponse) return result.errorResponse;
 
   try {
     const seo = createSEOEngine(env);

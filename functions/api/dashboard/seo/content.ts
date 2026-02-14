@@ -1,15 +1,14 @@
 import type { Env } from '../../../types';
 import { json, error, options } from '../../../lib/response';
-import { verifySession, EXEC_ROLES } from '../../../lib/auth';
+import { requireAuth } from '../../../lib/auth';
+import { EXEC_ROLES } from '../../../types';
 import { createSEOEngine } from '../../../lib/seo-engine';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { env, request } = context;
 
-  const session = await verifySession(request, env);
-  if (!session || !EXEC_ROLES.includes(session.role)) {
-    return error('Unauthorized', 401);
-  }
+  const result = await requireAuth(request, env.DB, [...EXEC_ROLES]);
+  if (result.errorResponse) return result.errorResponse;
 
   const url = new URL(request.url);
   const status = url.searchParams.get('status') || undefined;
@@ -29,10 +28,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { env, request } = context;
 
-  const session = await verifySession(request, env);
-  if (!session || !EXEC_ROLES.includes(session.role)) {
-    return error('Unauthorized', 401);
-  }
+  const result = await requireAuth(request, env.DB, [...EXEC_ROLES]);
+  if (result.errorResponse) return result.errorResponse;
 
   try {
     const body = await request.json() as { action: string; id: number };
@@ -46,17 +43,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (action === 'approve') {
       const success = await seo.approveArticle(id);
-      if (!success) {
-        return error('Failed to approve article', 500);
-      }
+      if (!success) return error('Failed to approve article', 500);
       return json({ success: true, message: 'Article approved' });
     }
 
     if (action === 'reject') {
       const success = await seo.rejectArticle(id);
-      if (!success) {
-        return error('Failed to reject article', 500);
-      }
+      if (!success) return error('Failed to reject article', 500);
       return json({ success: true, message: 'Article rejected' });
     }
 
