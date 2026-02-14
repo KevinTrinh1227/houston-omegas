@@ -2,7 +2,7 @@
 
 export type MemberStatus = 'active' | 'inactive';
 export type EboardPosition = 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | null;
-export type SortField = 'name' | 'created_at' | 'role' | 'class_year';
+export type SortField = 'name' | 'created_at' | 'role' | 'class_year' | 'last_login_at';
 export type SortOrder = 'asc' | 'desc';
 export type ViewMode = 'grid' | 'list';
 
@@ -32,8 +32,27 @@ export interface MemberWithDetails extends Member {
   chairs: string[];
   tags?: string[];
   dues_balance?: number;
+  dues_history?: DuesRecord[];
   attendance_percentage?: number;
+  attendance_records?: AttendanceRecord[];
   recent_activity?: ActivityItem[];
+}
+
+export interface DuesRecord {
+  id: number;
+  amount: number;
+  description: string;
+  status: 'paid' | 'pending' | 'overdue';
+  due_date: string;
+  paid_date?: string;
+}
+
+export interface AttendanceRecord {
+  id: number;
+  event_id: string;
+  event_name: string;
+  event_date: string;
+  status: 'present' | 'absent' | 'excused';
 }
 
 export interface ActivityItem {
@@ -73,6 +92,11 @@ export interface PaginationState {
 export interface SortState {
   field: SortField;
   order: SortOrder;
+}
+
+export interface BulkActionState {
+  selectedIds: string[];
+  action: 'none' | 'change-status' | 'assign-chair' | 'export';
 }
 
 // Available chairs from the database
@@ -135,4 +159,28 @@ export function getChairDisplayName(chair: string): string {
     brotherhood: 'Brotherhood',
   };
   return names[chair] || chair.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// Format relative time
+export function formatRelativeTime(dateString: string | null): string {
+  if (!dateString) return 'Never';
+  const date = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
+// Format date nicely
+export function formatDate(dateString: string | null, options?: Intl.DateTimeFormatOptions): string {
+  if (!dateString) return '-';
+  const date = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
+  return date.toLocaleDateString('en-US', options || { month: 'short', day: 'numeric', year: 'numeric' });
 }
