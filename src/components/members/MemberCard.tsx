@@ -4,26 +4,56 @@ import Link from 'next/link';
 import StatusBadge from './StatusBadge';
 import { RoleBadge, EboardBadge, ChairBadge } from './RoleBadge';
 import type { Member } from '@/lib/member-types';
-import { Mail, Phone, Instagram, MessageCircle, Calendar, ChevronRight } from 'lucide-react';
+import { formatRelativeTime } from '@/lib/member-types';
+import { Mail, Phone, Instagram, MessageCircle, Calendar, ChevronRight, Edit2, Send, UserX, RefreshCw } from 'lucide-react';
 
 interface MemberCardProps {
   member: Member;
+  currentMemberId?: string;
+  isExec?: boolean;
   showActions?: boolean;
-  onEdit?: (member: Member) => void;
+  onAction?: (action: string, member: Member) => void;
+  selected?: boolean;
+  onSelect?: (selected: boolean) => void;
   className?: string;
 }
 
-export default function MemberCard({ member, showActions = false, onEdit, className = '' }: MemberCardProps) {
+export default function MemberCard({
+  member,
+  currentMemberId,
+  isExec = false,
+  showActions = false,
+  onAction,
+  selected = false,
+  onSelect,
+  className = '',
+}: MemberCardProps) {
   const isActive = member.is_active === 1 && member.membership_status !== 'inactive';
   const chairs = member.chairs || (member.chair_position ? [member.chair_position] : []);
+  const isSelf = member.id === currentMemberId;
+  const neverLoggedIn = !member.last_login_at;
 
   return (
     <div
-      className={`bg-dash-card rounded-xl border border-dash-border p-5 hover:border-dash-text-muted/30 transition-all group ${className}`}
+      className={`bg-dash-card rounded-xl border border-dash-border p-5 hover:border-dash-text-muted/30 transition-all group relative ${
+        !isActive ? 'opacity-70' : ''
+      } ${selected ? 'ring-2 ring-gray-900 dark:ring-white' : ''} ${className}`}
     >
+      {/* Selection checkbox */}
+      {onSelect && (
+        <div className="absolute top-4 left-4">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={(e) => onSelect(e.target.checked)}
+            className="w-4 h-4 rounded border-dash-border bg-dash-input text-gray-900 dark:text-white focus:ring-0 cursor-pointer"
+          />
+        </div>
+      )}
+
       <div className="flex items-start gap-4">
         {/* Avatar */}
-        <div className="shrink-0">
+        <div className={`shrink-0 ${onSelect ? 'ml-6' : ''}`}>
           {member.avatar_url ? (
             <img
               src={member.avatar_url}
@@ -31,7 +61,7 @@ export default function MemberCard({ member, showActions = false, onEdit, classN
               className="w-14 h-14 rounded-full object-cover ring-2 ring-dash-border"
             />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-dash-badge-bg flex items-center justify-center text-dash-text-secondary text-lg font-semibold ring-2 ring-dash-border">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-dash-text-secondary text-lg font-semibold ring-2 ring-dash-border">
               {member.first_name[0]}{member.last_name[0]}
             </div>
           )}
@@ -65,7 +95,7 @@ export default function MemberCard({ member, showActions = false, onEdit, classN
             )}
           </div>
 
-          {/* Contact Info */}
+          {/* Academic Info */}
           <div className="flex items-center gap-3 mt-3 text-[10px] text-dash-text-muted">
             {member.class_year && (
               <span className="flex items-center gap-1">
@@ -81,7 +111,7 @@ export default function MemberCard({ member, showActions = false, onEdit, classN
           {/* Social Links */}
           <div className="flex items-center gap-2 mt-2">
             {member.phone && (
-              <a href={`tel:${member.phone}`} className="text-dash-text-muted hover:text-dash-text transition-colors">
+              <a href={`tel:${member.phone}`} className="text-dash-text-muted hover:text-dash-text transition-colors p-1 -m-1">
                 <Phone size={12} />
               </a>
             )}
@@ -90,13 +120,13 @@ export default function MemberCard({ member, showActions = false, onEdit, classN
                 href={`https://instagram.com/${member.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-dash-text-muted hover:text-dash-text transition-colors"
+                className="text-dash-text-muted hover:text-dash-text transition-colors p-1 -m-1"
               >
                 <Instagram size={12} />
               </a>
             )}
             {member.discord_id && (
-              <span className="text-dash-text-muted" title={`Discord: ${member.discord_id}`}>
+              <span className="text-dash-text-muted p-1 -m-1" title={`Discord: ${member.discord_id}`}>
                 <MessageCircle size={12} />
               </span>
             )}
@@ -104,18 +134,62 @@ export default function MemberCard({ member, showActions = false, onEdit, classN
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Footer */}
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-dash-border/50">
         <span className="text-[10px] text-dash-text-muted">
-          Joined {new Date(member.created_at).toLocaleDateString()}
+          {neverLoggedIn ? (
+            <span className="text-yellow-600 dark:text-yellow-400">Invite pending</span>
+          ) : (
+            <>Last login {formatRelativeTime(member.last_login_at)}</>
+          )}
         </span>
-        <Link
-          href={`/dashboard/members/profile?id=${member.id}`}
-          className="flex items-center gap-1 text-[10px] text-dash-text-secondary hover:text-dash-text transition-colors uppercase tracking-wider font-medium"
-        >
-          View Profile
-          <ChevronRight size={12} />
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Quick Actions */}
+          {showActions && isExec && !isSelf && onAction && (
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => { e.preventDefault(); onAction('edit', member); }}
+                className="p-1.5 rounded-md hover:bg-dash-card-hover text-dash-text-muted hover:text-dash-text transition-colors"
+                title="Edit"
+              >
+                <Edit2 size={12} />
+              </button>
+              {neverLoggedIn && (
+                <button
+                  onClick={(e) => { e.preventDefault(); onAction('resend', member); }}
+                  className="p-1.5 rounded-md hover:bg-dash-card-hover text-dash-text-muted hover:text-dash-text transition-colors"
+                  title="Resend invite"
+                >
+                  <Send size={12} />
+                </button>
+              )}
+              {isActive ? (
+                <button
+                  onClick={(e) => { e.preventDefault(); onAction('deactivate', member); }}
+                  className="p-1.5 rounded-md hover:bg-dash-card-hover text-yellow-500 hover:text-yellow-600 transition-colors"
+                  title="Deactivate"
+                >
+                  <UserX size={12} />
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => { e.preventDefault(); onAction('reactivate', member); }}
+                  className="p-1.5 rounded-md hover:bg-dash-card-hover text-green-500 hover:text-green-600 transition-colors"
+                  title="Reactivate"
+                >
+                  <RefreshCw size={12} />
+                </button>
+              )}
+            </div>
+          )}
+          <Link
+            href={`/dashboard/members/profile?id=${member.id}`}
+            className="flex items-center gap-1 text-[10px] text-dash-text-secondary hover:text-dash-text transition-colors uppercase tracking-wider font-medium"
+          >
+            View Profile
+            <ChevronRight size={12} />
+          </Link>
+        </div>
       </div>
     </div>
   );

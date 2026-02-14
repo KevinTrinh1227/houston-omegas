@@ -6,21 +6,52 @@ import { json, error, options } from '../../lib/response';
 import { sanitize, isValidEmail } from '../../lib/validate';
 import { notifyNewMember } from '../../lib/notify';
 
-// GET: Auth - list members
+// GET: Auth - list members with chairs
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const result = await requireAuth(context.request, context.env.DB);
     if (result.errorResponse) return result.errorResponse;
 
+    // Fetch all members with basic query
     const rows = await context.env.DB.prepare(
       `SELECT id, email, first_name, last_name, role, chair_position, phone, class_year, major, instagram, discord_id,
-              avatar_url, is_active, created_at, last_login_at
+              avatar_url, is_active, eboard_position, membership_status, created_at, last_login_at
        FROM members ORDER BY
          CASE role WHEN 'admin' THEN 0 WHEN 'president' THEN 1 WHEN 'vpi' THEN 2 WHEN 'vpx' THEN 3 WHEN 'treasurer' THEN 4 WHEN 'secretary' THEN 5 WHEN 'junior_active' THEN 6 WHEN 'active' THEN 7 WHEN 'alumni' THEN 8 ELSE 9 END,
          first_name ASC`
     ).all();
 
-    return json(rows.results);
+    let members = rows.results as Record<string, unknown>[];
+
+    // Fetch chairs for each member
+    const memberIds = members.map(m => m.id as string);
+    if (memberIds.length > 0) {
+      try {
+        const chairsResult = await context.env.DB.prepare(
+          `SELECT member_id, chair_name FROM member_chairs WHERE member_id IN (${memberIds.map(() => '?').join(',')})`
+        ).bind(...memberIds).all();
+
+        const chairsByMember: Record<string, string[]> = {};
+        for (const row of chairsResult.results || []) {
+          const r = row as { member_id: string; chair_name: string };
+          if (!chairsByMember[r.member_id]) chairsByMember[r.member_id] = [];
+          chairsByMember[r.member_id].push(r.chair_name);
+        }
+
+        members = members.map(m => ({
+          ...m,
+          chairs: chairsByMember[m.id as string] || (m.chair_position ? [m.chair_position as string] : []),
+        }));
+      } catch {
+        // If member_chairs table doesn't exist, use legacy chair_position
+        members = members.map(m => ({
+          ...m,
+          chairs: m.chair_position ? [m.chair_position as string] : [],
+        }));
+      }
+    }
+
+    return json(members);
   } catch {
     return error('Internal server error', 500);
   }

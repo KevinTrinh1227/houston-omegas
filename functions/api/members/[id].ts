@@ -5,7 +5,7 @@ import { getClientIP } from '../../lib/rate-limit';
 import { json, error, options } from '../../lib/response';
 import { sanitize } from '../../lib/validate';
 
-// GET: Auth - get member details
+// GET: Auth - get member details with chairs
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const result = await requireAuth(context.request, context.env.DB);
@@ -14,14 +14,28 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const id = (context.params as { id: string }).id;
 
     const member = await context.env.DB.prepare(
-      `SELECT id, email, first_name, last_name, role, phone, class_year, major, instagram, discord_id,
-              avatar_url, is_active, created_at, updated_at, last_login_at
+      `SELECT id, email, first_name, last_name, role, chair_position, phone, class_year, major, instagram, discord_id,
+              avatar_url, is_active, eboard_position, membership_status, created_at, updated_at, last_login_at
        FROM members WHERE id = ?`
     ).bind(id).first();
 
     if (!member) return error('Member not found', 404);
 
-    return json(member);
+    // Fetch member chairs
+    let chairs: string[] = [];
+    try {
+      const chairsResult = await context.env.DB.prepare(
+        `SELECT chair_name FROM member_chairs WHERE member_id = ?`
+      ).bind(id).all();
+      chairs = (chairsResult.results || []).map((r: { chair_name: string }) => r.chair_name);
+    } catch {
+      // Use legacy chair_position if member_chairs doesn't exist
+      if (member.chair_position) {
+        chairs = [member.chair_position as string];
+      }
+    }
+
+    return json({ ...member, chairs });
   } catch {
     return error('Internal server error', 500);
   }
