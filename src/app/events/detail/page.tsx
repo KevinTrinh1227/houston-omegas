@@ -7,7 +7,15 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
-import { Calendar, MapPin, Clock, Ticket, ArrowLeft, ExternalLink, ShieldCheck, Users, Car, Phone, ChevronDown } from 'lucide-react';
+import { Calendar, MapPin, Clock, Ticket, ArrowLeft, ExternalLink, ShieldCheck, Users, Car, Phone, ChevronDown, X, Loader2, Minus, Plus } from 'lucide-react';
+
+interface TicketType {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  available?: number;
+}
 
 interface EventDetail {
   id: string;
@@ -32,6 +40,9 @@ interface EventDetail {
   capacity: string | null;
   parking_info: string | null;
   contact_info: string | null;
+  tickets_enabled: number | null;
+  ticket_types: string | null;
+  service_fee_percent: number | null;
 }
 
 function useCountdown(targetTime: number) {
@@ -95,12 +106,217 @@ function isSafeUrl(url: string | null | undefined): boolean {
   } catch { return false; }
 }
 
+function formatPrice(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+function TicketModal({
+  event,
+  ticketTypes,
+  serviceFeePercent,
+  onClose,
+}: {
+  event: EventDetail;
+  ticketTypes: TicketType[];
+  serviceFeePercent: number;
+  onClose: () => void;
+}) {
+  const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(ticketTypes[0] || null);
+  const [quantity, setQuantity] = useState(1);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const ticketTotal = selectedTicket ? selectedTicket.price * quantity : 0;
+  const serviceFee = Math.ceil(ticketTotal * (serviceFeePercent / 100));
+  const totalAmount = ticketTotal + serviceFee;
+
+  const handleCheckout = async () => {
+    if (!selectedTicket) return;
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/payments/events/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: event.id,
+          ticket_type_id: selectedTicket.id,
+          quantity,
+          customer_email: email,
+          customer_name: name,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Failed to create checkout');
+        setLoading(false);
+        return;
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">Get Tickets</h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={20} className="text-gray-400" />
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto max-h-[70vh]">
+          <p className="text-sm text-gray-500 mb-4">{event.title}</p>
+
+          <div className="space-y-2 mb-6">
+            <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Select Ticket</label>
+            {ticketTypes.map((ticket) => (
+              <button
+                key={ticket.id}
+                onClick={() => setSelectedTicket(ticket)}
+                className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                  selectedTicket?.id === ticket.id
+                    ? 'border-gray-900 bg-gray-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{ticket.name}</p>
+                    {ticket.description && (
+                      <p className="text-xs text-gray-500 mt-0.5">{ticket.description}</p>
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">{formatPrice(ticket.price)}</p>
+                </div>
+                {ticket.available !== undefined && (
+                  <p className="text-xs text-gray-400 mt-1">{ticket.available} remaining</p>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="mb-6">
+            <label className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2 block">Quantity</label>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Minus size={16} />
+              </button>
+              <span className="text-lg font-semibold text-gray-900 w-8 text-center">{quantity}</span>
+              <button
+                onClick={() => setQuantity(Math.min(10, quantity + 1))}
+                className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2 block">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gray-400 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2 block">Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gray-400 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-xl p-4 mb-6">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-gray-500">
+                {selectedTicket?.name} x {quantity}
+              </span>
+              <span className="text-gray-700">{formatPrice(ticketTotal)}</span>
+            </div>
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-gray-500">Service fee ({serviceFeePercent}%)</span>
+              <span className="text-gray-700">{formatPrice(serviceFee)}</span>
+            </div>
+            <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between">
+              <span className="text-sm font-medium text-gray-900">Total</span>
+              <span className="text-lg font-semibold text-gray-900">{formatPrice(totalAmount)}</span>
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleCheckout}
+            disabled={loading || !selectedTicket}
+            className="w-full bg-gray-900 text-white text-sm font-semibold py-4 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Ticket size={16} />
+                Pay {formatPrice(totalAmount)}
+              </>
+            )}
+          </button>
+
+          <p className="text-[10px] text-gray-400 text-center mt-4">
+            Secure checkout powered by Stripe. Card and Cash App accepted.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EventDetailContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug');
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
 
   useEffect(() => {
     if (!slug) { setNotFound(true); setLoading(false); return; }
@@ -153,6 +369,9 @@ function EventDetailContent() {
   const isToday = event ? new Date(event.start_time + 'Z').toDateString() === new Date().toDateString() : false;
   const rules: string[] = event?.rules ? (() => { try { return JSON.parse(event.rules); } catch { return []; } })() : [];
   const faq: { q: string; a: string }[] = event?.faq ? (() => { try { return JSON.parse(event.faq); } catch { return []; } })() : [];
+  const ticketTypes: TicketType[] = event?.ticket_types ? (() => { try { return JSON.parse(event.ticket_types); } catch { return []; } })() : [];
+  const hasTickets = event?.tickets_enabled && ticketTypes.length > 0;
+  const serviceFeePercent = event?.service_fee_percent ?? 5;
 
   // Google Maps embed URL from address (validated)
   const rawMapUrl = event?.map_url || (event?.address ? `https://www.google.com/maps?q=${encodeURIComponent(event.address)}&output=embed` : null);
@@ -317,7 +536,16 @@ function EventDetailContent() {
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-3 flex-wrap">
-              {isSafeUrl(event.ticket_url) && !isPast && (
+              {hasTickets && !isPast && (
+                <button
+                  onClick={() => setShowTicketModal(true)}
+                  className="inline-flex items-center gap-2 bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-all"
+                >
+                  <Ticket size={14} />
+                  Buy Tickets
+                </button>
+              )}
+              {!hasTickets && isSafeUrl(event.ticket_url) && !isPast && (
                 <a href={event.ticket_url!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-gray-900 text-white text-[11px] uppercase tracking-[0.15em] font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-all">
                   <Ticket size={14} />
                   Get Tickets
@@ -402,6 +630,16 @@ function EventDetailContent() {
       </div>
 
       <Footer variant="light" />
+
+      {/* Ticket Purchase Modal */}
+      {showTicketModal && hasTickets && (
+        <TicketModal
+          event={event}
+          ticketTypes={ticketTypes}
+          serviceFeePercent={serviceFeePercent}
+          onClose={() => setShowTicketModal(false)}
+        />
+      )}
 
       {/* Schema.org structured data for SEO */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({

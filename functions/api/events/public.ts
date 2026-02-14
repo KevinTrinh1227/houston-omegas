@@ -12,7 +12,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         `SELECT id, title, slug, description, event_type, location, address, map_url,
                 start_time, end_time, flyer_url, cover_url, age_requirement, dress_code,
                 ticket_url, ticket_price, rules, faq, disclaimer, capacity, parking_info,
-                contact_info, socials, is_public
+                contact_info, socials, is_public, tickets_enabled, ticket_types, service_fee_percent
          FROM events WHERE slug = ? AND is_public = 1`
       ).bind(slug).first();
 

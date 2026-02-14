@@ -12,7 +12,8 @@ import {
   Settings, UserPlus, BookOpen,
   ChevronLeft, ChevronDown, Info, LogOut,
   GraduationCap, PartyPopper, Camera, HeartHandshake,
-  Sun, Moon, Archive, PenSquare, CalendarDays, ExternalLink, Share2, Sparkles,
+  Sun, Moon, Archive, PenSquare, CalendarDays, ExternalLink, Share2,
+  CreditCard,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -46,6 +47,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Members', href: '/dashboard/members', icon: <Users size={18} />, roles: EXEC },
       { label: 'Finance & Sponsors', href: '/dashboard/finance', icon: <DollarSign size={18} />, roles: EXEC },
+      { label: 'Payments', href: '/dashboard/payments', icon: <CreditCard size={18} />, roles: ['admin', 'president', 'treasurer'] },
       { label: 'Meetings', href: '/dashboard/meetings', icon: <FileText size={18} />, roles: EXEC },
       { label: 'Inquiries', href: '/dashboard/submissions', icon: <Mail size={18} />, roles: EXEC },
       { label: 'SEO Content', href: '/dashboard/content', icon: <Sparkles size={18} />, roles: EXEC },
