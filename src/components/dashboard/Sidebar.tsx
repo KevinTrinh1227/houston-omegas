@@ -39,46 +39,54 @@ const navGroups: NavGroup[] = [
   {
     title: '',
     items: [
-      { label: 'Overview', href: '/dashboard', icon: <Home size={18} /> },
+      { label: 'Dashboard', href: '/dashboard', icon: <Home size={18} /> },
     ],
   },
   {
-    title: 'Executive Board',
+    title: 'Organization',
     items: [
       { label: 'Members', href: '/dashboard/members', icon: <Users size={18} />, roles: EXEC },
-      { label: 'Finance & Sponsors', href: '/dashboard/finance', icon: <DollarSign size={18} />, roles: EXEC },
-      { label: 'Payments', href: '/dashboard/payments', icon: <CreditCard size={18} />, roles: ['admin', 'president', 'treasurer'] },
-      { label: 'Meetings', href: '/dashboard/meetings', icon: <FileText size={18} />, roles: EXEC },
-      { label: 'Inquiries', href: '/dashboard/submissions', icon: <Mail size={18} />, roles: EXEC },
-      { label: 'SEO Content', href: '/dashboard/content', icon: <Sparkles size={18} />, roles: EXEC },
+      { label: 'Events', href: '/dashboard/calendar', icon: <Calendar size={18} /> },
+      { label: 'Recruitment', href: '/dashboard/recruitment', icon: <UserPlus size={18} />, roles: EXEC, chairPositions: ['recruitment'] },
     ],
   },
   {
-    title: 'Chairs',
+    title: 'Finance',
     items: [
-      { label: 'Recruitment', href: '/dashboard/recruitment', icon: <UserPlus size={18} />, roles: EXEC, chairPositions: ['recruitment'] },
-      { label: 'Alumni Relations', href: '/dashboard/alumni', icon: <GraduationCap size={18} />, roles: EXEC, chairPositions: ['alumni'] },
-      { label: 'Events & Socials', href: '/dashboard/events', icon: <PartyPopper size={18} />, roles: EXEC, chairPositions: ['social'] },
-      { label: 'Social Media', href: '/dashboard/socials', icon: <Share2 size={18} />, roles: EXEC, chairPositions: ['social_media'] },
-      { label: 'Brotherhood', href: '/dashboard/points', icon: <HeartHandshake size={18} />, roles: EXEC, chairPositions: ['brotherhood'] },
-      { label: 'Historian', href: '/dashboard/historian', icon: <Archive size={18} />, roles: EXEC, chairPositions: ['historian'] },
+      { label: 'Finance & Sponsors', href: '/dashboard/finance', icon: <DollarSign size={18} />, roles: EXEC },
+      { label: 'Payments', href: '/dashboard/payments', icon: <CreditCard size={18} />, roles: ['admin', 'president', 'treasurer'] },
+    ],
+  },
+  {
+    title: 'Content',
+    items: [
+      { label: 'Blog', href: '/dashboard/blog', icon: <FileText size={18} /> },
+      { label: 'SEO Content', href: '/dashboard/content', icon: <Sparkles size={18} />, roles: EXEC },
     ],
   },
   {
     title: 'Social Media',
     items: [
-      { label: 'Compose', href: `${POSTIZ_BASE_URL}/launches`, icon: <PenSquare size={18} />, roles: EXEC, chairPositions: ['social_media'], external: true },
-      { label: 'Calendar', href: `${POSTIZ_BASE_URL}/calendar`, icon: <CalendarDays size={18} />, roles: EXEC, chairPositions: ['social_media'], external: true },
+      { label: 'Overview', href: '/dashboard/socials', icon: <Share2 size={18} />, roles: EXEC, chairPositions: ['social_media'] },
       { label: 'Analytics', href: '/dashboard/analytics', icon: <BarChart3 size={18} />, roles: EXEC, chairPositions: ['social_media'] },
+      { label: 'Compose', href: `${POSTIZ_BASE_URL}/launches`, icon: <PenSquare size={18} />, roles: EXEC, chairPositions: ['social_media'], external: true },
+      { label: 'Post Calendar', href: `${POSTIZ_BASE_URL}/calendar`, icon: <CalendarDays size={18} />, roles: EXEC, chairPositions: ['social_media'], external: true },
+    ],
+  },
+  {
+    title: 'Files & Media',
+    items: [
+      { label: 'Files', href: '/dashboard/files', icon: <FolderOpen size={18} /> },
+      { label: 'Historian', href: '/dashboard/historian', icon: <Archive size={18} />, roles: EXEC, chairPositions: ['historian'] },
     ],
   },
   {
     title: 'Community',
     items: [
-      { label: 'Events', href: '/dashboard/calendar', icon: <Calendar size={18} /> },
       { label: 'Wiki', href: '/dashboard/wiki', icon: <BookOpen size={18} /> },
-      { label: 'Blog', href: '/dashboard/blog', icon: <BarChart3 size={18} /> },
-      { label: 'Files', href: '/dashboard/files', icon: <FolderOpen size={18} /> },
+      { label: 'Inbox', href: '/dashboard/submissions', icon: <Mail size={18} />, roles: EXEC },
+      { label: 'Brotherhood', href: '/dashboard/points', icon: <HeartHandshake size={18} />, roles: EXEC, chairPositions: ['brotherhood'] },
+      { label: 'Meetings', href: '/dashboard/meetings', icon: <FileText size={18} />, roles: EXEC },
     ],
   },
 ];
