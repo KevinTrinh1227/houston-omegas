@@ -3,8 +3,6 @@ import type { Env } from '../types';
 export interface SEOArticle {
   id: number;
   brand_id: number;
-  keyword_id: number | null;
-  content_type: 'how-to' | 'listicle' | 'comparison' | 'guide' | 'news-angle';
   title: string;
   slug: string;
   body: string;
@@ -12,57 +10,42 @@ export interface SEOArticle {
   meta_title: string | null;
   meta_description: string | null;
   cover_image_url: string | null;
-  quality_score: number | null;
+  content_type: 'how-to' | 'listicle' | 'comparison' | 'guide' | 'news-angle';
   status: 'draft' | 'pending' | 'approved' | 'published' | 'rejected';
+  quality_score: number | null;
+  word_count: number;
+  reading_time: number;
   published_at: string | null;
   created_at: string;
   updated_at: string;
-  keyword?: string;
-  first_name?: string;
-  last_name?: string;
-  word_count?: number;
 }
 
 export interface SEOStats {
   total_articles: number;
   published: number;
   pending: number;
-  draft: number;
   approved: number;
+  draft: number;
   rejected: number;
   total_keywords: number;
-  total_distributions: number;
 }
 
 export interface SEOKeyword {
   id: number;
   keyword: string;
-  search_volume: number | null;
-  difficulty: number | null;
-  intent: string | null;
-  cluster: string | null;
-  priority: number;
+  search_volume: number;
+  difficulty: number;
   status: string;
-  created_at: string;
 }
 
 export interface SEOEngineClient {
-  getArticles(params?: {
-    status?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ articles: SEOArticle[]; total: number; page: number; limit: number }>;
-  getArticle(id: number): Promise<SEOArticle>;
-  getArticleBySlug(slug: string): Promise<SEOArticle | null>;
-  getStats(): Promise<SEOStats>;
-  approveArticle(id: number): Promise<{ success: boolean }>;
-  rejectArticle(id: number): Promise<{ success: boolean }>;
-  getKeywords(params?: {
-    status?: string;
-    cluster?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ keywords: SEOKeyword[]; total: number }>;
+  getArticles: (params?: { status?: string; page?: number; limit?: number }) => Promise<{ articles: SEOArticle[]; total: number }>;
+  getArticle: (id: number) => Promise<SEOArticle | null>;
+  getArticleBySlug: (slug: string) => Promise<SEOArticle | null>;
+  getStats: () => Promise<SEOStats>;
+  approveArticle: (id: number) => Promise<boolean>;
+  rejectArticle: (id: number) => Promise<boolean>;
+  getKeywords: () => Promise<SEOKeyword[]>;
 }
 
 export function createSEOEngine(env: Env): SEOEngineClient {
@@ -70,89 +53,93 @@ export function createSEOEngine(env: Env): SEOEngineClient {
   const apiKey = env.SEO_ENGINE_API_KEY;
   const brandId = env.SEO_BRAND_ID || '3';
 
-  async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (apiKey) {
+    headers['X-API-Key'] = apiKey;
+  }
+
+  const fetchWithAuth = async (path: string, options: RequestInit = {}) => {
     const url = `${baseUrl}${path}`;
     const res = await fetch(url, {
       ...options,
-      headers: {
-        'X-API-Key': apiKey,
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers: { ...headers, ...(options.headers || {}) },
     });
-
     if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`SEO Engine error: ${res.status} ${text}`);
+      throw new Error(`SEO Engine error: ${res.status} ${res.statusText}`);
     }
-
     return res.json();
-  }
+  };
 
   return {
     async getArticles(params = {}) {
       const query = new URLSearchParams();
+      query.set('brand_id', brandId);
       if (params.status) query.set('status', params.status);
       if (params.page) query.set('page', String(params.page));
       if (params.limit) query.set('limit', String(params.limit));
-      const qs = query.toString();
-      return request(`/api/brands/${brandId}/content${qs ? `?${qs}` : ''}`);
+
+      const data = await fetchWithAuth(`/api/articles?${query.toString()}`);
+      return { articles: data.articles || [], total: data.total || 0 };
     },
 
     async getArticle(id: number) {
-      return request(`/api/content/${id}`);
+      try {
+        const data = await fetchWithAuth(`/api/articles/${id}`);
+        return data.article || null;
+      } catch {
+        return null;
+      }
     },
 
     async getArticleBySlug(slug: string) {
       try {
-        const data = await request<{ articles: SEOArticle[] }>(
-          `/api/brands/${brandId}/content?slug=${encodeURIComponent(slug)}&limit=1`
-        );
-        return data.articles?.[0] || null;
+        const data = await fetchWithAuth(`/api/articles/slug/${slug}?brand_id=${brandId}`);
+        return data.article || null;
       } catch {
         return null;
       }
     },
 
     async getStats() {
-      const [all, published, pending, draft, approved, rejected, keywords] = await Promise.all([
-        request<{ total: number }>(`/api/brands/${brandId}/content?limit=1`),
-        request<{ total: number }>(`/api/brands/${brandId}/content?status=published&limit=1`),
-        request<{ total: number }>(`/api/brands/${brandId}/content?status=pending&limit=1`),
-        request<{ total: number }>(`/api/brands/${brandId}/content?status=draft&limit=1`),
-        request<{ total: number }>(`/api/brands/${brandId}/content?status=approved&limit=1`),
-        request<{ total: number }>(`/api/brands/${brandId}/content?status=rejected&limit=1`),
-        request<{ total: number }>(`/api/brands/${brandId}/keywords?limit=1`).catch(() => ({ total: 0 })),
-      ]);
-
+      const data = await fetchWithAuth(`/api/brands/${brandId}/stats`);
       return {
-        total_articles: all.total || 0,
-        published: published.total || 0,
-        pending: pending.total || 0,
-        draft: draft.total || 0,
-        approved: approved.total || 0,
-        rejected: rejected.total || 0,
-        total_keywords: keywords.total || 0,
-        total_distributions: 0,
+        total_articles: data.total_articles || 0,
+        published: data.published || 0,
+        pending: data.pending || 0,
+        approved: data.approved || 0,
+        draft: data.draft || 0,
+        rejected: data.rejected || 0,
+        total_keywords: data.total_keywords || 0,
       };
     },
 
     async approveArticle(id: number) {
-      return request(`/api/content/${id}/approve`, { method: 'POST' });
+      try {
+        await fetchWithAuth(`/api/articles/${id}/approve`, { method: 'POST' });
+        return true;
+      } catch {
+        return false;
+      }
     },
 
     async rejectArticle(id: number) {
-      return request(`/api/content/${id}/reject`, { method: 'POST' });
+      try {
+        await fetchWithAuth(`/api/articles/${id}/reject`, { method: 'POST' });
+        return true;
+      } catch {
+        return false;
+      }
     },
 
-    async getKeywords(params = {}) {
-      const query = new URLSearchParams();
-      if (params.status) query.set('status', params.status);
-      if (params.cluster) query.set('cluster', params.cluster);
-      if (params.page) query.set('page', String(params.page));
-      if (params.limit) query.set('limit', String(params.limit));
-      const qs = query.toString();
-      return request(`/api/brands/${brandId}/keywords${qs ? `?${qs}` : ''}`);
+    async getKeywords() {
+      try {
+        const data = await fetchWithAuth(`/api/brands/${brandId}/keywords`);
+        return data.keywords || [];
+      } catch {
+        return [];
+      }
     },
   };
 }

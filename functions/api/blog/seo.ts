@@ -1,5 +1,5 @@
 import type { Env } from '../../types';
-import { jsonCached, error, options } from '../../lib/response';
+import { json, jsonCached, error, options } from '../../lib/response';
 import { createSEOEngine } from '../../lib/seo-engine';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -10,26 +10,25 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   try {
     const seo = createSEOEngine(env);
-    const data = await seo.getArticles({ status: 'published', page, limit });
+    const { articles, total } = await seo.getArticles({ status: 'published', page, limit });
 
-    const articles = data.articles.map((article) => ({
-      id: article.id,
-      slug: article.slug,
-      title: article.title,
-      excerpt: article.excerpt || article.meta_description,
-      cover_image_url: article.cover_image_url,
-      published_at: article.published_at,
+    const formatted = articles.map((a) => ({
+      id: a.id,
+      slug: a.slug,
+      title: a.title,
+      excerpt: a.excerpt || a.meta_description,
+      cover_image_url: a.cover_image_url,
+      content_type: a.content_type,
+      published_at: a.published_at,
       views: 0,
       first_name: 'Houston',
       last_name: 'Omegas',
-      source: 'seo' as const,
-      content_type: article.content_type,
     }));
 
-    return jsonCached({ articles, total: data.total, page, limit }, 300);
+    return jsonCached({ articles: formatted, total, page, limit }, 300);
   } catch (err) {
     console.error('SEO Engine error:', err);
-    return jsonCached({ articles: [], total: 0, page, limit }, 60);
+    return json({ articles: [], total: 0, page, limit });
   }
 };
 
