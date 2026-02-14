@@ -350,3 +350,70 @@ a { transition: color 0.2s ease; }
 .dark-scroll::-webkit-scrollbar-track { background: #111; }
 .dark-scroll::-webkit-scrollbar-thumb { background: #333; }
 .dark-scroll::-webkit-scrollbar-thumb:hover { background: #B2BEB5; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE APP UX ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Page transition */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-page-in { animation: page-in 0.2s ease-out; }
+
+/* Slide up from bottom */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+
+/* Card press effect */
+.card-press { transition: transform 0.1s ease-out; }
+.card-press:active { transform: scale(0.98); }
+
+/* Button press */
+.btn-press { transition: transform 0.1s ease-out; }
+.btn-press:active { transform: scale(0.95); }
+
+/* Stagger entrance */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger-item { animation: stagger-in 0.3s ease-out backwards; }
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+
+/* Bottom sheet */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--dash-sidebar);
+  border-radius: 1.5rem 1.5rem 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hover lift effect */
+.hover-lift { transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+.dark .hover-lift:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

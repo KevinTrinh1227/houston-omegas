@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import BottomTabBar from './BottomTabBar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,10 +33,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className={`transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-60'}`}>
         <TopBar onMenuToggle={() => setMobileOpen(!mobileOpen)} />
-        <main className="p-4 sm:p-6 safe-area-bottom">
+        <main className="p-4 sm:p-6 pb-24 lg:pb-6 safe-area-bottom animate-page-in">
           {children}
         </main>
       </div>
+      <BottomTabBar />
     </div>
   );
 }

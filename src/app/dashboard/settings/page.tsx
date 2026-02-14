@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isPushSupported, isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/lib/push';
+import { getDeviceInfo, type DeviceInfo } from '@/lib/pwa';
+import { Smartphone, Monitor, Tablet, Info, User } from 'lucide-react';
 
 interface Passkey {
   id: string;
@@ -462,14 +464,96 @@ export default function SettingsPage() {
 
         {/* Account info */}
         <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
-          <h2 className="text-sm font-medium text-dash-text mb-3">Account Information</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <User size={16} className="text-dash-text-muted" />
+            <h2 className="text-sm font-medium text-dash-text">Account Information</h2>
+          </div>
           <div className="space-y-2 text-xs text-dash-text-secondary">
             <p>Role: <span className="text-dash-text font-medium capitalize">{member?.role}</span></p>
             <p>Member since: <span className="text-dash-text">{member?.created_at ? new Date(member.created_at + 'Z').toLocaleDateString() : '-'}</span></p>
             <p>Last login: <span className="text-dash-text">{member?.last_login_at ? new Date(member.last_login_at + 'Z').toLocaleDateString() : '-'}</span></p>
           </div>
         </div>
+
+        {/* Device Info */}
+        <DeviceInfoSection />
+
+        {/* About */}
+        <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Info size={16} className="text-dash-text-muted" />
+            <h2 className="text-sm font-medium text-dash-text">About</h2>
+          </div>
+          <div className="space-y-2 text-xs text-dash-text-secondary">
+            <p>Version: <span className="text-dash-text font-medium">2.0.0</span></p>
+            <p>Last updated: <span className="text-dash-text">February 2026</span></p>
+            <div className="pt-2 flex gap-3">
+              <a href="https://github.com/KevinTrinh1227/houston-omegas" target="_blank" rel="noopener noreferrer" className="text-dash-text-muted hover:text-dash-text transition-colors underline">
+                GitHub
+              </a>
+              <a href="/dashboard/changelog" className="text-dash-text-muted hover:text-dash-text transition-colors underline">
+                Changelog
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function DeviceInfoSection() {
+  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
+
+  useEffect(() => {
+    setDeviceInfo(getDeviceInfo());
+    const handleResize = () => setDeviceInfo(getDeviceInfo());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!deviceInfo) return null;
+
+  const DeviceIcon = deviceInfo.platform === 'ios' || deviceInfo.platform === 'android'
+    ? Smartphone
+    : deviceInfo.screenWidth < 1024 ? Tablet : Monitor;
+
+  return (
+    <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
+      <div className="flex items-center gap-2 mb-3">
+        <DeviceIcon size={16} className="text-dash-text-muted" />
+        <h2 className="text-sm font-medium text-dash-text">Device Information</h2>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">PWA Status</p>
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${deviceInfo.isPWA ? 'bg-green-500' : 'bg-yellow-500'}`} />
+            <span className="text-xs text-dash-text font-medium">
+              {deviceInfo.isPWA ? 'Installed' : 'Browser'}
+            </span>
+          </div>
+        </div>
+        <div>
+          <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Platform</p>
+          <p className="text-xs text-dash-text font-medium capitalize">{deviceInfo.platform}</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Browser</p>
+          <p className="text-xs text-dash-text font-medium capitalize">{deviceInfo.browser}</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Screen Size</p>
+          <p className="text-xs text-dash-text font-medium">{deviceInfo.screenWidth} x {deviceInfo.screenHeight}</p>
+        </div>
+      </div>
+      {!deviceInfo.isPWA && deviceInfo.platform !== 'desktop' && (
+        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-xs text-blue-700 dark:text-blue-400">
+            <strong>Tip:</strong> Add to Home Screen for the best app-like experience with push notifications and offline support.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
