@@ -49,7 +49,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.redirect(`${loginUrl}?error=user_info_failed`, 302);
   }
 
-  const userInfo = (await userRes.json()) as { email?: string; picture?: string };
+  const userInfo = (await userRes.json()) as { email?: string; picture?: string; given_name?: string; family_name?: string };
   const email = userInfo.email?.toLowerCase();
 
   if (!email) {
@@ -58,7 +58,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   // Check if member exists (active or pending)
   const member = await context.env.DB.prepare(
-    'SELECT id, is_active, avatar_url, status FROM members WHERE email = ?'
+    'SELECT id, is_active, avatar_url, status, has_completed_onboarding, first_name, last_name FROM members WHERE email = ?'
   ).bind(email).first();
 
   if (!member) {
@@ -74,18 +74,44 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.redirect(`${loginUrl}?error=not_registered`, 302);
   }
 
+  // Update member info from Google if missing
+  const updates: string[] = [];
+  const binds: (string | null)[] = [];
+
   // Save avatar from Google if member doesn't have one
   if (!member.avatar_url && userInfo.picture) {
-    await context.env.DB.prepare(
-      `UPDATE members SET avatar_url = ?, updated_at = datetime('now') WHERE id = ?`
-    ).bind(userInfo.picture, member.id).run();
+    updates.push('avatar_url = ?');
+    binds.push(userInfo.picture);
   }
+
+  // Pre-fill name from Google if not already set
+  if (!member.first_name && userInfo.given_name) {
+    updates.push('first_name = ?');
+    binds.push(userInfo.given_name);
+  }
+  if (!member.last_name && userInfo.family_name) {
+    updates.push('last_name = ?');
+    binds.push(userInfo.family_name);
+  }
+
+  if (updates.length > 0) {
+    updates.push(`updated_at = datetime('now')`);
+    binds.push(member.id as string);
+    await context.env.DB.prepare(
+      `UPDATE members SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...binds).run();
+  }
+
+  // Redirect to onboarding if not completed
+  const redirectTo = member.has_completed_onboarding === 0
+    ? `${origin}/onboarding`
+    : `${origin}/dashboard`;
 
   return createOAuthSession(
     context.env.DB,
     member.id as string,
     'google',
     context.request,
-    `${origin}/dashboard`
+    redirectTo
   );
 };

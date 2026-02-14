@@ -28,7 +28,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Find the member by phone
     const member = await context.env.DB.prepare(
-      `SELECT id, is_active, phone_verified FROM members WHERE phone = ? OR phone = ?`
+      `SELECT id, is_active, phone_verified, has_completed_onboarding FROM members WHERE phone = ? OR phone = ?`
     ).bind(body.phone.replace(/\D/g, ''), normalized).first();
 
     if (!member || member.is_active !== 1) {
@@ -64,8 +64,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     await logAudit(context.env.DB, member.id as string, 'login_phone', 'member', member.id as string, { ip }, ip);
 
+    // Return redirect URL based on onboarding status
+    const redirectTo = member.has_completed_onboarding === 0 ? '/onboarding' : '/dashboard';
+
     return json(
-      { success: true },
+      { success: true, redirect: redirectTo },
       200,
       { 'Set-Cookie': getSessionCookie(token) }
     );

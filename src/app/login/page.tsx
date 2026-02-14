@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,12 +18,15 @@ const ERROR_MESSAGES: Record<string, string> = {
 function PhoneLogin() {
   const [phase, setPhase] = useState<'phone' | 'code'>('phone');
   const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [err, setErr] = useState('');
   const [cooldown, setCooldown] = useState(0);
+
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     return () => {
@@ -31,7 +34,24 @@ function PhoneLogin() {
     };
   }, []);
 
-  const startCooldown = () => {
+  // Focus phone input when phase changes to phone
+  useEffect(() => {
+    if (phase === 'phone' && phoneInputRef.current) {
+      phoneInputRef.current.focus();
+    }
+  }, [phase]);
+
+  // Focus first OTP input when phase changes to code
+  useEffect(() => {
+    if (phase === 'code') {
+      // Small delay to ensure DOM is ready
+      requestAnimationFrame(() => {
+        otpInputRefs.current[0]?.focus();
+      });
+    }
+  }, [phase]);
+
+  const startCooldown = useCallback(() => {
     setCooldown(60);
     if (cooldownRef.current) clearInterval(cooldownRef.current);
     cooldownRef.current = setInterval(() => {
@@ -43,9 +63,9 @@ function PhoneLogin() {
         return prev - 1;
       });
     }, 1000);
-  };
+  }, []);
 
-  const handleSendCode = async () => {
+  const handleSendCode = useCallback(async () => {
     const cleaned = phone.replace(/\D/g, '');
     if (cleaned.length < 10) {
       setErr('Please enter a valid 10-digit phone number.');
@@ -62,7 +82,7 @@ function PhoneLogin() {
       const data = await res.json();
       if (res.ok) {
         setPhase('code');
-        setCode('');
+        setOtpDigits(['', '', '', '', '', '']);
         startCooldown();
       } else {
         setErr(data.error || 'Failed to send code.');
@@ -72,11 +92,11 @@ function PhoneLogin() {
     } finally {
       setSending(false);
     }
-  };
+  }, [phone, startCooldown]);
 
-  const handleVerify = async () => {
-    const cleaned = code.replace(/\D/g, '');
-    if (cleaned.length !== 6) {
+  const handleVerify = useCallback(async (digits: string[]) => {
+    const code = digits.join('');
+    if (code.length !== 6) {
       setErr('Please enter the 6-digit code.');
       return;
     }
@@ -87,22 +107,107 @@ function PhoneLogin() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ phone, code: cleaned }),
+        body: JSON.stringify({ phone, code }),
       });
       const data = await res.json();
       if (res.ok) {
-        window.location.href = '/dashboard';
+        window.location.href = data.redirect || '/dashboard';
       } else {
         setErr(data.error || 'Verification failed.');
+        // Clear OTP and focus first input on error
+        setOtpDigits(['', '', '', '', '', '']);
+        requestAnimationFrame(() => {
+          otpInputRefs.current[0]?.focus();
+        });
       }
     } catch {
       setErr('Connection error.');
     } finally {
       setVerifying(false);
     }
-  };
+  }, [phone]);
 
-  const handleResend = async () => {
+  const handleOtpChange = useCallback((index: number, value: string) => {
+    // Only allow single digit
+    const digit = value.replace(/\D/g, '').slice(-1);
+
+    setOtpDigits(prev => {
+      const newDigits = [...prev];
+      newDigits[index] = digit;
+
+      // Auto-advance to next input
+      if (digit && index < 5) {
+        requestAnimationFrame(() => {
+          otpInputRefs.current[index + 1]?.focus();
+        });
+      }
+
+      // Auto-submit when all 6 digits entered
+      if (digit && index === 5) {
+        const allFilled = newDigits.every(d => d !== '');
+        if (allFilled) {
+          handleVerify(newDigits);
+        }
+      }
+
+      return newDigits;
+    });
+  }, [handleVerify]);
+
+  const handleOtpKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (otpDigits[index] === '' && index > 0) {
+        // Move to previous input and clear it
+        e.preventDefault();
+        setOtpDigits(prev => {
+          const newDigits = [...prev];
+          newDigits[index - 1] = '';
+          return newDigits;
+        });
+        requestAnimationFrame(() => {
+          otpInputRefs.current[index - 1]?.focus();
+        });
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      e.preventDefault();
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      e.preventDefault();
+      otpInputRefs.current[index + 1]?.focus();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const code = otpDigits.join('');
+      if (code.length === 6) {
+        handleVerify(otpDigits);
+      }
+    }
+  }, [otpDigits, handleVerify]);
+
+  const handleOtpPaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData.length > 0) {
+      const newDigits = [...otpDigits];
+      for (let i = 0; i < pastedData.length && i < 6; i++) {
+        newDigits[i] = pastedData[i];
+      }
+      setOtpDigits(newDigits);
+
+      // Focus the next empty input or last input
+      const nextEmptyIndex = newDigits.findIndex(d => d === '');
+      const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
+      requestAnimationFrame(() => {
+        otpInputRefs.current[focusIndex]?.focus();
+      });
+
+      // Auto-submit if all 6 pasted
+      if (pastedData.length === 6) {
+        handleVerify(newDigits);
+      }
+    }
+  }, [otpDigits, handleVerify]);
+
+  const handleResend = useCallback(async () => {
     if (cooldown > 0) return;
     setSending(true);
     setErr('');
@@ -115,7 +220,10 @@ function PhoneLogin() {
       const data = await res.json();
       if (res.ok) {
         startCooldown();
-        setCode('');
+        setOtpDigits(['', '', '', '', '', '']);
+        requestAnimationFrame(() => {
+          otpInputRefs.current[0]?.focus();
+        });
       } else {
         setErr(data.error || 'Failed to resend.');
       }
@@ -124,7 +232,14 @@ function PhoneLogin() {
     } finally {
       setSending(false);
     }
-  };
+  }, [cooldown, phone, startCooldown]);
+
+  const handlePhoneKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSendCode();
+    }
+  }, [handleSendCode]);
 
   return (
     <div>
@@ -137,16 +252,23 @@ function PhoneLogin() {
       {phase === 'phone' ? (
         <div className="space-y-3">
           <input
+            ref={phoneInputRef}
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            pattern="[0-9]*"
+            enterKeyHint="send"
             value={phone}
             onChange={e => setPhone(e.target.value)}
+            onKeyDown={handlePhoneKeyDown}
             placeholder="(123) 456-7890"
             className="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-gray-300 outline-none transition-all"
+            style={{ fontSize: '16px' }} // Prevent iOS zoom
           />
           <button
             onClick={handleSendCode}
             disabled={sending}
-            className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all text-sm font-medium text-white disabled:opacity-50"
+            className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all text-sm font-medium text-white disabled:opacity-50 min-h-[48px]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
@@ -157,34 +279,49 @@ function PhoneLogin() {
       ) : (
         <div className="space-y-3">
           <p className="text-gray-400 text-xs text-center">Code sent to {phone}</p>
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            value={code}
-            onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="000000"
-            autoFocus
-            className="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-gray-300 outline-none transition-all text-center tracking-[0.3em] font-mono"
-          />
+
+          {/* Individual OTP digit boxes */}
+          <div className="flex justify-center gap-2">
+            {otpDigits.map((digit, index) => (
+              <input
+                key={index}
+                ref={el => { otpInputRefs.current[index] = el; }}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                enterKeyHint={index === 5 ? 'send' : 'next'}
+                maxLength={1}
+                value={digit}
+                onChange={e => handleOtpChange(index, e.target.value)}
+                onKeyDown={e => handleOtpKeyDown(index, e)}
+                onPaste={handleOtpPaste}
+                disabled={verifying}
+                className="w-11 h-14 text-center text-xl font-mono bg-white border border-gray-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 outline-none transition-all disabled:opacity-50"
+                style={{ fontSize: '20px' }} // Prevent iOS zoom
+                aria-label={`Digit ${index + 1}`}
+              />
+            ))}
+          </div>
+
           <button
-            onClick={handleVerify}
-            disabled={verifying}
-            className="w-full px-4 py-3.5 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all text-sm font-medium text-white disabled:opacity-50"
+            onClick={() => handleVerify(otpDigits)}
+            disabled={verifying || otpDigits.some(d => d === '')}
+            className="w-full px-4 py-3.5 bg-gray-900 rounded-lg hover:bg-gray-800 transition-all text-sm font-medium text-white disabled:opacity-50 min-h-[48px]"
           >
             {verifying ? 'Verifying...' : 'Verify & Sign In'}
           </button>
           <div className="flex items-center justify-between">
             <button
-              onClick={() => { setPhase('phone'); setErr(''); setCode(''); }}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              onClick={() => { setPhase('phone'); setErr(''); setOtpDigits(['', '', '', '', '', '']); }}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors py-2 px-1 min-h-[44px]"
             >
               Change number
             </button>
             <button
               onClick={handleResend}
               disabled={cooldown > 0 || sending}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 py-2 px-1 min-h-[44px]"
             >
               {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
             </button>
@@ -192,6 +329,89 @@ function PhoneLogin() {
         </div>
       )}
     </div>
+  );
+}
+
+function PasskeyLogin({ onError }: { onError: (msg: string) => void }) {
+  const [loading, setLoading] = useState(false);
+  const [supported, setSupported] = useState(false);
+
+  useEffect(() => {
+    // Check WebAuthn support
+    setSupported(
+      typeof window !== 'undefined' &&
+      window.PublicKeyCredential !== undefined &&
+      typeof window.PublicKeyCredential === 'function'
+    );
+  }, []);
+
+  const handlePasskeyLogin = async () => {
+    setLoading(true);
+    onError('');
+
+    try {
+      // Get challenge from server
+      const optionsRes = await fetch('/api/auth/passkey/login-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!optionsRes.ok) {
+        const data = await optionsRes.json();
+        onError(data.error || 'Failed to start passkey login.');
+        return;
+      }
+
+      const options = await optionsRes.json();
+
+      // Import SimpleWebAuthn browser
+      const { startAuthentication } = await import('@simplewebauthn/browser');
+
+      // Trigger browser passkey UI
+      const credential = await startAuthentication({ optionsJSON: options });
+
+      // Verify with server
+      const verifyRes = await fetch('/api/auth/passkey/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(credential),
+      });
+
+      if (verifyRes.ok) {
+        const data = await verifyRes.json();
+        window.location.href = data.redirect || '/dashboard';
+      } else {
+        const data = await verifyRes.json();
+        onError(data.error || 'Passkey verification failed.');
+      }
+    } catch (e) {
+      // User cancelled or other error
+      if (e instanceof Error && e.name === 'NotAllowedError') {
+        // User cancelled - don't show error
+      } else {
+        onError('Passkey login failed. Try another method.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!supported) return null;
+
+  return (
+    <button
+      onClick={handlePasskeyLogin}
+      disabled={loading}
+      className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 disabled:opacity-50 min-h-[48px]"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <circle cx="12" cy="16" r="1"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+      {loading ? 'Authenticating...' : 'Sign in with Passkey'}
+    </button>
   );
 }
 
@@ -233,9 +453,10 @@ function LoginContent() {
             <div className="flex-1 h-px bg-gray-200" />
           </div>
           <div className="mt-5 space-y-3">
+            <PasskeyLogin onError={setError} />
             <a
               href="/api/auth/login/google"
-              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
+              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 min-h-[48px]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -247,7 +468,7 @@ function LoginContent() {
             </a>
             <a
               href="/api/auth/login/discord"
-              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-[#5865F2] border border-[#5865F2] rounded-lg hover:bg-[#4752C4] transition-all text-sm font-medium text-white"
+              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-[#5865F2] border border-[#5865F2] rounded-lg hover:bg-[#4752C4] transition-all text-sm font-medium text-white min-h-[48px]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                 <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z"/>
@@ -259,9 +480,10 @@ function LoginContent() {
       ) : (
         <>
           <div className="space-y-3">
+            <PasskeyLogin onError={setError} />
             <a
               href="/api/auth/login/google"
-              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
+              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 min-h-[48px]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -274,7 +496,7 @@ function LoginContent() {
 
             <a
               href="/api/auth/login/discord"
-              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-[#5865F2] border border-[#5865F2] rounded-lg hover:bg-[#4752C4] transition-all text-sm font-medium text-white"
+              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-[#5865F2] border border-[#5865F2] rounded-lg hover:bg-[#4752C4] transition-all text-sm font-medium text-white min-h-[48px]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                 <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z"/>
@@ -284,7 +506,7 @@ function LoginContent() {
 
             <button
               onClick={() => setShowPhone(true)}
-              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
+              className="flex items-center justify-center gap-3 w-full px-4 py-3.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 min-h-[48px]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
