@@ -12,7 +12,7 @@ import {
   Settings, UserPlus, BookOpen,
   ChevronLeft, ChevronDown, Info, LogOut,
   GraduationCap, PartyPopper, Camera, HeartHandshake,
-  Sun, Moon, Archive, PenSquare, CalendarDays, ExternalLink, Share2,
+  Sun, Moon, Archive, PenSquare, CalendarDays, ExternalLink, Share2, Sparkles,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -48,6 +48,7 @@ const navGroups: NavGroup[] = [
       { label: 'Finance & Sponsors', href: '/dashboard/finance', icon: <DollarSign size={18} />, roles: EXEC },
       { label: 'Meetings', href: '/dashboard/meetings', icon: <FileText size={18} />, roles: EXEC },
       { label: 'Inquiries', href: '/dashboard/submissions', icon: <Mail size={18} />, roles: EXEC },
+      { label: 'SEO Content', href: '/dashboard/content', icon: <Sparkles size={18} />, roles: EXEC },
     ],
   },
   {
@@ -132,12 +133,12 @@ function SidebarThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted) return <div className="p-2 w-[31px] h-[31px]" />;
+  if (!mounted) return <div className="p-2 w-[44px] h-[44px] sm:w-[31px] sm:h-[31px]" />;
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
+      className="flex items-center justify-center p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
     >
       {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
     </button>
@@ -313,13 +314,13 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
           </div>
         )}
 
-        {/* Action buttons row */}
+        {/* Action buttons row - min 44px touch targets on mobile */}
         <div className={`flex items-center ${collapsed && !isMobile ? 'flex-col gap-1' : 'gap-1'}`}>
           <Link
             href="/dashboard/settings"
             onClick={onClose}
             title="Settings"
-            className={`flex items-center justify-center p-2 rounded-lg transition-all ${
+            className={`flex items-center justify-center p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-lg transition-all ${
               isActive('/dashboard/settings')
                 ? 'bg-dash-sidebar-active text-dash-sidebar-text-active'
                 : 'text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover'
@@ -331,14 +332,14 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
           <button
             onClick={() => setShowChangelog(true)}
             title="Changelog"
-            className="flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
+            className="flex items-center justify-center p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-lg text-dash-sidebar-text-muted hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover transition-all"
           >
             <Info size={15} />
           </button>
           <button
             onClick={logout}
             title="Sign Out"
-            className="flex items-center justify-center p-2 rounded-lg text-dash-sidebar-text-muted hover:text-red-400 hover:bg-dash-sidebar-hover transition-all"
+            className="flex items-center justify-center p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-lg text-dash-sidebar-text-muted hover:text-red-400 hover:bg-dash-sidebar-hover transition-all"
           >
             <LogOut size={15} />
           </button>

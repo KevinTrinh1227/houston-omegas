@@ -54,15 +54,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
        VALUES (?, ?, ?, ?, ?, ?, ?)`
     ).bind(id, title, meeting_type, meeting_date, semester_id, notes, result.auth.member.id).run();
 
-    // Create action items if provided
+    // Create action items if provided (batch to avoid N+1)
     const actionItems = body.action_items as { description: string; assigned_to?: string; due_date?: string }[] | undefined;
     if (actionItems?.length) {
-      for (const item of actionItems) {
+      const stmts = actionItems.map(item => {
         const aiId = generateId();
-        await context.env.DB.prepare(
+        return context.env.DB.prepare(
           `INSERT INTO action_items (id, meeting_id, description, assigned_to, due_date) VALUES (?, ?, ?, ?, ?)`
-        ).bind(aiId, id, sanitize(item.description), item.assigned_to || null, item.due_date || null).run();
-      }
+        ).bind(aiId, id, sanitize(item.description), item.assigned_to || null, item.due_date || null);
+      });
+      await context.env.DB.batch(stmts);
     }
 
     const ip = getClientIP(context.request);

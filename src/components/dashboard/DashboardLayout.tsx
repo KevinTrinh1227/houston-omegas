@@ -28,11 +28,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="min-h-screen bg-dash-bg">
+    <div className="min-h-screen bg-dash-bg safe-area-inset">
       <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className={`transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-60'}`}>
         <TopBar onMenuToggle={() => setMobileOpen(!mobileOpen)} />
-        <main className="p-4 sm:p-6">
+        <main className="p-4 sm:p-6 safe-area-bottom">
           {children}
         </main>
       </div>
