@@ -110,7 +110,7 @@ export default function MemberCard({ member, showActions = false, onEdit, classN
           Joined {new Date(member.created_at).toLocaleDateString()}
         </span>
         <Link
-          href={`/dashboard/members/${member.id}`}
+          href={`/dashboard/members/profile?id=${m.id}`}
           className="flex items-center gap-1 text-[10px] text-dash-text-secondary hover:text-dash-text transition-colors uppercase tracking-wider font-medium"
         >
           View Profile

@@ -75,7 +75,7 @@ export default function MemberRow({
           )}
           <div>
             <Link
-              href={`/dashboard/members/${member.id}`}
+              href={`/dashboard/members/profile?id=${m.id}`}
               className="text-xs font-medium text-dash-text hover:underline"
             >
               {member.first_name} {member.last_name}
@@ -164,7 +164,7 @@ export default function MemberRow({
               className="absolute right-5 top-full mt-1 bg-dash-card border border-dash-border rounded-lg shadow-lg z-50 min-w-[160px] py-1"
             >
               <Link
-                href={`/dashboard/members/${member.id}`}
+                href={`/dashboard/members/profile?id=${m.id}`}
                 className="w-full text-left px-3 py-2 text-xs text-dash-text hover:bg-dash-card-hover transition-colors flex items-center gap-2"
               >
                 <Eye size={12} />

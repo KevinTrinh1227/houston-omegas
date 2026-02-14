@@ -176,7 +176,7 @@ export default function BlogPage() {
               {posts.map(post => (
                 <Link
                   key={`${post.source}-${post.id}`}
-                  href={`/blog/${post.slug}`}
+                  href={`/blog/article?slug=${a.slug}`}
                   className="group rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"
                 >
                   {post.cover_image_url ? (
