@@ -13,7 +13,7 @@ import {
   ChevronLeft, ChevronDown, Info, LogOut,
   GraduationCap, PartyPopper, Camera, HeartHandshake,
   Sun, Moon, Archive, PenSquare, CalendarDays, ExternalLink, Share2,
-  Sparkles,
+  Sparkles, CreditCard,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
