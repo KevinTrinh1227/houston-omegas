@@ -174,7 +174,7 @@ export default function HomePage() {
         </div>
 
         {/* Title + CTAs */}
-        <div className="relative z-10 flex flex-col items-center pt-[16vh] sm:pt-[18vh] lg:pt-[26vh]">
+        <div className="relative z-10 flex flex-col items-center pt-[22vh] sm:pt-[22vh] lg:pt-[26vh]">
           <div className="animate-float">
             <p className="text-black/60 text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase mb-1 text-center" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Established 2004

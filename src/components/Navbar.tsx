@@ -70,7 +70,7 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
         <div className="max-w-7xl mx-auto px-5 sm:px-10 flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             <Image src="/images/omega-logo.jpg" alt="Logo" width={34} height={34} className="rounded-full group-hover:opacity-80 transition-opacity" />
-            <span className={`${nameColor} ${nameHover} text-xs sm:text-sm uppercase tracking-[0.04em] font-bold transition-colors`} style={{ fontFamily: 'var(--font-cinzel), serif' }}>Houston Omegas</span>
+            <span className={`${nameColor} ${nameHover} text-sm sm:text-base uppercase tracking-[0.04em] font-extrabold transition-colors`} style={{ fontFamily: 'var(--font-cinzel), serif' }}>Houston Omegas</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-3">
