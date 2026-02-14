@@ -98,3 +98,5 @@ export function notifyNewMember(webhookUrl: string | undefined, name: string, ro
     color: 0x22c55e,
   });
 }
+
+export { sendDiscordNotification as notifyDiscord };
