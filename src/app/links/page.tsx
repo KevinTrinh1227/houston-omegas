@@ -17,11 +17,13 @@ const socials = [
 ];
 
 const links = [
+  { label: '💬 Join Our WhatsApp', href: 'https://chat.whatsapp.com/BuN7ZMjKR4Z06QWWe1q3vP', desc: 'Community group chat', external: true },
   { label: 'Parties & Events', href: '/#events', desc: 'See upcoming events' },
   { label: 'Recruitment', href: '/recruitment', desc: 'Rush Fall 2026' },
   { label: 'Venue Rental', href: '/rent', desc: 'Book Omega Mansion' },
   { label: 'Merch', href: '/merch', desc: 'Shop official apparel' },
   { label: 'Partner With Us', href: '/partners', desc: 'Sponsorship opportunities' },
+  { label: 'Blog', href: '/blog', desc: 'Articles & updates' },
   { label: 'Member Login', href: '/login', desc: 'Members & alumni' },
 ];
 
@@ -66,7 +68,8 @@ export default function LinksPage() {
             <Link
               key={l.label}
               href={l.href}
-              className="block w-full border border-white/[0.1] hover:border-white/[0.2] rounded-xl px-5 py-4 bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-300 group"
+              {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              className={`block w-full border rounded-xl px-5 py-4 transition-all duration-300 group ${l.external ? 'border-green-500/30 hover:border-green-400/50 bg-green-500/[0.05] hover:bg-green-500/[0.1]' : 'border-white/[0.1] hover:border-white/[0.2] bg-white/[0.02] hover:bg-white/[0.05]'}`}
             >
               <div className="flex items-center justify-between">
                 <div>
