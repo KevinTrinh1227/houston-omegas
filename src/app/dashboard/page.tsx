@@ -6,7 +6,8 @@ import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isExecRole } from '@/lib/roles';
 import {
   PenSquare, LayoutGrid, Users, Settings, Calendar, BookOpen,
-  ArrowRight, FileText, FolderOpen, Star, ClipboardList,
+  ArrowRight, FileText, FolderOpen, Star, ClipboardList, Share2,
+  Instagram, Twitter, ExternalLink,
 } from 'lucide-react';
 import {
   BarChart, Bar, AreaChart, Area,
@@ -44,6 +45,35 @@ interface PageViewData {
   total: number;
 }
 
+interface SocialAnalytics {
+  source: string;
+  totalAccounts: number;
+  activeAccounts: number;
+  totalFollowers?: number;
+  totalPosts?: number;
+  totalLikes?: number;
+  totalViews?: number;
+  platforms: Array<{
+    name: string;
+    followers?: number;
+    posts?: number;
+  }>;
+  postizConnected: boolean;
+}
+
+const POSTIZ_BASE_URL = 'https://social.houstonomegas.com';
+
+const PLATFORM_COLORS: Record<string, string> = {
+  instagram: '#E4405F', twitter: '#1DA1F2', tiktok: '#000000',
+  youtube: '#FF0000', facebook: '#1877F2', linkedin: '#0A66C2',
+};
+
+function formatNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString();
+}
+
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -59,6 +89,7 @@ export default function DashboardOverview() {
 
   const [analyticsData, setAnalyticsData] = useState<Analytics | null>(null);
   const [pageViews, setPageViews] = useState<PageViewData | null>(null);
+  const [socialAnalytics, setSocialAnalytics] = useState<SocialAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   useEffect(() => {
@@ -73,12 +104,14 @@ export default function DashboardOverview() {
     if (!isExec) { setAnalyticsLoading(false); return; }
     setAnalyticsLoading(true);
     try {
-      const [analyticsRes, viewsRes] = await Promise.all([
+      const [analyticsRes, viewsRes, socialRes] = await Promise.all([
         fetch('/api/dashboard/analytics', { credentials: 'include' }),
         fetch('/api/analytics/views?days=30', { credentials: 'include' }).catch(() => null),
+        fetch('/api/social/analytics', { credentials: 'include' }).catch(() => null),
       ]);
       if (analyticsRes.ok) setAnalyticsData(await analyticsRes.json());
       if (viewsRes && viewsRes.ok) setPageViews(await viewsRes.json());
+      if (socialRes && socialRes.ok) setSocialAnalytics(await socialRes.json());
     } catch { /* */ }
     finally { setAnalyticsLoading(false); }
   }, [isExec]);
@@ -254,6 +287,86 @@ export default function DashboardOverview() {
                   <Bar dataKey="views" fill="#6366f1" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Social Media Analytics Widget */}
+          {socialAnalytics && (
+            <div className="bg-gradient-to-r from-violet-500/10 to-indigo-500/10 rounded-xl border border-violet-200 dark:border-violet-800 p-6 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white">
+                    <Share2 size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-dash-text">Social Media</h3>
+                    <p className="text-[10px] text-dash-text-muted">
+                      {socialAnalytics.postizConnected ? 'Managed via Postiz' : 'Local analytics'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/dashboard/socials"
+                    className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-dash-text-muted hover:text-dash-text font-medium"
+                  >
+                    View All
+                    <ArrowRight size={12} />
+                  </Link>
+                  {socialAnalytics.postizConnected && (
+                    <a
+                      href={POSTIZ_BASE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium ml-3"
+                    >
+                      Postiz
+                      <ExternalLink size={10} />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+                  <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Followers</p>
+                  <p className="text-lg font-semibold text-dash-text">{formatNumber(socialAnalytics.totalFollowers || 0)}</p>
+                </div>
+                <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+                  <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Posts</p>
+                  <p className="text-lg font-semibold text-dash-text">{formatNumber(socialAnalytics.totalPosts || 0)}</p>
+                </div>
+                <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+                  <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Likes</p>
+                  <p className="text-lg font-semibold text-dash-text">{formatNumber(socialAnalytics.totalLikes || 0)}</p>
+                </div>
+                <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+                  <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Views</p>
+                  <p className="text-lg font-semibold text-dash-text">{formatNumber(socialAnalytics.totalViews || 0)}</p>
+                </div>
+              </div>
+
+              {socialAnalytics.platforms && socialAnalytics.platforms.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {socialAnalytics.platforms.slice(0, 6).map((platform) => (
+                    <div
+                      key={platform.name}
+                      className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-full px-3 py-1.5"
+                    >
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
+                        style={{ backgroundColor: PLATFORM_COLORS[platform.name] || '#666' }}
+                      >
+                        {platform.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <span className="text-xs text-dash-text capitalize">{platform.name}</span>
+                      {platform.followers !== undefined && (
+                        <span className="text-[10px] text-dash-text-muted">{formatNumber(platform.followers)}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

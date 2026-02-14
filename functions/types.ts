@@ -13,6 +13,8 @@ export interface Env {
   TWILIO_AUTH_TOKEN: string;
   TWILIO_PHONE_NUMBER: string;
   TWILIO_MESSAGING_SERVICE_SID: string;
+  POSTIZ_API_KEY: string;
+  POSTIZ_BASE_URL: string;
 }
 
 export type Role = 'admin' | 'president' | 'vpi' | 'vpx' | 'treasurer' | 'secretary' | 'junior_active' | 'active' | 'alumni' | 'inactive';
