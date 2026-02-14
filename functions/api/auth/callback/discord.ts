@@ -49,7 +49,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.redirect(`${loginUrl}?error=user_info_failed`, 302);
   }
 
-  const userInfo = (await userRes.json()) as { email?: string; id?: string; avatar?: string };
+  const userInfo = (await userRes.json()) as { email?: string; id?: string; avatar?: string; global_name?: string; username?: string };
   const email = userInfo.email?.toLowerCase();
 
   if (!email) {
@@ -58,7 +58,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   // Check if member exists (active or pending)
   const member = await context.env.DB.prepare(
-    'SELECT id, is_active, avatar_url, status FROM members WHERE email = ?'
+    'SELECT id, is_active, avatar_url, status, has_completed_onboarding, first_name FROM members WHERE email = ?'
   ).bind(email).first();
 
   if (!member) {
@@ -82,6 +82,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       updates.push(`avatar_url = ?`);
       binds.push(`https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}.png?size=256`);
     }
+    // Pre-fill name from Discord display name if not set
+    if (!member.first_name && (userInfo.global_name || userInfo.username)) {
+      const displayName = userInfo.global_name || userInfo.username || '';
+      const nameParts = displayName.split(' ');
+      if (nameParts.length >= 1) {
+        updates.push('first_name = ?');
+        binds.push(nameParts[0]);
+      }
+      if (nameParts.length >= 2) {
+        updates.push('last_name = ?');
+        binds.push(nameParts.slice(1).join(' '));
+      }
+    }
     updates.push(`updated_at = datetime('now')`);
     binds.push(member.id as string);
     await context.env.DB.prepare(
@@ -89,11 +102,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     ).bind(...binds).run();
   }
 
+  // Redirect to onboarding if not completed
+  const redirectTo = member.has_completed_onboarding === 0
+    ? `${origin}/onboarding`
+    : `${origin}/dashboard`;
+
   return createOAuthSession(
     context.env.DB,
     member.id as string,
     'discord',
     context.request,
-    `${origin}/dashboard`
+    redirectTo
   );
 };

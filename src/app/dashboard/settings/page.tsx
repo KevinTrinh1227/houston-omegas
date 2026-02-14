@@ -1,8 +1,230 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/dashboard/AuthProvider';
 import { isPushSupported, isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/lib/push';
+
+interface Passkey {
+  id: string;
+  name: string;
+  device_type: string;
+  backed_up: boolean;
+  created_at: string;
+  last_used_at: string | null;
+}
+
+function PasskeySettings() {
+  const [supported, setSupported] = useState(false);
+  const [passkeys, setPasskeys] = useState<Passkey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    setSupported(
+      typeof window !== 'undefined' &&
+      window.PublicKeyCredential !== undefined &&
+      typeof window.PublicKeyCredential === 'function'
+    );
+  }, []);
+
+  const fetchPasskeys = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/passkey/list', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setPasskeys(data.passkeys || []);
+      }
+    } catch {
+      // Ignore
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (supported) {
+      fetchPasskeys();
+    } else {
+      setLoading(false);
+    }
+  }, [supported, fetchPasskeys]);
+
+  const handleRegister = async () => {
+    setRegistering(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Get registration options
+      const optionsRes = await fetch('/api/auth/passkey/register-options', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!optionsRes.ok) {
+        const data = await optionsRes.json();
+        setError(data.error || 'Failed to start registration.');
+        return;
+      }
+
+      const options = await optionsRes.json();
+
+      // Import SimpleWebAuthn
+      const { startRegistration } = await import('@simplewebauthn/browser');
+
+      // Trigger browser passkey UI
+      const credential = await startRegistration({ optionsJSON: options });
+
+      // Verify with server
+      const verifyRes = await fetch('/api/auth/passkey/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(credential),
+      });
+
+      if (verifyRes.ok) {
+        setSuccess('Passkey added successfully!');
+        fetchPasskeys();
+      } else {
+        const data = await verifyRes.json();
+        setError(data.error || 'Failed to register passkey.');
+      }
+    } catch (e) {
+      if (e instanceof Error && e.name === 'NotAllowedError') {
+        // User cancelled
+      } else {
+        setError('Failed to add passkey. Try again.');
+      }
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Remove this passkey? You will not be able to use it to sign in.')) return;
+
+    setDeleting(id);
+    setError('');
+    setSuccess('');
+
+    try {
+      const res = await fetch(`/api/auth/passkey/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        setSuccess('Passkey removed.');
+        setPasskeys(passkeys.filter(p => p.id !== id));
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Failed to remove passkey.');
+      }
+    } catch {
+      setError('Failed to remove passkey.');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  if (!supported) {
+    return (
+      <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
+        <h2 className="text-sm font-medium text-dash-text mb-3">Passkeys &amp; Biometric Login</h2>
+        <p className="text-xs text-dash-text-secondary">
+          Passkeys are not supported in this browser. Try using Safari, Chrome, or Edge.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 bg-dash-card rounded-xl border border-dash-border p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-sm font-medium text-dash-text">Passkeys &amp; Biometric Login</h2>
+          <p className="text-[11px] text-dash-text-muted mt-0.5">Use Face ID, Touch ID, or Windows Hello to sign in</p>
+        </div>
+        <button
+          onClick={handleRegister}
+          disabled={registering}
+          className="text-[10px] uppercase tracking-[0.15em] font-semibold px-4 py-2 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
+        >
+          {registering ? 'Adding...' : 'Add Passkey'}
+        </button>
+      </div>
+
+      {error && (
+        <div className="mb-3 p-2.5 rounded-lg text-xs text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-3 p-2.5 rounded-lg text-xs text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400 border border-green-200 dark:border-green-800">
+          {success}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-4">
+          <div className="w-5 h-5 border-2 border-dash-border border-t-dash-text rounded-full animate-spin" />
+        </div>
+      ) : passkeys.length === 0 ? (
+        <div className="text-center py-4 text-xs text-dash-text-secondary">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-2 text-dash-text-muted">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <circle cx="12" cy="16" r="1"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <p>No passkeys registered</p>
+          <p className="text-[10px] mt-1">Add a passkey to enable Face ID, Touch ID, or fingerprint login</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {passkeys.map((passkey) => (
+            <div key={passkey.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-dash-bg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-dash-badge-bg flex items-center justify-center">
+                  {passkey.device_type === 'singleDevice' ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-dash-text-muted">
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                      <line x1="12" y1="18" x2="12.01" y2="18"/>
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-dash-text-muted">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-dash-text font-medium">{passkey.name}</p>
+                  <p className="text-[10px] text-dash-text-muted">
+                    Added {new Date(passkey.created_at).toLocaleDateString()}
+                    {passkey.last_used_at && ` · Last used ${new Date(passkey.last_used_at).toLocaleDateString()}`}
+                    {passkey.backed_up && ' · Synced'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => handleDelete(passkey.id)}
+                disabled={deleting === passkey.id}
+                className="text-[10px] text-red-500 hover:text-red-600 font-medium disabled:opacity-50 px-2 py-1"
+              >
+                {deleting === passkey.id ? '...' : 'Remove'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PushNotificationSettings() {
   const [supported, setSupported] = useState(false);
@@ -231,6 +453,9 @@ export default function SettingsPage() {
             </button>
           </div>
         </form>
+
+        {/* Passkeys */}
+        <PasskeySettings />
 
         {/* Notifications */}
         <PushNotificationSettings />
