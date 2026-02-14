@@ -8,7 +8,8 @@ import {
   LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { Eye, Users, Globe, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+import { Eye, Users, Globe, ArrowUpRight, ArrowDownRight, TrendingUp, ExternalLink, Share2 } from 'lucide-react';
+import Link from 'next/link';
 
 /* ───── Types ───── */
 interface SocialAccount {
@@ -252,10 +253,34 @@ function WebsiteAnalytics() {
   );
 }
 
+const POSTIZ_BASE_URL = 'https://social.houstonomegas.com';
+
+interface PostizAnalytics {
+  source: string;
+  totalAccounts: number;
+  activeAccounts: number;
+  totalFollowers?: number;
+  totalPosts?: number;
+  totalLikes?: number;
+  totalViews?: number;
+  platforms: Array<{
+    name: string;
+    count?: number;
+    followers?: number;
+    posts?: number;
+    likes?: number;
+    views?: number;
+    accounts?: Array<{ id: string; name: string; handle: string; picture?: string }>;
+  }>;
+  postizConnected: boolean;
+  postizUrl?: string;
+}
+
 /* ───── Social Media Tab ───── */
 function SocialMediaTab() {
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [metricsMap, setMetricsMap] = useState<Record<string, SocialMetric[]>>({});
+  const [postizData, setPostizData] = useState<PostizAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState({ platform: 'instagram', handle: '', url: '' });
@@ -266,9 +291,13 @@ function SocialMediaTab() {
   const fetchSocials = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/social/accounts', { credentials: 'include' });
-      if (res.ok) {
-        const data: SocialAccount[] = await res.json();
+      const [accountsRes, postizRes] = await Promise.all([
+        fetch('/api/social/accounts', { credentials: 'include' }),
+        fetch('/api/social/analytics', { credentials: 'include' }),
+      ]);
+
+      if (accountsRes.ok) {
+        const data: SocialAccount[] = await accountsRes.json();
         setAccounts(data);
         const metricsEntries = await Promise.all(
           data.map(async (acc) => {
@@ -278,6 +307,11 @@ function SocialMediaTab() {
           })
         );
         setMetricsMap(Object.fromEntries(metricsEntries));
+      }
+
+      if (postizRes.ok) {
+        const postizAnalytics = await postizRes.json();
+        setPostizData(postizAnalytics);
       }
     } catch {}
     finally { setLoading(false); }
@@ -333,6 +367,73 @@ function SocialMediaTab() {
 
   return (
     <div className="space-y-6">
+      {/* Postiz Quick Stats */}
+      {postizData && (
+        <div className="bg-gradient-to-r from-violet-500/10 to-indigo-500/10 rounded-xl border border-violet-200 dark:border-violet-800 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white">
+                <Share2 size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-dash-text">Social Media Overview</h3>
+                <p className="text-[10px] text-dash-text-muted">
+                  {postizData.postizConnected ? 'Connected to Postiz' : 'Using local analytics'}
+                </p>
+              </div>
+            </div>
+            <a
+              href={POSTIZ_BASE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium"
+            >
+              Open Postiz
+              <ExternalLink size={12} />
+            </a>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+              <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Total Followers</p>
+              <p className="text-lg font-semibold text-dash-text">{formatNumber(postizData.totalFollowers || 0)}</p>
+            </div>
+            <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+              <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Total Posts</p>
+              <p className="text-lg font-semibold text-dash-text">{formatNumber(postizData.totalPosts || 0)}</p>
+            </div>
+            <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+              <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Total Likes</p>
+              <p className="text-lg font-semibold text-dash-text">{formatNumber(postizData.totalLikes || 0)}</p>
+            </div>
+            <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
+              <p className="text-[10px] text-dash-text-muted uppercase tracking-wider mb-1">Total Views</p>
+              <p className="text-lg font-semibold text-dash-text">{formatNumber(postizData.totalViews || 0)}</p>
+            </div>
+          </div>
+          {postizData.platforms && postizData.platforms.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {postizData.platforms.map((platform) => (
+                <div
+                  key={platform.name}
+                  className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-full px-3 py-1.5"
+                >
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
+                    style={{ backgroundColor: PLATFORM_COLORS[platform.name] || '#666' }}
+                  >
+                    {platform.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-xs text-dash-text">{PLATFORM_LABELS[platform.name] || platform.name}</span>
+                  {platform.followers !== undefined && (
+                    <span className="text-[10px] text-dash-text-muted">{formatNumber(platform.followers)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <p className="text-xs text-dash-text-secondary">{accounts.length} account{accounts.length !== 1 ? 's' : ''} tracked</p>
         <button onClick={() => setShowAdd(true)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] uppercase tracking-[0.15em] font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">

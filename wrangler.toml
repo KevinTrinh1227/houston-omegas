@@ -11,6 +11,8 @@ compatibility_date = "2024-09-23"
 # npx wrangler pages secret put TWILIO_ACCOUNT_SID --project-name=houston-omegas
 # npx wrangler pages secret put TWILIO_AUTH_TOKEN --project-name=houston-omegas
 # npx wrangler pages secret put TWILIO_PHONE_NUMBER --project-name=houston-omegas
+# npx wrangler pages secret put POSTIZ_API_KEY --project-name=houston-omegas
+# npx wrangler pages secret put POSTIZ_BASE_URL --project-name=houston-omegas  # Optional: defaults to https://social.houstonomegas.com
 
 # D1 Database
 [[d1_databases]]

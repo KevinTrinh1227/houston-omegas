@@ -12,7 +12,7 @@ import {
   Settings, UserPlus, BookOpen,
   ChevronLeft, ChevronDown, Info, LogOut,
   GraduationCap, PartyPopper, Camera, HeartHandshake,
-  Sun, Moon, Archive,
+  Sun, Moon, Archive, PenSquare, CalendarDays, ExternalLink, Share2,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -24,12 +24,15 @@ interface NavItem {
   icon: React.ReactNode;
   roles?: string[];
   chairPositions?: string[];
+  external?: boolean;
 }
 
 interface NavGroup {
   title: string;
   items: NavItem[];
 }
+
+const POSTIZ_BASE_URL = 'https://social.houstonomegas.com';
 
 const navGroups: NavGroup[] = [
   {
@@ -53,9 +56,17 @@ const navGroups: NavGroup[] = [
       { label: 'Recruitment', href: '/dashboard/recruitment', icon: <UserPlus size={18} />, roles: EXEC, chairPositions: ['recruitment'] },
       { label: 'Alumni Relations', href: '/dashboard/alumni', icon: <GraduationCap size={18} />, roles: EXEC, chairPositions: ['alumni'] },
       { label: 'Events & Socials', href: '/dashboard/events', icon: <PartyPopper size={18} />, roles: EXEC, chairPositions: ['social'] },
-      { label: 'Social Media', href: '/dashboard/analytics', icon: <Camera size={18} />, roles: EXEC, chairPositions: ['social_media'] },
+      { label: 'Social Media', href: '/dashboard/socials', icon: <Share2 size={18} />, roles: EXEC, chairPositions: ['social_media'] },
       { label: 'Brotherhood', href: '/dashboard/points', icon: <HeartHandshake size={18} />, roles: EXEC, chairPositions: ['brotherhood'] },
       { label: 'Historian', href: '/dashboard/historian', icon: <Archive size={18} />, roles: EXEC, chairPositions: ['historian'] },
+    ],
+  },
+  {
+    title: 'Social Media',
+    items: [
+      { label: 'Compose', href: `${POSTIZ_BASE_URL}/launches`, icon: <PenSquare size={18} />, roles: EXEC, chairPositions: ['social_media'], external: true },
+      { label: 'Calendar', href: `${POSTIZ_BASE_URL}/calendar`, icon: <CalendarDays size={18} />, roles: EXEC, chairPositions: ['social_media'], external: true },
+      { label: 'Analytics', href: '/dashboard/analytics', icon: <BarChart3 size={18} />, roles: EXEC, chairPositions: ['social_media'] },
     ],
   },
   {
@@ -229,22 +240,44 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; 
               }}
             >
               {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  title={collapsed && !isMobile ? item.label : undefined}
-                  className={`flex items-center gap-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                    collapsed && !isMobile ? 'justify-center px-2' : 'px-3'
-                  } ${
-                    isActive(item.href)
-                      ? 'bg-dash-sidebar-active text-dash-sidebar-text-active'
-                      : 'text-dash-sidebar-text hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover'
-                  }`}
-                >
-                  {item.icon}
-                  {(!collapsed || isMobile) && item.label}
-                </Link>
+                item.external ? (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={onClose}
+                    title={collapsed && !isMobile ? item.label : undefined}
+                    className={`flex items-center gap-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                      collapsed && !isMobile ? 'justify-center px-2' : 'px-3'
+                    } text-dash-sidebar-text hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover`}
+                  >
+                    {item.icon}
+                    {(!collapsed || isMobile) && (
+                      <>
+                        <span className="flex-1">{item.label}</span>
+                        <ExternalLink size={12} className="opacity-50" />
+                      </>
+                    )}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    title={collapsed && !isMobile ? item.label : undefined}
+                    className={`flex items-center gap-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                      collapsed && !isMobile ? 'justify-center px-2' : 'px-3'
+                    } ${
+                      isActive(item.href)
+                        ? 'bg-dash-sidebar-active text-dash-sidebar-text-active'
+                        : 'text-dash-sidebar-text hover:text-dash-sidebar-text-active hover:bg-dash-sidebar-hover'
+                    }`}
+                  >
+                    {item.icon}
+                    {(!collapsed || isMobile) && item.label}
+                  </Link>
+                )
               ))}
             </div>
           </div>
