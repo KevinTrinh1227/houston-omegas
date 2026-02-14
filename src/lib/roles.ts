@@ -109,6 +109,6 @@ export function canAccessPage(role: string, chairPosition: string | null | undef
     return false;
   }
 
-  // Default allow for any unrecognized pages (new blog post, etc.)
-  return true;
+  // Default deny for unrecognized pages (security: deny by default)
+  return false;
 }

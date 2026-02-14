@@ -46,7 +46,8 @@ export default function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuToggle}
-            className="lg:hidden text-dash-text-secondary hover:text-dash-text transition-colors"
+            className="lg:hidden text-dash-text-secondary hover:text-dash-text transition-colors touch-target flex items-center justify-center"
+            aria-label="Toggle menu"
           >
             <Menu size={22} />
           </button>
